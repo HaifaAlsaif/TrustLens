@@ -1,0 +1,1818 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustLens AI Detection Dashboard | Project Management Platform</title>
+  <meta name="description" content="Comprehensive AI detection project management dashboard with real-time analytics, project tracking, and examiner invitation management for TrustLens platform.">
+  <meta name="keywords" content="AI detection, project management, dashboard, analytics, TrustLens, examiner invitations, project tracking">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="TrustLens AI Detection Dashboard | Project Management Platform">
+  <meta property="og:description" content="Comprehensive AI detection project management dashboard with real-time analytics, project tracking, and examiner invitation management for TrustLens platform.">
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #0a0a0a;
+      line-height: 1.5;
+    }
+    
+    /* Layout components */
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      width: 100%;
+      min-height: 100vh;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 16px;
+      margin-top: 16px;
+      margin-left: 140px;
+      margin-right: 128px;
+    }
+    
+    .header-left {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .logo {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .brand-text {
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 23px;
+      background: linear-gradient(90deg, #00b8da 0%, #155cfb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .header-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .language-selector {
+      padding: 6px;
+      font-size: 14px;
+      color: #0a0a0a;
+    }
+    
+    .notification-btn {
+      width: 36px;
+      height: 36px;
+    }
+    
+    .user-profile {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #00b8da 0%, #155cfb 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 400;
+    }
+    
+    .user-info h3 {
+      font-size: 14px;
+      font-weight: 400;
+      color: #0a0a0a;
+    }
+    
+    .user-info p {
+      font-size: 12px;
+      color: #717182;
+      text-transform: capitalize;
+    }
+    
+    .content-wrapper {
+      display: flex;
+      width: 100%;
+      flex: 1;
+    }
+    
+    .sidebar {
+      width: 256px;
+      background-color: #ffffff;
+      border: 0 solid #00000019;
+      padding: 16px;
+      min-height: calc(100vh - 80px);
+    }
+    
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-bottom: 4px;
+    }
+    
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      gap: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .menu-item:hover {
+      background-color: #f3f4f6;
+      border-radius: 8px;
+    }
+    
+    .menu-icon {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .menu-text {
+      font-size: 14px;
+      color: #0a0a0a;
+    }
+    
+    .main-content {
+      flex: 1;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    
+    .welcome-section {
+      background: linear-gradient(90deg, #00b8da19 0%, #2b7fff19 50%, #ac46ff19 100%);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0px 4px 128px #888888ff;
+    }
+    
+    .welcome-title {
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 28px;
+      color: #0a0a0a;
+      margin-bottom: 8px;
+    }
+    
+    .welcome-subtitle {
+      font-size: 16px;
+      color: #717182;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 32px;
+    }
+    
+    .stat-card {
+      position: relative;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    .stat-card-total {
+      background: linear-gradient(135deg, #ebfdfe7f 0%, #eef5fe4c 100%);
+      border: 0 solid #0000000d;
+    }
+    
+    .stat-card-pending {
+      background: linear-gradient(135deg, #fff7ec7f 0%, #fef2f24c 100%);
+      border: 0 solid #0000000d;
+    }
+    
+    .stat-card-active {
+      background: linear-gradient(135deg, #eef5fe7f 0%, #eef2ff4c 100%);
+      border: 0 solid #0000000d;
+    }
+    
+    .stat-card-completed {
+      background: linear-gradient(135deg, #f0fdf47f 0%, #ebfcf44c 100%);
+      border: 0 solid #0000000d;
+    }
+    
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      width: 128px;
+      height: 128px;
+      border-radius: 64px;
+      top: -20px;
+      right: -20px;
+      box-shadow: 0px 4px 80px #888888ff;
+    }
+    
+    .stat-card-total::before {
+      background: linear-gradient(135deg, #00d2f233 0%, #2b7fff33 100%);
+    }
+    
+    .stat-card-pending::before {
+      background: linear-gradient(135deg, #ff880333 0%, #fa2b3633 100%);
+    }
+    
+    .stat-card-active::before {
+      background: linear-gradient(135deg, #50a2ff33 0%, #615eff33 100%);
+    }
+    
+    .stat-card-completed::before {
+      background: linear-gradient(135deg, #05df7233 0%, #00bc7c33 100%);
+    }
+    
+    .stat-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .stat-info {
+      flex: 1;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 14px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    
+    .stat-label-total { color: #007594; }
+    .stat-label-pending { color: #c93400; }
+    .stat-label-active { color: #1347e5; }
+    .stat-label-completed { color: #008235; }
+    
+    .stat-number {
+      font-size: 36px;
+      font-weight: 400;
+      line-height: 42px;
+      color: #0a0a0a;
+      margin-bottom: 16px;
+    }
+    
+    .stat-description {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: #717182;
+    }
+    
+    .stat-description.pending { color: #f54900; }
+    .stat-description.active { color: #155cfb; }
+    .stat-description.completed { color: #00a63e; }
+    
+    .stat-icon-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    }
+    
+    .stat-icon-btn-total {
+      background: linear-gradient(135deg, #00b8da 0%, #155cfb 100%);
+    }
+    
+    .stat-icon-btn-pending {
+      background: linear-gradient(135deg, #ff6800 0%, #e7000a 100%);
+    }
+    
+    .stat-icon-btn-active {
+      background: linear-gradient(135deg, #2b7fff 0%, #4f39f6 100%);
+    }
+    
+    .stat-icon-btn-completed {
+      background: linear-gradient(135deg, #00c850 0%, #009865 100%);
+    }
+    
+    .quick-actions {
+      background: linear-gradient(90deg, #00b8da0c 0%, #2b7fff0c 50%, #ac46ff0c 100%);
+      border-radius: 14px;
+      padding: 24px;
+      border: 0 solid #0000000d;
+    }
+    
+    .quick-actions h2 {
+      font-size: 16px;
+      color: #0a0a0a;
+      margin-bottom: 40px;
+    }
+    
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 400;
+      box-shadow: 0px 2px 4px #00000019;
+      transition: transform 0.3s ease;
+    }
+    
+    .action-btn:hover {
+      transform: translateY(-2px);
+    }
+    
+    .action-btn-create {
+      background: linear-gradient(90deg, #00b8da 0%, #155cfb 100%);
+    }
+    
+    .action-btn-projects {
+      background: linear-gradient(90deg, #ac46ff 0%, #e50076 100%);
+    }
+    
+    .action-btn-explain {
+      background: linear-gradient(90deg, #ff6800 0%, #e7000a 100%);
+    }
+    
+    .action-icon {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .charts-section {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    
+    .chart-card {
+      background: linear-gradient(135deg, #eef5fe4c 0%, #ffffff 50%, #ebfdfe4c 100%);
+      border-radius: 14px;
+      padding: 24px;
+      border: 0 solid #0000000d;
+      box-shadow: 0px 8px 10px #00000019;
+    }
+    
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 48px;
+    }
+    
+    .chart-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .chart-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+    }
+    
+    .chart-title {
+      font-size: 16px;
+      color: #0a0a0a;
+      margin-bottom: 4px;
+    }
+    
+    .chart-subtitle {
+      font-size: 12px;
+      color: #717182;
+    }
+    
+    .chart-period {
+      font-size: 12px;
+      color: #0a0a0a;
+      background-color: #eff6ff;
+      border: 0 solid #00000019;
+      border-radius: 8px;
+      padding: 2px 8px;
+    }
+    
+    .chart-container {
+      width: 100%;
+      height: 300px;
+      margin-bottom: 88px;
+      position: relative;
+    }
+    
+    .chart-legend {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .legend-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+    }
+    
+    .legend-dot-completed { background-color: #10b981; }
+    .legend-dot-progress { background-color: #3b82f6; }
+    .legend-dot-pending { background-color: #f59e0b; }
+    
+    .legend-text {
+      font-size: 16px;
+      color: #10b981;
+    }
+    
+    .legend-text-progress { color: #3b82f6; }
+    .legend-text-pending { color: #f59e0b; }
+    
+    .activity-card {
+      background: linear-gradient(135deg, #faf5fe4c 0%, #ffffff 50%, #fcf1f74c 100%);
+      border-radius: 14px;
+      padding: 16px;
+      border: 0 solid #0000000d;
+      box-shadow: 0px 8px 10px #00000019;
+    }
+    
+    .activity-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 48px;
+      margin-top: 8px;
+    }
+    
+    .activity-info {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .activity-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #ac46ff 0%, #f6329a 50%, #ff1f56 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0px 4px 6px #ac46ff4c;
+    }
+    
+    .activity-title {
+      font-size: 16px;
+      color: #0a0a0a;
+      margin-bottom: 4px;
+    }
+    
+    .activity-subtitle {
+      font-size: 12px;
+      color: #717182;
+    }
+    
+    .activity-status {
+      font-size: 12px;
+      color: #0a0a0a;
+      background-color: #faf5ff;
+      border: 0 solid #00000019;
+      border-radius: 8px;
+      padding: 2px 6px;
+    }
+    
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-right: 18px;
+    }
+    
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #f8f9fb7f 0%, #00000000 100%);
+    }
+    
+    .activity-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    
+    .activity-content {
+      flex: 1;
+      margin-right: 28px;
+    }
+    
+    .activity-text {
+      font-size: 14px;
+      color: #0a0a0a;
+      margin-bottom: 4px;
+    }
+    
+    .activity-description {
+      font-size: 12px;
+      color: #717182;
+      margin-bottom: 4px;
+    }
+    
+    .activity-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #717182;
+    }
+    
+    .activity-meta img {
+      width: 12px;
+      height: 12px;
+    }
+    
+    .view-all-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      padding: 14px 64px 14px 64px;
+      border-top: 1px solid #0000000d;
+      background: none;
+      border: none;
+      font-size: 14px;
+      color: #0a0a0a;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    
+    .view-all-btn:hover {
+      background-color: #f9fafb;
+    }
+    
+    .invitations-section {
+      background: linear-gradient(135deg, #f8f9fb7f 0%, #ffffff 50%, #faf5fe4c 100%);
+      border-radius: 14px;
+      padding: 32px;
+      border: 0 solid #0000000d;
+      box-shadow: 0px 25px 50px #0000003f;
+      position: relative;
+      margin-bottom: 28px;
+    }
+    
+    .invitations-section::before {
+      content: '';
+      position: absolute;
+      width: 256px;
+      height: 256px;
+      border-radius: 128px;
+      top: 1px;
+      right: 33px;
+      background: linear-gradient(135deg, #c17aff19 0%, #fb63b619 100%);
+      box-shadow: 0px 4px 128px #888888ff;
+    }
+    
+    .invitations-section::after {
+      content: '';
+      position: absolute;
+      width: 192px;
+      height: 192px;
+      border-radius: 96px;
+      bottom: -261px;
+      left: 32px;
+      background: linear-gradient(45deg, #00d2f219 0%, #50a2ff19 100%);
+      box-shadow: 0px 4px 128px #888888ff;
+    }
+    
+    .invitations-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .invitations-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .invitations-icon-wrapper {
+      position: relative;
+      width: 60px;
+      height: 60px;
+    }
+    
+    .invitations-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #615eff 0%, #ac46ff 50%, #f6329a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0px 25px 50px #ac46ff4c;
+    }
+    
+    .invitations-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 20px;
+      height: 20px;
+      background: linear-gradient(135deg, #ff8803 0%, #fa2b36 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #ffffff;
+      box-shadow: 0px 4px 6px #00000019;
+    }
+    
+    .invitations-title {
+      font-size: 16px;
+      font-weight: 400;
+      background: linear-gradient(90deg, #4f39f6 0%, #980ffa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+    }
+    
+    .invitations-subtitle {
+      font-size: 14px;
+      color: #717182;
+    }
+    
+    .invitations-total {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #0a0a0a;
+      background: linear-gradient(90deg, #faf5fe 0%, #fcf1f7 100%);
+      border: 0 solid #e9d4ff;
+      border-radius: 8px;
+      padding: 8px 16px 8px 36px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .invitations-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .invitation-card {
+      border-radius: 14px;
+      padding: 26px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .invitation-card-accepted {
+      background: linear-gradient(135deg, #f0fdf4 0%, #ebfcf4b2 50%, #f0fdfa7f 100%);
+      border: 1px solid #b8f7cf7f;
+    }
+    
+    .invitation-card-pending {
+      background: linear-gradient(135deg, #fff7ec 0%, #fffbeab2 50%, #fdfbe87f 100%);
+      border: 1px solid #ffd6a77f;
+    }
+    
+    .invitation-card-declined {
+      background: linear-gradient(135deg, #fef2f2 0%, #fef0f1b2 50%, #fcf1f77f 100%);
+      border: 1px solid #ffc9c97f;
+    }
+    
+    .invitation-card::before {
+      content: '';
+      position: absolute;
+      width: 128px;
+      height: 128px;
+      border-radius: 64px;
+      top: 1px;
+      right: 1px;
+      box-shadow: 0px 4px 80px #888888ff;
+    }
+    
+    .invitation-card-accepted::before {
+      background: linear-gradient(135deg, #05df7233 0%, #00d49133 100%);
+    }
+    
+    .invitation-card-pending::before {
+      background: linear-gradient(135deg, #ff880333 0%, #fdc70033 100%);
+    }
+    
+    .invitation-card-declined::before {
+      background: linear-gradient(135deg, #ff636633 0%, #fb63b633 100%);
+    }
+    
+    .invitation-content {
+      position: relative;
+      z-index: 2;
+    }
+    
+    .invitation-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    
+    .invitation-avatar {
+      width: 64px;
+      height: 64px;
+      margin-top: 12px;
+    }
+    
+    .invitation-number {
+      font-size: 48px;
+      font-weight: 400;
+      line-height: 56px;
+      text-align: right;
+    }
+    
+    .invitation-number-accepted {
+      background: linear-gradient(135deg, #00a63d 0%, #009865 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .invitation-number-pending {
+      background: linear-gradient(135deg, #f44900 0%, #e17100 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .invitation-number-declined {
+      background: linear-gradient(135deg, #e7000a 0%, #ec003f 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .invitation-label {
+      font-size: 14px;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+    
+    .invitation-label-accepted { color: #008235; }
+    .invitation-label-pending { color: #c93400; }
+    .invitation-label-declined { color: #c10007; }
+    
+    .invitation-description {
+      font-size: 12px;
+      color: #717182;
+      margin-bottom: 16px;
+    }
+    
+    .progress-bar-container {
+      background-color: rgba(185, 248, 207, 0.5);
+      border-radius: 4px;
+      height: 8px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    
+    .progress-bar-container-pending {
+      background-color: rgba(255, 214, 168, 0.5);
+    }
+    
+    .progress-bar-container-declined {
+      background-color: rgba(255, 201, 201, 0.5);
+    }
+    
+    .progress-bar {
+      height: 100%;
+      border-radius: 4px;
+      box-shadow: 0px 4px 6px rgba(0, 200, 80, 0.5);
+    }
+    
+    .progress-bar-accepted {
+      background: linear-gradient(90deg, #00c850 0%, #00bc7c 100%);
+      width: 44%;
+    }
+    
+    .progress-bar-pending {
+      background: linear-gradient(90deg, #ff6800 0%, #fd9900 100%);
+      width: 36%;
+      box-shadow: 0px 4px 6px rgba(255, 104, 0, 0.5);
+    }
+    
+    .progress-bar-declined {
+      background: linear-gradient(90deg, #fa2b36 0%, #ff1f56 100%);
+      width: 18%;
+      box-shadow: 0px 4px 6px rgba(250, 43, 54, 0.5);
+    }
+    
+    .invitation-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    
+    .invitation-rate {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .rate-icon {
+      width: 14px;
+      height: 14px;
+    }
+    
+    .rate-label {
+      font-size: 12px;
+    }
+    
+    .rate-label-accepted { color: #00a63e; }
+    .rate-label-pending { color: #f54900; }
+    .rate-label-declined { color: #e7000b; }
+    
+    .rate-value {
+      font-size: 12px;
+      font-weight: 400;
+    }
+    
+    .rate-value-accepted { color: #008235; }
+    .rate-value-pending { color: #c93400; }
+    .rate-value-declined { color: #c10007; }
+    
+    .invitation-action {
+      font-size: 12px;
+      padding: 12px 34px 0 0;
+      margin-top: -6px;
+    }
+    
+    .invitation-action-accepted {
+      color: #00a63e;
+      border-top: 1px solid rgba(122, 241, 167, 0.3);
+    }
+    
+    .invitation-action-pending {
+      color: #f54900;
+      border-top: 1px solid rgba(255, 184, 105, 0.3);
+    }
+    
+    .invitation-action-declined {
+      color: #e7000b;
+      border-top: 1px solid rgba(255, 161, 162, 0.3);
+    }
+    
+    .user-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background-color: #ffffff;
+      border: 0 solid #00000019;
+      border-radius: 8px;
+      box-shadow: 0px 2px 4px #00000019;
+      padding: 4px 0;
+      margin-top: 4px;
+      margin-right: 98px;
+      width: 190px;
+      display: none;
+    }
+    
+    .user-dropdown.show {
+      display: block;
+    }
+    
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 4px 8px;
+      font-size: 14px;
+      color: #0a0a0a;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+    
+    .dropdown-item:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .dropdown-icon {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .dropdown-divider {
+      height: 1px;
+      background-color: #00000019;
+      margin: 4px 0;
+    }
+    
+    /* Typography */
+    h1 {
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 28px;
+      color: #0a0a0a;
+    }
+    
+    h2 {
+      font-size: 16px;
+      font-weight: 400;
+      color: #0a0a0a;
+    }
+    
+    /* Interactive states */
+    .menu-item:hover,
+    .action-btn:hover,
+    .stat-icon-btn:hover {
+      transform: translateY(-1px);
+    }
+    
+    .menu-item:active,
+    .action-btn:active {
+      transform: translateY(0);
+    }
+    
+    /* Responsive media queries */
+    @media (max-width: 639px) {
+      .header {
+        margin-left: 16px;
+        margin-right: 16px;
+        padding: 12px;
+      }
+      
+      .content-wrapper {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        padding: 16px;
+        min-height: auto;
+      }
+      
+      .sidebar-menu {
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 4px;
+      }
+      
+      .menu-item {
+        flex-shrink: 0;
+        padding: 8px 12px;
+      }
+      
+      .menu-text {
+        font-size: 12px;
+      }
+      
+      .main-content {
+        padding: 16px;
+        gap: 24px;
+      }
+      
+      .welcome-title {
+        font-size: 20px;
+        line-height: 24px;
+      }
+      
+      .welcome-subtitle {
+        font-size: 14px;
+      }
+      
+      .stats-grid {
+        gap: 12px;
+      }
+      
+      .stat-card {
+        padding: 16px;
+      }
+      
+      .stat-number {
+        font-size: 28px;
+        line-height: 32px;
+      }
+      
+      .action-buttons {
+        gap: 12px;
+      }
+      
+      .charts-section {
+        gap: 16px;
+      }
+      
+      .chart-card,
+      .activity-card {
+        padding: 16px;
+      }
+      
+      .chart-container {
+        height: 250px;
+        margin-bottom: 40px;
+      }
+      
+      .chart-legend {
+        gap: 12px;
+      }
+      
+      .legend-text {
+        font-size: 14px;
+      }
+      
+      .invitations-section {
+        padding: 16px;
+      }
+      
+      .invitations-grid {
+        gap: 16px;
+      }
+      
+      .invitation-card {
+        padding: 16px;
+      }
+      
+      .invitation-number {
+        font-size: 36px;
+        line-height: 42px;
+      }
+      
+      .user-dropdown {
+        position: fixed;
+        top: 60px;
+        right: 16px;
+        left: 16px;
+        width: auto;
+        margin-right: 0;
+      }
+    }
+    
+    @media (min-width: 640px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+      
+      .action-buttons {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+      
+      .charts-section {
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      .invitations-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (min-width: 768px) {
+      .header {
+        padding: 16px;
+      }
+      
+      .main-content {
+        padding: 24px;
+      }
+      
+      .welcome-section {
+        padding: 32px;
+      }
+      
+      .stats-grid {
+        gap: 24px;
+      }
+      
+      .stat-card {
+        padding: 22px;
+      }
+      
+      .chart-container {
+        height: 300px;
+        margin-bottom: 60px;
+      }
+      
+      .invitations-section {
+        padding: 24px;
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      
+      .action-buttons {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .charts-section {
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      .invitations-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .main-content {
+        padding: 32px;
+      }
+      
+      .invitations-section {
+        padding: 32px;
+      }
+    }
+    
+    @media (min-width: 1280px) {
+      .chart-container {
+        height: 350px;
+        margin-bottom: 88px;
+      }
+    }
+ 
+  /* ---------------- Dark-Only Overrides ---------------- */
+/* يُلصق بعد الأنماط الافتراضية مباشرة،
+   ويُفعَّل فقط عند إضافة كلاس .dark إلى <body> */
+
+body.dark {
+    --bg: #0a0a0a;
+    --card: #1c1c1e;
+    --text: #e5e5e5;
+    --text-inv: #0a0a0a;
+    --border: #333;
+    --shadow: rgba(0,0,0,.6);
+  }
+  
+  body.dark { background: var(--bg); color: var(--text); }
+  
+  body.dark .sidebar                       { background: var(--bg); border-color: var(--border); }
+  body.dark .menu-text,
+  body.dark .brand-text,
+  body.dark .language-selector,
+  body.dark .user-info h3,
+  body.dark .welcome-title,
+  body.dark .stat-number,
+  body.dark .chart-title,
+  body.dark .activity-title,
+  body.dark .invitations-title,
+  body.dark .activity-text,
+  body.dark .view-all-btn,
+  body.dark .dropdown-item                 { color: var(--text); }
+  
+  body.dark .brand-text {
+    background: linear-gradient(90deg, #5decf6 0%, #6cbcff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  body.dark .welcome-section,
+  body.dark .quick-actions,
+  body.dark .chart-card,
+  body.dark .activity-card,
+  body.dark .invitations-section,
+  body.dark .stat-card,
+  body.dark .invitation-card               { background: var(--card); border-color: var(--border); box-shadow: 0 4px 20px var(--shadow); }
+  
+  body.dark .menu-item:hover               { background: #2a2a2a; }
+  body.dark .user-dropdown                 { background: var(--card); border-color: var(--border); }
+  body.dark .dropdown-divider              { background: var(--border); }
+  body.dark .view-all-btn:hover            { background: #2a2a2a; }
+  body.dark .activity-item                 { background: linear-gradient(90deg, #2a2a2a7f 0%, #0000 100%); }
+  body.dark .chart-period,
+  body.dark .activity-status               { background: #2a2a2a; }
+  /* 1) خط رمادي خفيف يفصل السايد بار عن المحتوى */
+.sidebar {
+    border-right: 1px solid #ddd;   /* لون خفيف في الوضع الفاتح */
+  }
+  body.dark .sidebar {
+    border-right-color: #555;       /* يصبح أبيض-رمادي في الدارك */
+  }
+  
+  /* 2) يزحف زرّ الإشعار وصورة/اسم البروفايل قليلاً لليسار */
+  .header-right {
+    margin-right: 8px;   /* أقلِّم القيمة حسب الحاجة */
+  }
+  .user-profile {
+    position: relative; /* ← مهم جداً */
+    cursor: pointer;
+  }
+  
+  .user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 9999; /* ← فوق كل شيء */
+    display: none;
+    background-color: #ffffff;
+    border: 0 solid #00000019;
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px #00000019;
+    padding: 4px 0;
+    width: 190px;
+    margin-top: 4px;
+  }
+  
+  .user-dropdown.show {
+    display: block;
+  }
+  .sidebar-menu .menu-item.active {
+    background-color: #f2f2f2;   /* خلفية رمادي خفيف جدًا */
+    border-right: 3px solid #4c84ff; /* خط ملون على الحافة اليمنى */
+    cursor: default;             /* يشير أنه غير قابل للنقر مرة ثانية */
+  }
+  </style>
+  
+  <script type="module" src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Ftrustlens5331back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.9"></script>
+  <script type="module" src="https://static.rocket.new/rocket-shot.js?v=0.0.1"></script>
+  </head>
+<body>
+  <div class="main-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <img src="../assets/images/img_header.svg" alt="TrustLens Logo" class="logo">
+        <div class="brand-text">TrustLens</div>
+      </div>
+      <div class="header-right">
+        <div class="language-selector">EN</div>
+     
+        <!-- زر تبديل الوضع المظلم/الفاتح -->
+<img src="../assets/images/img_buttonlight.png" alt="Toggle Dark Mode" id="themeToggle" class="notification-btn" style="cursor:pointer;">
+<div class="user-profile" onclick="toggleUserDropdown()">
+    <img src="../assets/images/user-profile.png" alt="Avatar" class="user-avatar">
+    <div class="user-info">
+      <h3>User</h3>
+      <p>Project Owner</p>
+    </div>
+  
+    <!-- القائمة داخل نفس الحاوية -->
+    <div class="user-dropdown" id="userDropdown">
+      <a href= HomePage.html class="dropdown-item">
+        <img src="../assets/images/img_iconhome.svg" alt="Home" class="dropdown-icon"> Home
+      </a>
+      <div class="dropdown-divider"></div>
+      <a href=Profile.html class="dropdown-item">
+        <img src="../assets/images/img_icon_gray_600_16x16.svg" alt="Profile" class="dropdown-icon"> Profile
+      </a>
+      <a href="Settings.html" class="dropdown-item">
+        <img src="../assets/images/img_icon_Settings.svg" alt="Settings" class="dropdown-icon"> Settings
+      </a>
+      <div class="dropdown-divider"></div>
+      <a href= HomePage.html class="dropdown-item">
+        <img src="../assets/images/img_icon_3.svg" alt="Logout" class="dropdown-icon"> Logout
+      </a>
+    </div>
+  </div>
+    </header>
+
+    <div class="content-wrapper">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <nav class="sidebar-menu">
+          <!-- Home -->
+          <div class="menu-item" onclick="window.location.href='HomePage.html'" style="cursor: pointer;">
+            <img src="../assets/images/img_iconhome.svg" alt="Home" class="menu-icon">
+            <span class="menu-text">Home</span>
+          </div>
+      
+          <div class="menu-item active" onclick="window.location.href='Ownerdashboard.html'">
+            <img src="../assets/images/img_icon_black_900_01.svg" alt="Dashboard" class="menu-icon">
+            <span class="menu-text">Dashboard</span>
+          </div>
+      
+          <!-- Create Project -->
+          <div class="menu-item" onclick="window.location.href='CreateProject.html'" style="cursor: pointer;">
+            <img src="../assets/images/img_iconAdd.svg" alt="Create Project" class="menu-icon">
+            <span class="menu-text">Create Project</span>
+          </div>
+      
+          <!-- My Projects -->
+          <div class="menu-item" onclick="window.location.href='MyProjectOwner.html'" style="cursor: pointer;">
+            <img src="../assets/images/img_iconProject.svg" alt="My Projects" class="menu-icon">
+            <span class="menu-text">My Projects</span>
+          </div>
+      
+          <!-- Explainability -->
+          <div class="menu-item" onclick="window.location.href='Explainability.html'" style="cursor: pointer;">
+            <img src="../assets/images/img_icon_16x16.svg" alt="Explainability" class="menu-icon">
+            <span class="menu-text">Explainability</span>
+          </div>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+          <h1 class="welcome-title">Welcome back, -- ! 👋</h1>
+          <p class="welcome-subtitle">Here's what's happening with your AI detection projects today</p>
+          
+          <!-- Statistics Grid -->
+          <div class="stats-grid">
+            <div class="stat-card stat-card-total">
+              <div class="stat-content">
+                <div class="stat-info">
+                  <div class="stat-label stat-label-total">Total Projects</div>
+                  <div class="stat-number">0</div>
+                  <div class="stat-description">All Projects</div>
+                </div>
+                <div class="stat-icon-btn stat-icon-btn-total">
+                  <img src="../assets/images/img_icon_whiteproject.svg" alt="Total Projects" style="width: 24px; height: 24px;">
+                </div>
+              </div>
+            </div>
+            
+            <div class="stat-card stat-card-pending">
+              <div class="stat-content">
+                <div class="stat-info">
+                  <div class="stat-label stat-label-pending">Pending Projects</div>
+                  <div class="stat-number">0</div>
+                  <div class="stat-description pending">
+                    <img src="../assets/images/img_icon_deep_orange_a400.svg" alt="Awaiting" style="width: 12px; height: 12px;">
+                    Awaiting Start
+                  </div>
+                </div>
+                <div class="stat-icon-btn stat-icon-btn-pending">
+                  <img src="../assets/images/img_icon_white_a700_56x56.svg" alt="Pending Projects" style="width: 24px; height: 24px;">
+                </div>
+              </div>
+            </div>
+            
+            <div class="stat-card stat-card-active">
+              <div class="stat-content">
+                <div class="stat-info">
+                  <div class="stat-label stat-label-active">Active Projects</div>
+                  <div class="stat-number">0</div>
+                  <div class="stat-description active">
+                    <img src="../assets/images/img_icon_blue_a700_01.svg" alt="In Progress" style="width: 12px; height: 12px;">
+                    In Progress
+                  </div>
+                </div>
+                <div class="stat-icon-btn stat-icon-btn-active">
+                  <img src="../assets/images/img_icon_56x56.svg" alt="Active Projects" style="width: 24px; height: 24px;">
+                </div>
+              </div>
+            </div>
+            
+            <div class="stat-card stat-card-completed">
+              <div class="stat-content">
+                <div class="stat-info">
+                  <div class="stat-label stat-label-completed">Completed Projects</div>
+                  <div class="stat-number">0</div>
+                  <div class="stat-description completed">
+                    <img src="../assets/images/img_icon_green_a700.svg" alt="Finished" style="width: 12px; height: 12px;">
+                    Finished
+                  </div>
+                </div>
+                <div class="stat-icon-btn stat-icon-btn-completed">
+                  <img src="../assets/images/img_icon_1.svg" alt="Completed Projects" style="width: 24px; height: 24px;">
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="quick-actions">
+          <h2>Quick Actions</h2>
+          <div class="action-buttons">
+            <a href=CreatProject.html class="action-btn action-btn-create">
+              <img src="../assets/images/img_iconAdd.svg" alt="Create" class="action-icon">
+              Create New Project
+            </a>
+            <a href=MyProjectOwner.html class="action-btn action-btn-projects">
+              <img src="../assets/images/img_icon_whiteproject.svg" alt="Projects" class="action-icon">
+              My Projects
+            </a>
+            <a href="Explainability" class="action-btn action-btn-explain">
+              <img src="../assets/images/img_icon_4.svg" alt="Explainability" class="action-icon">
+              View Explainability
+            </a>
+          </div>
+        </section>
+
+        <!-- Charts and Activity Section -->
+        <div class="charts-section">
+          <!-- Project Status Flow Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-info">
+                <img src="../assets/images/img_container.png" alt="Chart Icon" class="chart-icon">
+                <div>
+                  <div class="chart-title">Project Status Flow</div>
+                  <div class="chart-subtitle">Track project progression over time</div>
+                </div>
+              </div>
+              <div class="chart-period">Last 4 Months</div>
+            </div>
+            
+            <div class="chart-container">
+              <canvas id="projectChart" role="img" aria-label="Project status flow chart showing completed, in progress, and pending projects over the last 4 months"></canvas>
+            </div>
+            
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-dot legend-dot-completed"></div>
+                <span class="legend-text">Completed</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot legend-dot-progress"></div>
+                <span class="legend-text legend-text-progress">In Progress</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot legend-dot-pending"></div>
+                <span class="legend-text legend-text-pending">Pending</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="activity-card">
+            <div class="activity-header">
+              <div class="activity-info">
+                <div class="activity-icon">
+                  <img src="../assets/images/img_container_white_a700.svg" alt="Activity" style="width: 24px; height: 24px;">
+                </div>
+                <div>
+                  <div class="activity-title">Recent Activity</div>
+                  <div class="activity-subtitle">Latest updates and events</div>
+                </div>
+              </div>
+              <div class="activity-status">Live</div>
+            </div>
+            
+            <div class="activity-list">
+              <div class="activity-item">
+                <img src="../assets/images/img_container_white_a700_40x40.png" alt="User Avatar" class="activity-avatar">
+                <div class="activity-content">
+                  <div class="activity-text">New project created</div>
+                  <div class="activity-description">AI News Detection Project</div>
+                  <div class="activity-meta">
+                    <img src="../assets/images/img_icon_gray_600_12x12.svg" alt="User">
+                    Sarah Johnson
+                    <span>•</span>
+                    <img src="../assets/images/img_icon_12x12.svg" alt="Time">
+                    2 hours ago
+                  </div>
+                </div>
+              </div>
+              
+              <div class="activity-item">
+                <img src="../assets/images/img_container_40x40.png" alt="User Avatar" class="activity-avatar">
+                <div class="activity-content">
+                  <div class="activity-text">Examiner accepted invitation</div>
+                  <div class="activity-description">Michael Chen joined Conversation Analysis</div>
+                  <div class="activity-meta">
+                    <img src="../assets/images/img_icon_gray_600_12x12.svg" alt="User">
+                    Michael Chen
+                    <span>•</span>
+                    <img src="../assets/images/img_icon_12x12.svg" alt="Time">
+                    5 hours ago
+                  </div>
+                </div>
+              </div>
+              
+              <div class="activity-item">
+                <img src="../assets/images/img_container_1.png" alt="User Avatar" class="activity-avatar">
+                <div class="activity-content">
+                  <div class="activity-text">Project completed</div>
+                  <div class="activity-description">Social Media Analysis finished</div>
+                  <div class="activity-meta">
+                    <img src="../assets/images/img_icon_gray_600_12x12.svg" alt="User">
+                    Emily Davis
+                    <span>•</span>
+                    <img src="../assets/images/img_icon_12x12.svg" alt="Time">
+                    1 day ago
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <button class="view-all-btn">
+              <img src="../assets/images/img_icon_5.svg" alt="View All" style="width: 16px; height: 16px;">
+              View All Activities
+            </button>
+          </div>
+        </div>
+
+        <!-- Examiner Invitations Section -->
+        <section class="invitations-section">
+          <div class="invitations-header">
+            <div class="invitations-info">
+              <div class="invitations-icon-wrapper">
+                <div class="invitations-icon">
+                  <img src="../assets/images/img_group_5.svg" alt="Invitations" style="width: 24px; height: 24px;">
+                </div>
+                <div class="invitations-badge">4</div>
+              </div>
+              <div>
+                <div class="invitations-title">Examiner Invitations</div>
+                <div class="invitations-subtitle">Track invitation responses and engagement</div>
+              </div>
+            </div>
+
+            <div class="invitations-total">
+              <img src="../assets/images/img_icon_black_900_12x12.svg" alt="Total" style="width: 12px; height: 12px;">
+              11 Total
+            </div>
+          </div>
+          
+          <div class="invitations-grid">
+            <!-- Accepted Invitations -->
+            <div class="invitation-card invitation-card-accepted">
+              <div class="invitation-content">
+                <div class="invitation-header">
+                  <img src="../assets/images/img_container_white_a700_64x64.png" alt="Accepted" class="invitation-avatar">
+                  <div class="invitation-number invitation-number-accepted">5</div>
+                </div>
+                <div class="invitation-label invitation-label-accepted">✓ Accepted Invitations</div>
+                <div class="invitation-description">Successfully joined your projects</div>
+                <div class="progress-bar-container">
+                  <div class="progress-bar progress-bar-accepted"></div>
+                </div>
+                <div class="invitation-stats">
+                  <div class="invitation-rate">
+                    <img src="../assets/images/img_icon_green_a700_14x14.svg" alt="Rate" class="rate-icon">
+                    <span class="rate-label rate-label-accepted">Acceptance Rate</span>
+                  </div>
+                  <div class="rate-value rate-value-accepted">45%</div>
+                </div>
+                <div class="invitation-action invitation-action-accepted">
+                  Recent: Sarah, Michael, Emily
+                </div>
+              </div>
+            </div>
+            
+            <!-- Pending Response -->
+            <div class="invitation-card invitation-card-pending">
+              <div class="invitation-content">
+                <div class="invitation-header">
+                  <img src="../assets/images/img_container_64x64.png" alt="Pending" class="invitation-avatar">
+                  <div class="invitation-number invitation-number-pending">4</div>
+                </div>
+                <div class="invitation-label invitation-label-pending">⏳ Pending Response</div>
+                <div class="invitation-description">Awaiting examiner decisions</div>
+                <div class="progress-bar-container progress-bar-container-pending">
+                  <div class="progress-bar progress-bar-pending"></div>
+                </div>
+                <div class="invitation-stats">
+                  <div class="invitation-rate">
+                    <img src="../assets/images/img_icon_deep_orange_a400.svg" alt="Rate" class="rate-icon">
+                    <span class="rate-label rate-label-pending">Response Rate</span>
+                  </div>
+                  <div class="rate-value rate-value-pending">36%</div>
+                </div>
+                <div class="invitation-action invitation-action-pending">
+                  Action: Send follow-up reminders
+                </div>
+              </div>
+            </div>
+            
+            <!-- Declined Invitations -->
+            <div class="invitation-card invitation-card-declined">
+              <div class="invitation-content">
+                <div class="invitation-header">
+                  <img src="../assets/images/img_container_3.png" alt="Declined" class="invitation-avatar">
+                  <div class="invitation-number invitation-number-declined">2</div>
+                </div>
+                <div class="invitation-label invitation-label-declined">✗ Declined Invitations</div>
+                <div class="invitation-description">Examiners who declined</div>
+                <div class="progress-bar-container progress-bar-container-declined">
+                  <div class="progress-bar progress-bar-declined"></div>
+                </div>
+                <div class="invitation-stats">
+                  <div class="invitation-rate">
+                    <img src="../assets/images/img_icon_red_a700_01.svg" alt="Rate" class="rate-icon">
+                    <span class="rate-label rate-label-declined">Decline Rate</span>
+                  </div>
+                  <div class="rate-value rate-value-declined">18%</div>
+                </div>
+                <div class="invitation-action invitation-action-declined">
+                  Action: Invite alternative examiners
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // User dropdown toggle
+    function toggleUserDropdown() {
+      const dropdown = document.getElementById('userDropdown');
+      dropdown.classList.toggle('show');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+      const dropdown = document.getElementById('userDropdown');
+      const userProfile = document.querySelector('.user-profile');
+      
+      if (!userProfile.contains(event.target)) {
+        dropdown.classList.remove('show');
+      }
+    });
+
+    // Project Status Flow Chart
+    const ctx = document.getElementById('projectChart')?.getContext('2d');
+    if (!ctx || typeof Chart === 'undefined') {
+      console.warn('Chart.js not available, showing placeholder');
+      const chartContainer = document.getElementById('projectChart');
+      if (chartContainer) {
+        chartContainer.innerHTML = `
+          <div class="chart-placeholder" style="background-color:#e5e7eb;height:100%;display:flex;align-items:center;justify-content:center;border-radius:8px;">
+            Project Status Flow Chart
+          </div>
+        `;
+      }
+    } else {
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Sep', 'Oct', 'Nov', 'Dec'],
+          datasets: [{
+            label: 'Completed',
+            data: [3, 6, 8, 9],
+            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+            borderColor: '#10b981',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+          }, {
+            label: 'In Progress',
+            data: [2, 4, 5, 3],
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderColor: '#3b82f6',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+          }, {
+            label: 'Pending',
+            data: [1, 2, 3, 1],
+            backgroundColor: 'rgba(245, 158, 11, 0.2)',
+            borderColor: '#f59e0b',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              enabled: true,
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              titleColor: '#ffffff',
+              bodyColor: '#ffffff',
+              borderColor: '#e5e7eb',
+              borderWidth: 1
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#0a0a0a',
+                font: {
+                  family: 'Inter',
+                  size: 12
+                }
+              }
+            },
+            y: {
+              beginAtZero: true,
+              max: 12,
+              grid: {
+                color: 'rgba(10, 10, 10, 0.1)'
+              },
+              ticks: {
+                stepSize: 3,
+                color: '#0a0a0a',
+                font: {
+                  family: 'Inter',
+                  size: 12
+                }
+              }
+            }
+          },
+          elements: {
+            point: {
+              radius: 4,
+              hoverRadius: 6
+            }
+          }
+        }
+      });
+    }
+
+    // Add hover effects to interactive elements
+    document.querySelectorAll('.menu-item, .action-btn, .stat-icon-btn').forEach(element => {
+      element.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-1px)';
+      });
+      
+      element.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+      });
+    });
+
+    // Add click effects
+    document.querySelectorAll('.menu-item, .action-btn').forEach(element => {
+      element.addEventListener('mousedown', function() {
+        this.style.transform = 'translateY(0)';
+      });
+      
+      element.addEventListener('mouseup', function() {
+        this.style.transform = 'translateY(-1px)';
+      });
+    });
+    // ---------- Theme Toggle ----------
+const themeToggle = document.getElementById('themeToggle');
+const darkSrc   = '../assets/images/img_buttonlight.png';
+const lightSrc  = '../assets/images/img_buttonDark.svg';
+
+// استرجاع الوضع المحفوظ (إن وجد)
+if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+  document.body.classList.add('dark');
+  themeToggle.src = darkSrc;
+} else {
+  themeToggle.src = lightSrc;
+}
+
+// تبديل الوضع عند النقر
+themeToggle.addEventListener('click', () => {
+  const isDark = document.body.classList.toggle('dark');
+  themeToggle.src = isDark ? darkSrc : lightSrc;
+  localStorage.theme = isDark ? 'dark' : 'light';
+});
+
+
+  </script>
+</body>
+</html>
