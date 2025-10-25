@@ -1,0 +1,254 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="initial-scale=1, width=device-width" />
+<title>Profile • TrustLens</title>
+
+<!-- Inline CSS (single file) -->
+<style>
+  :root{
+    --bg:#fff; --text:#0A0A0A; --muted:#717182; --line:rgba(0,0,0,.10);
+    --primary1:#00B8DB; --primary2:#155DFC; --card:rgba(255,255,255,.7);
+    --radius:14px; --r8:8px; --r10:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;line-height:1.45;background:#fff;color:var(--text)}
+  .page{min-height:100vh;background:
+    linear-gradient(135deg,#fff 0 50%,rgba(0,184,219,.05) 50%), #fff;}
+
+  /* Masthead (logo + user) */
+  .mast{display:flex;align-items:center;justify-content:space-between;gap:20px;
+        height:40px;padding:16px clamp(16px,6vw,134.8px);}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand img{width:32px;height:32px}
+  .brand-name{font-size:20px;background:linear-gradient(90deg,var(--primary1),var(--primary2));
+              -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .mast-right{display:flex;align-items:center;gap:12px;font-size:14px}
+  .lang{height:32px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;padding:0 12px}
+  .avatar-pill{position:relative;width:83px;height:40px}
+  .avatar-circle{position:absolute;inset:0;width:40px;height:40px;border-radius:9999px;
+                 background:linear-gradient(135deg,var(--primary1),var(--primary2));
+                 display:grid;place-items:center;color:#fff;font-weight:700}
+  .user-meta{position:absolute;left:48px;top:2px;display:flex;flex-direction:column}
+  .small{font-size:12px}
+  .muted{color:var(--muted)}
+
+  /* Content frame */
+  .wrap{padding:96px clamp(16px,6vw,246.8px) 40px;display:grid;gap:24px}
+  @media(min-width:980px){ .wrap{grid-template-columns:330px 1fr;align-items:start} }
+  @media(max-width:979px){ .wrap{grid-template-columns:1fr} }
+
+  /* Title row */
+  .headrow{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:20px}
+  .h-title{display:flex;flex-direction:column;gap:8px}
+  .h-title h1{margin:0;font-size:24px;background:linear-gradient(90deg,var(--primary1),var(--primary2));
+              -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .h-title p{margin:0;color:var(--muted)}
+
+  /* Buttons */
+  .btn{height:36px;border-radius:8px;border:0;cursor:pointer;display:inline-flex;align-items:center;gap:10px;padding:0 14px;font-size:14px}
+  .btn-primary{color:#fff;background:linear-gradient(90deg,var(--primary1),var(--primary2))}
+  .btn-ghost{background:#fff;border:0.8px solid var(--line);color:var(--text)}
+  .btn .ic{width:16px;height:16px;display:block}
+
+  /* Cards */
+  .card{box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);
+        background:var(--card);border:0.8px solid rgba(0,0,0,.05);border-radius:var(--radius)}
+  .card-pad{padding:24px}
+
+  /* Left: profile summary */
+  .p-sum{display:flex;flex-direction:column;gap:16px;text-align:center}
+  .p-avatar{width:128px;height:128px;border-radius:9999px;margin:0 auto;
+            border:4px solid rgba(0,184,219,.2);background:linear-gradient(135deg,var(--primary1),var(--primary2));
+            color:#fff;display:grid;place-items:center;font-size:30px}
+  .pill{display:inline-flex;align-items:center;justify-content:center;border-radius:8px;padding:2px 8px;height:20px;
+        background:linear-gradient(90deg,var(--primary1),var(--primary2));color:#fff;font-size:12px;text-transform:capitalize;margin:6px auto 0}
+  .p-line{height:1px;background:var(--line);margin:12px 0}
+  .row-center{display:flex;align-items:center;justify-content:center;gap:8px}
+
+  /* Right: details */
+  .section{display:flex;flex-direction:column;gap:24px}
+  .sec-title{display:flex;align-items:center;gap:8px}
+  .sec-title .ic20{width:20px;height:20px}
+  .grid-2{display:grid;gap:16px}
+  @media(min-width:720px){ .grid-2{grid-template-columns:1fr 1fr} }
+  .field{display:flex;flex-direction:column;gap:8px}
+  .label{font-size:14px}
+  .value{color:var(--muted)}
+  .separator{height:1px;background:var(--line)}
+
+  /* Inputs (edit mode) */
+  .input, .textarea{width:100%;height:36px;border-radius:8px;border:0.8px solid var(--line);
+                    background:#F3F3F5;padding:6px 10px;font-size:14px}
+  .textarea{height:auto;min-height:90px;resize:vertical}
+  .editing .value{display:none}
+  .editing .input, .editing .textarea{display:block}
+  .input, .textarea{display:none}
+  /* In view mode, we show text values only */
+  .actions{display:flex;gap:12px;align-items:center}
+
+  /* Save bar (appears only in editing) */
+  .savebar{grid-column:1/-1;display:none;justify-content:flex-start;gap:10px}
+  .editing .savebar{display:flex}
+
+  /* Helper tag list for interests */
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{padding:4px 8px;border-radius:9999px;background:rgba(0,184,219,.08);border:1px solid rgba(0,184,219,.3);font-size:12px}
+
+  /* Icons img base */
+  img.ic, img.ic20{object-fit:contain}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Masthead -->
+  <div class="mast">
+    <div class="brand">
+      <img src="../assets/images/icon_logo.svg" alt="TrustLens logo">
+      <div class="brand-name">TrustLens</div>
+    </div>
+    <div class="mast-right">
+      <div class="lang">EN</div>
+      <div class="avatar-pill">
+        <div class="avatar-circle">H</div>
+        <div class="user-meta">
+          <div>Haifa</div>
+          <div class="small muted" style="text-transform:capitalize">owner</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div id="profileRoot" class="wrap">
+    <!-- Title + right action -->
+    <div class="headrow">
+      <div class="h-title">
+        <h1>Profile</h1>
+        <p>Manage your personal information and settings</p>
+      </div>
+      <div class="actions">
+        <!-- Edit button (hidden in editing) -->
+        <button id="btnEdit" class="btn btn-primary">
+          <img class="ic" src="../assets/images/icon_edit.svg" alt=""> Edit Profile
+        </button>
+        <!-- Save / Cancel (show in editing) -->
+        <div class="savebar">
+          <button id="btnSave" class="btn btn-primary">
+            <img class="ic" src="../assets/images/icon_save.svg" alt=""> Save Changes
+          </button>
+          <button id="btnCancel" class="btn btn-ghost">
+            <img class="ic" src="../assets/images/icon_close.svg" alt=""> Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Left summary -->
+    <aside class="card card-pad p-sum">
+      <div class="p-avatar" aria-hidden="true">H</div>
+      <div style="font-size:16px">Haifa Alsaif</div>
+      <div class="muted">@Haifa</div>
+      <div class="pill">owner</div>
+      <div class="row-center">
+        <img class="ic" src="../assets/images/icon_mail.svg" alt="">
+        <div class="muted">hss.1438@hotmail.com</div>
+      </div>
+      <div class="p-line"></div>
+    </aside>
+
+    <!-- Right details -->
+    <main id="detailCard" class="card card-pad section">
+      <!-- Personal info -->
+      <div>
+        <div class="sec-title">
+          <img class="ic20" src="../assets/images/icon_user.svg" alt="">
+          <div>Personal Information</div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <div class="label">First Name</div>
+            <div class="value" data-k="firstName">Haifa</div>
+            <input class="input" type="text" value="Haifa" data-k="firstName">
+          </div>
+          <div class="field">
+            <div class="label">Last Name</div>
+            <div class="value" data-k="lastName">Alsaif</div>
+            <input class="input" type="text" value="Alsaif" data-k="lastName">
+          </div>
+
+          <div class="field">
+            <div class="label">Username</div>
+            <div class="value" data-k="username">@Haifa</div>
+            <input class="input" type="text" value="@Haifa" data-k="username">
+          </div>
+          <div class="field">
+            <div class="label">Email</div>
+            <div class="value" data-k="email">hss.1438@hotmail.com</div>
+            <input class="input" type="email" value="hss.1438@hotmail.com" data-k="email">
+          </div>
+
+          <div class="field">
+            <div class="label">Gender</div>
+            <div class="value" data-k="gender">Not specified</div>
+            <input class="input" type="text" value="Not specified" data-k="gender">
+          </div>
+          <div class="field">
+            <div class="label">Specialization</div>
+            <div class="value" data-k="spec">Not specified</div>
+            <input class="input" type="text" value="Not specified" data-k="spec">
+          </div>
+        </div>
+      </div>
+
+      <div class="separator"></div>
+
+      <!-- Professional Links -->
+      <div>
+        <div class="sec-title">
+          <img class="ic20" src="../assets/images/icon_link.svg" alt="">
+          <div>Professional Links</div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <div class="label">GitHub</div>
+            <div class="value" data-k="github">Not specified</div>
+            <input class="input" type="url" placeholder="https://github.com/username" data-k="github">
+          </div>
+          <div class="field">
+            <div class="label">LinkedIn</div>
+            <div class="value" data-k="linkedin">Not specified</div>
+            <input class="input" type="url" placeholder="https://linkedin.com/in/username" data-k="linkedin">
+          </div>
+        </div>
+      </div>
+
+      <div class="separator"></div>
+
+      <!-- Bio -->
+      <div class="field">
+        <div class="label">Bio</div>
+        <div class="value" data-k="bio">No bio added yet</div>
+        <textarea class="textarea" placeholder="Tell us about yourself..." data-k="bio"></textarea>
+      </div>
+
+      <!-- Interests -->
+      <div>
+        <div class="sec-title">
+          <img class="ic" style="width:16px;height:16px" src="../assets/images/icon_heart.svg" alt="">
+          <div>Interests</div>
+        </div>
+        <div class="value" data-k="interests">No interests added yet</div>
+        <div class="chips" id="chipWrap" style="display:none"></div>
+        <textarea class="textarea" placeholder="Enter interests separated by commas (e.g., AI, Programming, Design)" data-k="interests" style="display:none"></textarea>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>
