@@ -250,5 +250,101 @@
     </main>
   </div>
 </div>
+<script>
+    /* ========= Basic profile editing logic =========
+       - Edit toggles .editing on the page root.
+       - Cancel restores original values and exits edit mode.
+       - Save copies inputs -> view text; updates chips for Interests; exits edit mode.
+       - NOTE: Hook btnSave to backend later if needed.
+    */
+    const root = document.getElementById('profileRoot');
+    const detail = document.getElementById('detailCard');
+    const btnEdit = document.getElementById('btnEdit');
+    const btnSave = document.getElementById('btnSave');
+    const btnCancel = document.getElementById('btnCancel');
+    
+    const state = {};      // original values snapshot for Cancel
+    const viewEls = {};    // map key -> view element
+    const inputEls = {};   // map key -> input/textarea
+    document.querySelectorAll('[data-k]').forEach(el=>{
+      const k = el.getAttribute('data-k');
+      if(el.classList.contains('value')) viewEls[k] = el;
+      else inputEls[k] = el;
+      // capture initial state only from view text if present; fall back to input value
+      if(!(k in state)){
+        state[k] = el.classList.contains('value') ? el.textContent.trim() :
+                   (el.value ?? '').trim();
+      }
+    });
+    
+    // interests chip UI helpers
+    const chipWrap = document.getElementById('chipWrap');
+    function renderChips(list){
+      chipWrap.innerHTML = '';
+      if(!list || list.length===0){ chipWrap.style.display='none'; return; }
+      chipWrap.style.display='flex';
+      list.forEach(v=>{
+        const c = document.createElement('span'); c.className='chip'; c.textContent=v.trim();
+        chipWrap.appendChild(c);
+      });
+    }
+    
+    // enter edit mode
+    btnEdit.addEventListener('click', ()=>{
+      root.classList.add('editing');
+      document.querySelector('.savebar').style.display='flex';
+      btnEdit.style.display='none';
+    
+      // show inputs, seed current values from views
+      Object.keys(inputEls).forEach(k=>{
+        const input = inputEls[k];
+        const v = (viewEls[k]?.textContent || input.value || '').trim();
+        input.value = v.replace(/^No bio added yet$|^No interests added yet$|^Not specified$/i,'');
+        input.style.display = (input.tagName==='INPUT' || input.tagName==='TEXTAREA') ? '' : '';
+      });
+    
+      // interests textarea visible in edit
+      inputEls['interests'].style.display='';
+    });
+    
+    // cancel -> restore snapshot
+    btnCancel.addEventListener('click', ()=>{
+      Object.keys(viewEls).forEach(k=>{
+        viewEls[k].textContent = state[k] || '';
+      });
+      renderChips([]); // hide chips until saved again
+      document.querySelector('.savebar').style.display='none';
+      btnEdit.style.display='';
+      root.classList.remove('editing');
+    });
+    
+    // save -> copy inputs -> views
+    btnSave.addEventListener('click', ()=>{
+      Object.keys(inputEls).forEach(k=>{
+        const val = (inputEls[k].value || '').trim();
+        if(k==='bio'){
+          viewEls[k].textContent = val || 'No bio added yet';
+          state[k] = viewEls[k].textContent;
+        }else if(k==='interests'){
+          // build chips & view text
+          const arr = val ? val.split(',').map(s=>s.trim()).filter(Boolean) : [];
+          if(arr.length){
+            viewEls[k].textContent = ''; // hide text line
+            renderChips(arr);
+          }else{
+            viewEls[k].textContent = 'No interests added yet';
+            renderChips([]);
+          }
+          state[k] = val;
+        }else{
+          viewEls[k].textContent = val || (k==='github'||k==='linkedin' ? 'Not specified' : '');
+          state[k] = viewEls[k].textContent;
+        }
+      });
+    
+      // (optional) success toast
+      // alert("Changes saved.");
+    });
+    </script>
 </body>
 </html>
