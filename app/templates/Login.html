@@ -588,15 +588,13 @@ body{background:var(--bg);color:var(--text);}
 .home-btn img{ width: 24px; height: 24px; }
   </style>
   
-  <script type="module" src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Ftrustlens9002back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.9 "></script>
-  <script type="module" src="https://static.rocket.new/rocket-shot.js?v=0.0.1 "></script>
   </head>
 <body>
   <div class="main-container">
     <header class="header">
       <div class="header-content">
         <div class="logo-section">
-          <img src="../assets/images/img_header.svg" alt="TrustLens Logo" class="logo-icon">
+          <img src="../static/images/img_header.svg" alt="TrustLens Logo" class="logo-icon">
           <h1 class="logo-text">TrustLens</h1>
         </div>
         
@@ -608,9 +606,9 @@ body{background:var(--bg);color:var(--text);}
         <div class="header-actions">
           <span class="nav-item language-selector">EN</span>
 <!-- زر التبديل -->
-<img id="theme-toggle" src="../assets/images/img_buttonDark.svg" alt="theme" class="theme-toggle">
+<img id="theme-toggle" src="../static/images/img_buttonDark.svg" alt="theme" class="theme-toggle">
 <a href="HomePage.html" class="home-btn">
-  <img src="../assets/images/home.png" alt="Home" width="24" height="24">
+  <img src="../static/images/home.png" alt="Home" width="24" height="24">
 </a>
         </div>
         <button class="hamburger" aria-label="Menu">☰</button>
@@ -628,7 +626,7 @@ body{background:var(--bg);color:var(--text);}
         <div class="form-group">
           <label for="email" class="form-label">Email or Username</label>
           <div class="input-wrapper">
-            <img src="../assets/images/img_icon.svg" alt="" class="input-icon">
+            <img src="../static/images/img_icon.svg" alt="" class="input-icon">
             <input 
               type="text" 
               id="email" 
@@ -642,7 +640,7 @@ body{background:var(--bg);color:var(--text);}
         <div class="form-group">
           <label for="password" class="form-label">Password</label>
           <div class="input-wrapper">
-            <img src="../assets/images/img_icon_gray_600.svg" alt="" class="input-icon">
+            <img src="../static/images/img_icon_gray_600.svg" alt="" class="input-icon">
             <input 
               type="password" 
               id="password" 
@@ -695,13 +693,13 @@ body{background:var(--bg);color:var(--text);}
                 <h3 class="footer-title">Connect With Us</h3>
                 <div class="social-links">
                   <div class="social-icon">
-                    <img src="../assets/images/img_link.svg" alt="Social Media Link" width="20" height="20">
+                    <img src="../static/images/img_link.svg" alt="Social Media Link" width="20" height="20">
                   </div>
                   <div class="social-icon">
-                    <img src="../assets/images/img_link_blue_gray_50.svg" alt="LinkedIn" width="20" height="20">
+                    <img src="../static/images/img_link_blue_gray_50.svg" alt="LinkedIn" width="20" height="20">
                   </div>
                   <div class="social-icon">
-                    <img src="../assets/images/img_link_blue_gray_50_40x40.svg" alt="GitHub" width="20" height="20">
+                    <img src="../static/images/img_link_blue_gray_50_40x40.svg" alt="GitHub" width="20" height="20">
                   </div>
                 </div>
               </div>
@@ -710,7 +708,7 @@ body{background:var(--bg);color:var(--text);}
           
           <div class="footer-bottom">
             <span class="copyright">© 2025 TrustLens — Built with love at King Saud University</span>
-            <img src="../assets/images/img_icon_red_500.svg" alt="Heart" class="heart-icon">
+            <img src="../static/images/img_icon_red_500.svg" alt="Heart" class="heart-icon">
           </div>
         </div>
       </div>
@@ -793,8 +791,8 @@ body{background:var(--bg);color:var(--text);}
 
       (()=>{
         const toggle = document.getElementById('theme-toggle');
-        const darkSrc  = '../assets/images/img_buttonlight.png'; // أيقونة الوضع الليلي
-        const lightSrc = '../assets/images/img_buttonDark.svg';  // أيقونة الوضع النهاري
+        const darkSrc  = '../static/images/img_buttonlight.png'; // أيقونة الوضع الليلي
+        const lightSrc = '../static/images/img_buttonDark.svg';  // أيقونة الوضع النهاري
       
         // استرجاع التفضيل
         if(localStorage.getItem('theme')==='dark') goDark(false);
