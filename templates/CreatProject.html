@@ -1,0 +1,288 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="initial-scale=1, width=device-width"/>
+  <title>Create Project • TrustLens</title>
+  <style>
+    :root{
+      --bg:#fff; --text:#0a0a0a; --muted:#717182;
+      --line:rgba(0,0,0,.10); --primary1:#00B8DB; --primary2:#155DFC;
+      --radius:14px; --r10:10px; --r8:8px;
+      --danger:#B42318; --success:#0A7A39;
+      --chip-bg:rgba(0,184,219,.08);
+      --chip-bd:#9ee5f2;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;line-height:1.45;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:#fff}
+
+    .page{position:relative}
+    .frame{position:absolute;inset:0;display:flex;flex-direction:column;gap:24px;
+           padding:80px clamp(16px,6vw,310.8px) 40px}
+
+    .mast{position:absolute;top:16px;left:clamp(16px,6vw,134.8px);right:clamp(16px,6vw,134.8px);
+          height:40px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand img{width:32px;height:32px}
+    .brand-name{font-size:20px;background:linear-gradient(90deg,var(--primary1),var(--primary2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .mast-right{display:flex;align-items:center;gap:12px;font-size:14px}
+    .lang{height:32px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;padding:0 12px}
+    .avatar-pill{position:relative;width:83px;height:40px}
+    .avatar-circle{position:absolute;inset:0;width:40px;height:40px;border-radius:9999px;
+      background:linear-gradient(135deg,var(--primary1),var(--primary2));display:grid;place-items:center;color:#fff;font-weight:700}
+    .user-meta{position:absolute;left:48px;top:2px;display:flex;flex-direction:column}
+    .small{font-size:12px}
+    .muted{color:var(--muted)}
+
+    .topbar{height:36px;display:flex;align-items:center;justify-content:space-between}
+    .back{height:36px;display:inline-flex;align-items:center;gap:12px;border-radius:8px;color:var(--text);text-decoration:none}
+    .icon-16{width:16px;height:16px;display:block}
+
+    .card{align-self:stretch;border:0.8px solid var(--line);border-radius:var(--radius);
+          background:#fff;display:flex;flex-direction:column;gap:32px;padding:32px 20px}
+    .head,.content{width:100%;max-width:830.4px;margin:0 auto}
+    .head{display:flex;flex-direction:column;gap:8px}
+    .title{font-size:20px;margin:0;font-weight:500}
+    .subtitle{font-size:16px;color:var(--muted);margin:0}
+
+    .content{font-size:14px}
+    .field{margin:16px 0}
+    .label{height:14px;display:flex;align-items:center;margin-bottom:6px}
+    .hint{color:var(--muted);margin:4px 0 6px}
+    .note{margin-top:8px;font-size:14px;line-height:20px}
+    .note.error{color:var(--danger)}
+    .note.success{color:var(--success)}
+    .input, .textarea, .domain-trigger, .search-input{
+      width:100%; border-radius:8px; background:#f3f3f5; border:0.8px solid transparent; color:#717182;
+    }
+    .input{height:36px;padding:4px 12px;display:flex;align-items:center}
+    .textarea{min-height:64px;padding:8px 12px}
+    .domain-trigger{height:36px;background:#fff;border-color:var(--line);display:flex;align-items:center;gap:8px;padding:0 12px;cursor:pointer}
+    .domain-trigger .chev{margin-left:auto;opacity:.55}
+
+    .domain-pop{margin-top:8px;border:0.8px solid var(--line);border-radius:10px;padding:12px;display:none}
+    .domain-pop.open{display:block}
+    .domain-top{display:flex;align-items:center;gap:12px}
+    .domain-top .search{flex:1;position:relative}
+    .search-input{height:36px;padding:4px 12px 4px 36px;background:#f3f3f5}
+    .search .icon{position:absolute;left:10px;top:10px;width:16px}
+    .domain-actions{margin-left:auto;display:flex;gap:12px}
+    .domain-list{max-height:220px;overflow:auto;padding-right:4px;margin-top:8px}
+    .domain-row{display:flex;align-items:center;gap:10px;height:32px}
+
+    .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+    .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:9999px;
+          background:var(--chip-bg);border:1px solid var(--chip-bd);color:#0a5b69}
+    .chip .x{font-weight:700;opacity:.7;cursor:pointer}
+
+    .cats{display:grid;gap:12px;grid-template-columns:1fr}
+    @media(min-width:720px){ .cats{grid-template-columns:1fr 1fr} }
+    .cat-input{position:absolute;opacity:0;pointer-events:none}
+    .cat-card{border:1.6px solid rgba(0,0,0,.1);border-radius:var(--r10);padding:14px 16px;cursor:pointer;transition:.2s;display:block}
+    .cat-card:hover{box-shadow:0 6px 16px -10px rgba(0,0,0,.2)}
+    .cat-card h4{margin:0 0 4px 0;font-size:16px;font-weight:400}
+    .cat-card p{margin:0;color:var(--muted);font-size:14px}
+    #cat-news:checked + label, #cat-conv:checked + label{background:rgba(0,184,219,.1);border-color:#00B8DB}
+
+    .dataset{display:flex;flex-direction:column;gap:8px}
+    .drop{min-height:159.2px;border-radius:var(--r10);border:1.6px solid var(--line);
+          padding:25.6px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center}
+    .drop h5{margin:0;font-size:16px;font-weight:400}
+    .drop p{margin:0;color:var(--muted)}
+    .file-input{display:none}
+    .gen-row{display:none;align-items:center;gap:8px}
+    .checkbox{width:16px;height:16px;border-radius:4px;background:#f3f3f5;border:0.8px solid var(--line);box-shadow:0 1px 2px rgba(0,0,0,.05)}
+    .cats:has(#cat-conv:checked) ~ .dataset .gen-row{display:flex;}
+
+    .invite{display:flex;flex-direction:column;gap:16px}
+    .invite-row{display:flex;align-items:center;gap:12px;position:relative}
+    .search-wrap{flex:1;position:relative}
+    .search-wrap .box{display:flex;align-items:center; height:36px; border-radius:8px;
+      background:#f3f3f5; border:0.8px solid transparent; padding:4px 16px 4px 40px; color:#717182}
+    .search-wrap .box input{all:unset;flex:1}
+    .search-wrap .box .icon{position:absolute;left:12px;top:10px;width:16px}
+    .add-btn{height:36px;min-width:82px;border-radius:8px;background:linear-gradient(90deg,var(--primary1),var(--primary2));
+      display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none}
+
+    .popover{position:absolute;left:0;right:100px;top:44px;background:#fff;border:1px solid var(--line);border-radius:10px;
+      box-shadow:0 12px 24px rgba(0,0,0,.08);padding:8px;display:none;z-index:10;max-height:320px;overflow:auto}
+    .popover.open{display:block}
+    .result{display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;cursor:pointer}
+    .result:hover{background:rgba(0,0,0,.03)}
+    .avatar{width:36px;height:36px;border-radius:9999px;background:linear-gradient(135deg,var(--primary1),var(--primary2));display:grid;place-items:center;color:#fff;font-weight:700}
+    .tag{font-size:12px;padding:4px 8px;border-radius:9999px;background:var(--chip-bg);border:1px solid var(--chip-bd);color:#0a5b69}
+
+    .empty{padding:10px 12px;color:var(--muted)}
+    .manual-btn{display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:8px 12px;border-radius:8px;
+      border:1px solid var(--line);background:#fff;cursor:pointer}
+
+    .sel{display:flex;flex-direction:column;gap:8px}
+    .sel-head{display:flex;align-items:center;gap:8px}
+    .sel-card{min-height:61.6px;border-radius:var(--r10);
+              background:linear-gradient(90deg,rgba(0,184,219,.05),rgba(43,127,255,.05));
+              border:0.8px solid rgba(0,184,219,.2);display:flex;align-items:center;justify-content:space-between;padding:10px 12px}
+    .sel-left{display:flex;align-items:center;gap:12px}
+    .remove{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;opacity:0;transition:.15s;cursor:pointer}
+    .sel-card:hover .remove{opacity:1}
+    .remove::after{content:"✕";font-weight:700;color:#b00}
+
+    .actions{display:flex;gap:16px;align-items:center;margin-top:16px}
+    .btn-primary{flex:1;height:40px;border-radius:8px;background:linear-gradient(90deg,var(--primary1),var(--primary2));
+      display:flex;align-items:center;justify-content:center;color:#fff;border:none;cursor:pointer}
+    .btn-ghost{height:40px;min-width:75px;border-radius:8px;background:#fff;border:0.8px solid var(--line);display:flex;align-items:center;justify-content:center;color:#0a0a0a;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="page" style="width:100%;min-height:100vh">
+    <!-- Header -->
+    <div class="mast">
+      <div class="brand">
+        <img src="../assets/images/icon_logo.svg" alt="TrustLens logo">
+        <div class="brand-name">TrustLens</div>
+      </div>
+      <div class="mast-right">
+        <div class="lang">EN</div>
+        <div class="avatar-pill">
+          <div class="avatar-circle">H</div>
+          <div class="user-meta">
+            <div>Haifa</div>
+            <div class="small muted" style="text-transform:capitalize">owner</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main frame -->
+    <div class="frame">
+      <div class="topbar">
+        <a class="back" href="#">
+          <img class="icon-16" src="../assets/images/icon_back.svg" alt="">
+          <div>Back to Dashboard</div>
+        </a>
+      </div>
+
+      <section class="card">
+        <div class="head">
+          <div class="title">Create New Project</div>
+          <div class="subtitle">Set up your content evaluation project</div>
+        </div>
+
+        <div class="content" id="form">
+          <!-- Project Name -->
+          <div class="field">
+            <div class="label"><span>Project Name</span></div>
+            <input id="name" class="input" type="text" placeholder="Enter project name"/>
+            <div class="note error" id="nameErr" hidden>Project name is required.</div>
+          </div>
+
+          <!-- Description -->
+          <div class="field">
+            <div class="label"><span>Description</span></div>
+            <textarea id="desc" class="textarea" rows="4" placeholder="Describe your project..."></textarea>
+            <div class="note error" id="descErr" hidden>Description is required.</div>
+          </div>
+
+          <!-- Domain -->
+          <div class="field">
+            <div class="label"><span>Domain</span></div>
+            <div class="hint">Select one or more domains for your project</div>
+
+            <button type="button" class="domain-trigger" id="domainBtn">
+              <span id="domainState">Click to select domains...</span>
+              <img class="icon-16 chev" src="../assets/images/chevron-down.svg" alt="">
+            </button>
+
+            <div class="chips" id="domainChips"></div>
+
+            <div class="domain-pop" id="domainPop">
+              <div class="domain-top">
+                <div class="search">
+                  <img class="icon" src="../assets/images/search.svg" alt="">
+                  <input id="domainSearch" class="search-input" type="text" placeholder="Search domains...">
+                </div>
+                <div class="domain-actions">
+                  <a href="#" id="selectAll">Select All</a>
+                  <a href="#" id="clearAll">Clear All</a>
+                </div>
+              </div>
+              <div class="domain-list" id="domainList"></div>
+            </div>
+          </div>
+
+          <!-- Category -->
+          <div class="field">
+            <div class="label"><span>Category</span></div>
+            <div class="hint">Choose the type of content you want to evaluate</div>
+            <div class="cats">
+              <input class="cat-input" type="radio" name="category" id="cat-news">
+              <label for="cat-news" class="cat-card">
+                <h4>News Articles</h4>
+                <p>Evaluate news content</p>
+              </label>
+
+              <input class="cat-input" type="radio" name="category" id="cat-conv">
+              <label for="cat-conv" class="cat-card">
+                <h4>Conversations</h4>
+                <p>Evaluate dialogue content</p>
+              </label>
+            </div>
+          </div>
+
+          <!-- Dataset -->
+          <div class="field dataset">
+            <div class="label"><span>Dataset</span></div>
+            <div class="drop" id="dropzone">
+              <input id="file" class="file-input" type="file" accept=".csv">
+              <img class="icon-16" src="../assets/images/upload.svg" alt="" style="width:48px;height:48px;opacity:.9">
+              <h5 id="dropTitle">Click to upload CSV file</h5>
+              <p>or drag and drop</p>
+              <div class="note error" id="fileErr" hidden></div>
+              <div class="note success" id="fileOk" hidden></div>
+            </div>
+            <label class="gen-row" id="genRow">
+              <input type="checkbox" id="gen" style="width:16px;height:16px;margin:0">
+              <span>No dataset? Generate from scratch</span>
+            </label>
+          </div>
+
+          <!-- Invite Examiners -->
+          <div class="field">
+            <div class="label"><span>Invite Examiners</span></div>
+            <div class="hint">Type username or email to add manually, or select from our volunteer community</div>
+
+            <div class="invite">
+              <div class="invite-row">
+                <div class="search-wrap">
+                  <div class="box">
+                    <img class="icon" src="../assets/images/search.svg" alt="">
+                    <input id="inviteSearch" type="text" placeholder="Enter username/email or select from suggestions below" autocomplete="off">
+                  </div>
+                  <div class="popover" id="suggestPop"></div>
+                </div>
+                <a class="add-btn" id="addManual" href="javascript:void(0)">+ Add</a>
+              </div>
+
+              <div class="sel">
+                <div class="sel-head">
+                  <span class="checkbox" aria-hidden="true"></span>
+                  <div id="selTitle">Selected Examiners (0)</div>
+                </div>
+                <div id="exList"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="actions">
+            <button id="submit" class="btn-primary" type="button">Create Project</button>
+            <button id="cancelBtn" class="btn-ghost" type="button">Cancel</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
