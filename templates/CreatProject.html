@@ -284,5 +284,306 @@
       </section>
     </div>
   </div>
+  <script>
+    const $ = (s, el=document) => el.querySelector(s);
+    const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+
+    /* ===== Domains ===== */
+    const domains = [
+      "Technology","Science","Food & Culinary","Automotive","Industry","Healthcare & Medicine",
+      "Education","Politics","Business","Sports","Entertainment","Travel","Environment",
+      "Finance","Art & Culture","Parenting & Family","Pets & Animals","Fitness & Wellness",
+      "Photography & Videography","Religion & Spirituality","Social Media","Journalism","Data Science"
+    ];
+
+    const domainBtn = $("#domainBtn"),
+          domainPop = $("#domainPop"),
+          domainSearch = $("#domainSearch"),
+          domainList = $("#domainList"),
+          domainState = $("#domainState"),
+          selectAll = $("#selectAll"),
+          clearAll = $("#clearAll"),
+          domainChips = $("#domainChips");
+
+    let selectedDomains = new Set();
+
+    function renderDomainList(filter=""){
+      domainList.innerHTML = "";
+      const q = filter.trim().toLowerCase();
+      const items = domains.filter(d => d.toLowerCase().includes(q));
+      if(items.length === 0){
+        const p = document.createElement("div");
+        p.className="hint"; p.textContent="No domains found";
+        domainList.appendChild(p); return;
+      }
+      items.forEach(name=>{
+        const id = "dom-"+name.toLowerCase().replace(/[^a-z0-9]+/g,"-");
+        const row = document.createElement("label");
+        row.className="domain-row";
+        row.innerHTML = `<input type="checkbox" value="${name}" id="${id}"><span>${name}</span>`;
+        domainList.appendChild(row);
+      });
+      selectedDomains.forEach(v=>{
+        const cb = domainList.querySelector(`input[value="${v}"]`);
+        if(cb) cb.checked = true;
+      });
+    }
+
+    function renderDomainChips(){
+      domainChips.innerHTML = "";
+      selectedDomains.forEach(v=>{
+        const chip = document.createElement("span");
+        chip.className="chip";
+        chip.innerHTML = `${v} <span class="x" title="Remove">×</span>`;
+        chip.querySelector(".x").onclick = ()=>{
+          selectedDomains.delete(v);
+          updateDomainState();
+          renderDomainList(domainSearch.value);
+          renderDomainChips();
+        };
+        domainChips.appendChild(chip);
+      });
+    }
+
+    function updateDomainState(){
+      const n = selectedDomains.size;
+      domainState.textContent = n===0 ? "Click to select domains..." :
+        (n===1 ? "1 domain selected" : `${n} domains selected`);
+    }
+
+    domainBtn.addEventListener("click", ()=> domainPop.classList.toggle("open"));
+    document.addEventListener("click",(e)=>{
+      if(!domainPop.contains(e.target)&&!domainBtn.contains(e.target)) domainPop.classList.remove("open");
+    });
+    domainSearch.addEventListener("input", ()=>renderDomainList(domainSearch.value));
+    domainList.addEventListener("change",(e)=>{
+      if(e.target.type==="checkbox"){
+        e.target.checked ? selectedDomains.add(e.target.value) : selectedDomains.delete(e.target.value);
+        updateDomainState(); renderDomainChips();
+      }
+    });
+    selectAll.addEventListener("click",(e)=>{ e.preventDefault(); domains.forEach(d=>selectedDomains.add(d));
+      renderDomainList(domainSearch.value); updateDomainState(); renderDomainChips(); });
+    clearAll.addEventListener("click",(e)=>{ e.preventDefault(); selectedDomains.clear();
+      renderDomainList(domainSearch.value); updateDomainState(); renderDomainChips(); });
+
+    renderDomainList(); updateDomainState();
+
+    /* ===== Category & Dataset ===== */
+    const catNews=$("#cat-news"), catConv=$("#cat-conv"), genRow=$("#genRow");
+    function syncGenVisibility(){ genRow.style.display = catConv.checked ? "flex" : "none"; }
+    catNews.addEventListener("change", syncGenVisibility);
+    catConv.addEventListener("change", syncGenVisibility);
+    syncGenVisibility();
+
+    /* ===== Dropzone ===== */
+    const fileInput=$("#file"), drop=$("#dropzone"), fileErr=$("#fileErr"),
+          fileOk=$("#fileOk"), dropTitle=$("#dropTitle"), gen=$("#gen");
+    const MAX=10*1024*1024;
+    function resetFileMessages(){ fileErr.hidden=true; fileErr.textContent=""; fileOk.hidden=true; fileOk.textContent=""; }
+    function validateFile(file){
+      resetFileMessages();
+      if(!file){ fileErr.hidden=false; fileErr.textContent="File is empty."; return false; }
+      const isCSV = /\.csv$/i.test(file.name||"");
+      if(!isCSV){ fileErr.hidden=false; fileErr.textContent="Only CSV files are allowed."; return false; }
+      if(file.size===0){ fileErr.hidden=false; fileErr.textContent="File is empty."; return false; }
+      if(file.size>MAX){ fileErr.hidden=false; fileErr.textContent="File is too large. Maximum size is 10MB."; return false; }
+      fileOk.hidden=false; fileOk.textContent="CSV looks good.";
+      dropTitle.textContent=file.name;
+      return true;
+    }
+    drop.addEventListener("click", ()=> fileInput.click());
+    ["dragenter","dragover"].forEach(evt=> drop.addEventListener(evt, e=>{ e.preventDefault(); drop.style.borderColor="#00B8DB"; }));
+    ["dragleave","drop"].forEach(evt=> drop.addEventListener(evt, e=>{ e.preventDefault(); drop.style.borderColor="var(--line)"; }));
+    drop.addEventListener("drop", e=>{ const f=e.dataTransfer.files?.[0]; if(f){ fileInput.files=e.dataTransfer.files; validateFile(f);} });
+    fileInput.addEventListener("change", ()=>{ const f=fileInput.files?.[0]; if(f) validateFile(f); else { resetFileMessages(); dropTitle.textContent="Click to upload CSV file"; } });
+
+    /* ===== Invite Examiners ===== */
+    const sampleUsers = [
+      {name:"John Doe", handle:"@john_doe", email:"john.doe@example.com", tag:"Computer Science"},
+      {name:"Maria Garcia", handle:"@maria_garcia", email:"maria.garcia@example.com", tag:"Journalism"},
+      {name:"Fatima Ali", handle:"@fatima_ali", email:"fatima.ali@example.com", tag:"Data Science"},
+      {name:"Omar Saleh", handle:"@omar_saleh", email:"omar.saleh@example.com", tag:"Healthcare"},
+      {name:"Sara Khan", handle:"@sara_khan", email:"sara.khan@example.com", tag:"Finance"},
+      {name:"Alex Kim", handle:"@alex_kim", email:"alex.kim@example.com", tag:"Design"},
+    ];
+
+    const inviteInput = $("#inviteSearch"),
+          suggestPop = $("#suggestPop"),
+          addManual = $("#addManual"),
+          exList = $("#exList"),
+          selTitle = $("#selTitle");
+
+    let selectedExaminers = [];
+
+    function renderPopover(q){
+      suggestPop.innerHTML = "";
+      const query = (q||"").trim().toLowerCase();
+      if(!query){
+        const em = document.createElement("div");
+        em.className="empty";
+        em.textContent = "Browse volunteer examiners";
+        suggestPop.appendChild(em);
+        suggestPop.classList.add("open"); return;
+      }
+      const results = sampleUsers.filter(u =>
+        u.name.toLowerCase().includes(query) ||
+        u.handle.toLowerCase().includes(query) ||
+        u.email.toLowerCase().includes(query)
+      ).slice(0,5);
+
+      if(results.length===0){
+        const em = document.createElement("div");
+        em.className="empty";
+        em.textContent = "No matching volunteers found";
+        suggestPop.appendChild(em);
+        const btn = document.createElement("button");
+        btn.className="manual-btn"; btn.innerHTML = `+ Add "${q}" manually`;
+        btn.onclick = ()=>{ addManualUser(q); closePopover(); };
+        suggestPop.appendChild(btn);
+        suggestPop.classList.add("open"); return;
+      }
+
+      results.forEach(u=>{
+        const row = document.createElement("div");
+        row.className="result";
+        row.innerHTML = `
+          <div class="avatar">${u.name.split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase()}</div>
+          <div style="flex:1">
+            <div style="display:flex;gap:8px;align-items:center">
+              <strong>${u.name}</strong><span class="muted">${u.handle}</span>
+            </div>
+            <div class="small muted">${u.email}</div>
+          </div>
+          <span class="tag">${u.tag}</span>
+        `;
+        row.onclick = ()=>{ addSelected(u); closePopover(); };
+        suggestPop.appendChild(row);
+      });
+      suggestPop.classList.add("open");
+    }
+
+    function closePopover(){ suggestPop.classList.remove("open"); }
+
+    function addSelected(u){
+      if(selectedExaminers.some(x=>x.email===u.email || x.handle===u.handle)) return;
+      selectedExaminers.push(u);
+      renderSelected();
+      inviteInput.value="";
+    }
+
+    function addManualUser(raw){
+      const v = raw.trim();
+      if(!v) return;
+      const u = {
+        name: v.includes("@") ? v.split("@")[0].replace(/[^a-z0-9_]/gi," ") : v,
+        handle: v.startsWith("@") ? v : "@manual",
+        email: v.includes("@") ? v : v+"@example.com",
+        tag: "Manual"
+      };
+      addSelected(u);
+    }
+
+    function renderSelected(){
+      exList.innerHTML = "";
+      selectedExaminers.forEach((u,i)=>{
+        const card = document.createElement("div");
+        card.className="sel-card";
+        card.innerHTML = `
+          <div class="sel-left">
+            <div class="avatar">${u.name.split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase()}</div>
+            <div>
+              <div style="display:flex;gap:8px"><div>${u.name}</div><div class="muted">${u.handle}</div></div>
+              <div class="small muted">${u.email}</div>
+            </div>
+          </div>
+          <div class="remove" title="Remove"></div>
+        `;
+        card.querySelector(".remove").onclick = ()=>{ selectedExaminers.splice(i,1); renderSelected(); };
+        exList.appendChild(card);
+      });
+      selTitle.textContent = `Selected Examiners (${selectedExaminers.length})`;
+    }
+
+    inviteInput.addEventListener("focus", ()=> renderPopover(inviteInput.value));
+    inviteInput.addEventListener("input", ()=> renderPopover(inviteInput.value));
+    document.addEventListener("click",(e)=>{
+      if(!suggestPop.contains(e.target) && !inviteInput.contains(e.target)) closePopover();
+    });
+    addManual.addEventListener("click", ()=> { addManualUser(inviteInput.value); closePopover(); });
+
+    /* ===== Reset (Cancel) ===== */
+    const cancelBtn = $("#cancelBtn");
+    const nameEl=$("#name"), descEl=$("#desc");
+
+    function resetAll(){
+      // text fields
+      nameEl.value=""; descEl.value="";
+      $("#nameErr").hidden = true; $("#descErr").hidden = true;
+
+      // domains
+      selectedDomains.clear();
+      updateDomainState();
+      domainSearch.value="";
+      renderDomainList();
+      renderDomainChips();
+      domainPop.classList.remove("open");
+
+      
+      catNews.checked = false;
+      catConv.checked = false;
+      syncGenVisibility();
+
+      // dataset
+      fileInput.value="";
+      resetFileMessages();
+      dropTitle.textContent="Click to upload CSV file";
+      gen.checked=false;
+
+      // invite examiners
+      selectedExaminers = [];
+      renderSelected();
+      inviteInput.value="";
+      closePopover();
+    }
+
+    cancelBtn.addEventListener("click", resetAll);
+
+    /* ===== Submit validation + redirect ===== */
+    const submitBtn=$("#submit");
+    submitBtn.addEventListener("click", ()=>{
+      // Required: Name + Description
+      $("#nameErr").hidden = !!nameEl.value.trim();
+      $("#descErr").hidden = !!descEl.value.trim();
+
+      // Required: Category
+      const hasCategory = catNews.checked || catConv.checked;
+      if(!hasCategory){
+        alert("Please select a category.");
+        return;
+      }
+
+      // Dataset rule
+      let datasetOK=true;
+      const hasFile=!!(fileInput.files&&fileInput.files[0]);
+      if(catNews.checked){
+        if(!hasFile){ datasetOK=false; fileErr.hidden=false; fileErr.textContent="For News Articles, a CSV file is required."; }
+        else datasetOK=validateFile(fileInput.files[0]);
+        gen.checked=false;
+      }else{ // Conversations
+        if(!hasFile && !gen.checked){
+          datasetOK=false; fileErr.hidden=false; fileErr.textContent="Upload a CSV or enable 'Generate from scratch'.";
+        }else if(hasFile){
+          datasetOK=validateFile(fileInput.files[0]);
+        }
+      }
+
+      const baseOK = !!nameEl.value.trim() && !!descEl.value.trim();
+      if(baseOK && datasetOK && hasCategory){
+    
+        window.location.href = "./Ownerdashboard.html";
+      }
+    });
+  </script>
 </body>
 </html>
