@@ -341,7 +341,10 @@
           state[k] = viewEls[k].textContent;
         }
       });
-    
+    // exit edit mode
+    document.querySelector('.savebar').style.display='none';
+      btnEdit.style.display='';
+      root.classList.remove('editing');
       // (optional) success toast
       // alert("Changes saved.");
     });
