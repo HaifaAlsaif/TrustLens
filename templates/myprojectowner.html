@@ -1,0 +1,1183 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustLens AI Detection Dashboard | Project Management Platform</title>
+  <meta name="description" content="Manage and track your AI detection projects with TrustLens dashboard. Monitor content analysis across technology, healthcare, education, finance and more domains with comprehensive project tracking tools.">
+  <meta name="keywords" content="AI detection, content analysis, project management, TrustLens, artificial intelligence, content verification, dashboard">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="TrustLens AI Detection Dashboard | Project Management Platform">
+  <meta property="og:description" content="Manage and track your AI detection projects with TrustLens dashboard. Monitor content analysis across multiple domains with comprehensive project tracking tools.">
+  
+  <style>
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #0a0a0a;
+      line-height: 1.5;
+    }
+    
+    /* Layout components */
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      width: 100%;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 1252px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    
+    .header-left {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .logo {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .brand-text {
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 23px;
+      background: linear-gradient(90deg, #00b8da 0%, #155cfb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .language-text {
+      font-size: 14px;
+      color: #0a0a0a;
+    }
+    
+    .theme-icon {
+      width: 10px;
+      height: 10px;
+    }
+    
+    .user-profile {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #00b8da 0%, #155cfb 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 400;
+    }
+    
+    .user-info h4 {
+      font-size: 14px;
+      color: #0a0a0a;
+      font-weight: 400;
+    }
+    
+    .user-info p {
+      font-size: 12px;
+      color: #717182;
+      text-transform: capitalize;
+    }
+    
+    .content-wrapper {
+      display: flex;
+      gap: 32px;
+      width: 98%;
+      margin: 0 auto;
+    }
+    
+    .sidebar {
+      width: 256px;
+      background-color: #ffffff;
+      border: 0 solid #00000019;
+      border-radius: 0;
+      padding: 16px;
+      height: fit-content;
+    }
+    
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .menu-item:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .menu-item.active {
+      background-color: #e5f3ff;
+    }
+    
+    .menu-icon {
+      width: 16px;
+      height: 16px;
+      margin-right: 16px;
+    }
+    
+    .menu-text {
+      font-size: 14px;
+      color: #0a0a0a;
+    }
+    
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding: 0 16px;
+    }
+    
+    .welcome-section {
+      background: linear-gradient(90deg, #00b8da19 0%, #2b7fff19 50%, #ac46ff19 100%);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0px 4px 128px #888888ff;
+    }
+    
+    .welcome-title {
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 28px;
+      color: #0a0a0a;
+      margin-bottom: 10px;
+    }
+    
+    .welcome-subtitle {
+      font-size: 16px;
+      color: #717182;
+      line-height: 19px;
+    }
+    
+    .projects-section {
+      background-color: #ffffff;
+      border: 0 solid #0000000d;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0px 4px 6px #00000019;
+    }
+    
+    .projects-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 48px;
+    }
+    
+    .projects-info {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .projects-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #00b8da 0%, #155cfb 100%);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0px 4px 6px #00b8da33;
+    }
+    
+    .projects-details h2 {
+      font-size: 16px;
+      color: #0a0a0a;
+      margin-bottom: 2px;
+    }
+    
+    .projects-details p {
+      font-size: 14px;
+      color: #717182;
+    }
+    
+    .new-project-btn {
+      background: linear-gradient(90deg, #00b8da 0%, #155cfb 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px 8px 44px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+    
+    .new-project-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    .new-project-btn::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      width: 16px;
+      height: 16px;
+      background-image: url('../assets/images/img_icon_3.svg');
+      background-size: contain;
+    }
+    
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+    }
+    
+    .chip-item {
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 0 solid transparent;
+    }
+    
+    .chip-item.active {
+      background: linear-gradient(90deg, #00b8da 0%, #155cfb 100%);
+      color: #ffffff;
+    }
+    
+    .chip-item:not(.active) {
+      background-color: #ffffff;
+      color: #0a0a0a;
+      border: 0 solid #00000019;
+    }
+    
+    .chip-item:hover:not(.active) {
+      background-color: #f3f4f6;
+    }
+    
+    .projects-table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 0 solid #0000000d;
+    }
+    
+    .table-header {
+      background-color: #ececf04c;
+      border-bottom: 1px solid #00000019;
+    }
+    
+    .table-header th {
+      padding: 10px 8px;
+      text-align: left;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0a0a0a;
+    }
+    
+    .table-row {
+      border-bottom: 1px solid #00000007;
+    }
+    
+    .table-row:hover {
+      background-color: #f9fafb;
+    }
+    
+    .table-cell {
+      padding: 22px 8px;
+      vertical-align: middle;
+    }
+    
+    .domain-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .domain-tag {
+      background-color: #615fff0c;
+      color: #432dd7;
+      border: 0 solid #615eff4c;
+      border-radius: 8px;
+      padding: 2px 8px;
+      font-size: 12px;
+    }
+    
+    .category-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+    
+    .category-news {
+      background-color: #2b7fff19;
+      color: #1347e5;
+      border: 0 solid #2b7fff66;
+    }
+    
+    .category-conversation {
+      background-color: #00c95019;
+      color: #008235;
+      border: 0 solid #00c85066;
+    }
+    
+    .examiners-count {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: center;
+    }
+    
+    .examiner-icon {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .status-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 24px 8px 8px;
+      font-size: 12px;
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0px 1px 2px #00000019;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+    
+    .status-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    .status-completed {
+      background-color: #00c950e5;
+    }
+    
+    .status-progress {
+      background-color: #2b7fffe5;
+    }
+    
+    .status-btn::after {
+      content: '';
+      position: absolute;
+      right: 8px;
+      width: 16px;
+      height: 16px;
+      background-image: url('../assets/images/img_arrowdown.svg');
+      background-size: contain;
+    }
+    
+    .actions-cell {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    
+    .view-btn {
+      background-color: #ffffff;
+      border: 0 solid #00000019;
+      border-radius: 8px;
+      padding: 6px 10px 6px 38px;
+      font-size: 14px;
+      color: #0a0a0a;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      transition: background-color 0.3s ease;
+    }
+    
+    .view-btn:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .view-btn::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      width: 16px;
+      height: 16px;
+      background-image: url('../assets/images/img_icon_4.svg');
+      background-size: contain;
+    }
+    
+    .action-icon {
+      width: 36px;
+      height: 32px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    
+    .action-icon:hover {
+      transform: scale(1.1);
+    }
+    
+    /* Mobile hamburger menu */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      padding: 8px;
+    }
+    
+    .hamburger span {
+      width: 25px;
+      height: 3px;
+      background-color: #0a0a0a;
+      margin: 3px 0;
+      transition: 0.3s;
+    }
+    
+    /* Responsive media queries */
+    @media (max-width: 639px) {
+      .header {
+        padding: 12px 16px;
+      }
+      
+      .brand-text {
+        font-size: 18px;
+      }
+      
+      .user-info {
+        display: none;
+      }
+      
+      .hamburger {
+        display: flex;
+      }
+      
+      .content-wrapper {
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+        padding: 0 16px;
+      }
+      
+      .sidebar {
+        display: none;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        height: 100vh;
+        background-color: #ffffff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      
+      .sidebar.active {
+        display: block;
+      }
+      
+      .main-content {
+        padding: 0;
+      }
+      
+      .welcome-title {
+        font-size: 20px;
+      }
+      
+      .welcome-subtitle {
+        font-size: 14px;
+      }
+      
+      .projects-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+      }
+      
+      .projects-table {
+        font-size: 12px;
+      }
+      
+      .table-cell {
+        padding: 12px 4px;
+      }
+      
+      .domain-tags {
+        flex-direction: column;
+        gap: 4px;
+      }
+      
+      .actions-cell {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .filter-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 8px;
+      }
+      
+      .chip-item {
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+    }
+    
+    @media (min-width: 640px) {
+      .header {
+        padding: 16px 24px;
+      }
+      
+      .content-wrapper {
+        gap: 24px;
+      }
+      
+      .main-content {
+        padding: 0 8px;
+      }
+    }
+    
+    @media (min-width: 768px) {
+      .welcome-title {
+        font-size: 24px;
+      }
+      
+      .projects-header {
+        flex-direction: row;
+        align-items: center;
+      }
+      
+      .table-cell {
+        padding: 22px 8px;
+      }
+      
+      .domain-tags {
+        flex-direction: row;
+      }
+      
+      .actions-cell {
+        flex-direction: row;
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .content-wrapper {
+        gap: 32px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      
+      .hamburger {
+        display: none;
+      }
+      
+      .sidebar {
+        display: block;
+        position: static;
+        height: auto;
+        box-shadow: none;
+      }
+      
+      .user-info {
+        display: block;
+      }
+    }
+    
+    @media (min-width: 1280px) {
+      .header {
+        max-width: 1252px;
+      }
+    }
+  </style>
+  
+  </head>
+<body>
+  <div class="main-container">
+    <header class="header">
+      <div class="header-left">
+        <img src="../static/images/img_header.svg" alt="TrustLens Logo" class="logo">
+        <div class="brand-text">TrustLens</div>
+      </div>
+      
+      <div class="header-right">
+        <div class="hamburger" onclick="toggleSidebar()">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        
+        <span class="language-text">EN</span>
+        <img src="../static/images/img_button.svg" alt="Theme Toggle" class="theme-icon">
+        
+        <div class="user-profile">
+          <div class="user-avatar">H</div>
+          <div class="user-info">
+            <h4>Haifa</h4>
+            <p>owner</p>
+          </div>
+        </div>
+      </div>
+    </header>
+    
+    <div class="content-wrapper">
+      <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-menu">
+          <div class="menu-item" id="menu-home">
+            <img src="../static/images/img_icon_black_900.svg" alt="Home" class="menu-icon">
+            <span class="menu-text">Home</span>
+          </div>
+          <div class="menu-item"  id="menu-dashboard">
+            <img src="../static/images/img_icon_black_900_16x16.svg" alt="Dashboard" class="menu-icon">
+            <span class="menu-text">Dashboard</span>
+          </div>
+          <div class="menu-item" id="menu-create">
+            <img src="../static/images/img_icon_1.svg" alt="Create Project" class="menu-icon">
+            <span class="menu-text">Create Project</span>
+          </div>
+          <div class="menu-item  active">
+            <img src="../static/images/img_icon_black_900_01.svg" alt="My Projects" class="menu-icon">
+            <span class="menu-text">My Projects</span>
+          </div>
+          <div class="menu-item" id="menu-Explain">
+            <img src="../static/images/img_icon_2.svg" alt="Explainability" class="menu-icon">
+            <span class="menu-text">Explainability</span>
+          </div>
+        </nav>
+      </aside>
+      
+      <main class="main-content">
+        <section class="welcome-section">
+          <h1 class="welcome-title">Welcome back, Haifa! 👋</h1>
+          <p class="welcome-subtitle">View and manage all your AI detection projects</p>
+        </section>
+        
+        <section class="projects-section">
+          <div class="projects-header">
+            <div class="projects-info">
+              <div class="projects-icon">
+                <img src="../static/images/img_container_white_a700_48x48.svg" alt="Projects Icon" width="24" height="24">
+              </div>
+              <div class="projects-details">
+                <h2>My Projects</h2>
+                <p>Manage and track your AI detection projects</p>
+              </div>
+            </div>
+            <button class="new-project-btn">New Project</button>
+          </div>
+          
+          <div class="filter-tabs">
+            <div class="chip-item active" onclick="filterProjects('all')">All (12)</div>
+            <div class="chip-item" onclick="filterProjects('pending')">Pending (0)</div>
+            <div class="chip-item" onclick="filterProjects('progress')">In Progress (3)</div>
+            <div class="chip-item" onclick="filterProjects('completed')">Completed (9)</div>
+          </div>
+          
+          <table class="projects-table">
+            <thead class="table-header">
+              <tr>
+                <th>Project Name</th>
+                <th>Domain</th>
+                <th>Category</th>
+                <th>Examiners</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="table-row">
+                <td class="table-cell">News Authenticity Study</td>
+                <td class="table-cell">
+                  <div class="domain-tags">
+                    <span class="domain-tag">Technology</span>
+                    <span class="domain-tag">Science</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <span class="category-badge category-news">News Article</span>
+                </td>
+                <td class="table-cell">
+                  <div class="examiners-count">
+                    <img src="../static/images/img_icon_cyan_700.svg" alt="Examiners" class="examiner-icon">
+                    <span>2</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <button class="status-btn status-completed">Completed</button>
+                </td>
+                <td class="table-cell">
+                  <div class="actions-cell">
+                    <button class="view-btn">View</button>
+                    <img src="../static/images/img_button_black_900.svg" alt="Edit" class="action-icon">
+                    <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete" class="action-icon">
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="table-row">
+                <td class="table-cell">AI Conversation Detection</td>
+                <td class="table-cell">
+                  <div class="domain-tags">
+                    <span class="domain-tag">Food</span>
+                    <span class="domain-tag">Customer Service</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <span class="category-badge category-conversation">Conversation</span>
+                </td>
+                <td class="table-cell">
+                  <div class="examiners-count">
+                    <img src="../static/images/img_icon_cyan_700.svg" alt="Examiners" class="examiner-icon">
+                    <span>1</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <button class="status-btn status-progress">In Progress</button>
+                </td>
+                <td class="table-cell">
+                  <div class="actions-cell">
+                    <button class="view-btn">View</button>
+                    <img src="../static/images/img_button_black_900.svg" alt="Edit" class="action-icon">
+                    <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete" class="action-icon">
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="table-row">
+                <td class="table-cell">Healthcare Content Verification</td>
+                <td class="table-cell">
+                  <div class="domain-tags">
+                    <span class="domain-tag">Healthcare</span>
+                    <span class="domain-tag">Science</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <span class="category-badge category-news">News Article</span>
+                </td>
+                <td class="table-cell">
+                  <div class="examiners-count">
+                    <img src="../static/images/img_icon_cyan_700.svg" alt="Examiners" class="examiner-icon">
+                    <span>1</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <button class="status-btn status-completed">Completed</button>
+                </td>
+                <td class="table-cell">
+                  <div class="actions-cell">
+                    <button class="view-btn">View</button>
+                    <img src="../static/images/img_button_black_900.svg" alt="Edit" class="action-icon">
+                    <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete" class="action-icon">
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="table-row">
+                <td class="table-cell">Educational Content Analysis</td>
+                <td class="table-cell">
+                  <div class="domain-tags">
+                    <span class="domain-tag">Education</span>
+                    <span class="domain-tag">Technology</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <span class="category-badge category-news">News Article</span>
+                </td>
+                <td class="table-cell">
+                  <div class="examiners-count">
+                    <img src="../static/images/img_icon_cyan_700.svg" alt="Examiners" class="examiner-icon">
+                    <span>2</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <button class="status-btn status-completed">Completed</button>
+                </td>
+                <td class="table-cell">
+                  <div class="actions-cell">
+                    <button class="view-btn">View</button>
+                    <img src="../static/images/img_button_black_900.svg" alt="Edit" class="action-icon">
+                    <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete" class="action-icon">
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="table-row">
+                <td class="table-cell">Financial News Authenticity</td>
+                <td class="table-cell">
+                  <div class="domain-tags">
+                    <span class="domain-tag">Finance</span>
+                    <span class="domain-tag">Technology</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <span class="category-badge category-news">News Article</span>
+                </td>
+                <td class="table-cell">
+                  <div class="examiners-count">
+                    <img src="../static/images/img_icon_cyan_700.svg" alt="Examiners" class="examiner-icon">
+                    <span>1</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <button class="status-btn status-progress">In Progress</button>
+                </td>
+                <td class="table-cell">
+                  <div class="actions-cell">
+                    <button class="view-btn">View</button>
+                    <img src="../static/images/img_button_black_900.svg" alt="Edit" class="action-icon">
+                    <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete" class="action-icon">
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="table-row">
+                <td class="table-cell">Sports Commentary Review</td>
+                <td class="table-cell">
+                  <div class="domain-tags">
+                    <span class="domain-tag">Sports</span>
+                    <span class="domain-tag">Entertainment</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <span class="category-badge category-news">News Article</span>
+                </td>
+                <td class="table-cell">
+                  <div class="examiners-count">
+                    <img src="../static/images/img_icon_cyan_700.svg" alt="Examiners" class="examiner-icon">
+                    <span>1</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <button class="status-btn status-completed">Completed</button>
+                </td>
+                <td class="table-cell">
+                  <div class="actions-cell">
+                    <button class="view-btn">View</button>
+                    <img src="../static/images/img_button_black_900.svg" alt="Edit" class="action-icon">
+                    <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete" class="action-icon">
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="table-row">
+                <td class="table-cell">E-commerce Chat Analysis</td>
+                <td class="table-cell">
+                  <div class="domain-tags">
+                    <span class="domain-tag">Technology</span>
+                    <span class="domain-tag">Customer Service</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <span class="category-badge category-conversation">Conversation</span>
+                </td>
+                <td class="table-cell">
+                  <div class="examiners-count">
+                    <img src="../static/images/img_icon_cyan_700.svg" alt="Examiners" class="examiner-icon">
+                    <span>2</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <button class="status-btn status-completed">Completed</button>
+                </td>
+                <td class="table-cell">
+                  <div class="actions-cell">
+                    <button class="view-btn">View</button>
+                    <img src="../static/images/img_button_black_900.svg" alt="Edit" class="action-icon">
+                    <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete" class="action-icon">
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="table-row">
+                <td class="table-cell">Environmental News Study</td>
+                <td class="table-cell">
+                  <div class="domain-tags">
+                    <span class="domain-tag">Environment</span>
+                    <span class="domain-tag">Science</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <span class="category-badge category-news">News Article</span>
+                </td>
+                <td class="table-cell">
+                  <div class="examiners-count">
+                    <img src="../static/images/img_icon_cyan_700.svg" alt="Examiners" class="examiner-icon">
+                    <span>1</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <button class="status-btn status-completed">Completed</button>
+                </td>
+                <td class="table-cell">
+                  <div class="actions-cell">
+                    <button class="view-btn">View</button>
+                    <img src="../static/images/img_button_black_900.svg" alt="Edit" class="action-icon">
+                    <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete" class="action-icon">
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="table-row">
+                <td class="table-cell">Political Content Verification</td>
+                <td class="table-cell">
+                  <div class="domain-tags">
+                    <span class="domain-tag">Politics</span>
+                    <span class="domain-tag">Media</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <span class="category-badge category-news">News Article</span>
+                </td>
+                <td class="table-cell">
+                  <div class="examiners-count">
+                    <img src="../static/images/img_icon_cyan_700.svg" alt="Examiners" class="examiner-icon">
+                    <span>2</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <button class="status-btn status-progress">In Progress</button>
+                </td>
+                <td class="table-cell">
+                  <div class="actions-cell">
+                    <button class="view-btn">View</button>
+                    <img src="../static/images/img_button_black_900.svg" alt="Edit" class="action-icon">
+                    <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete" class="action-icon">
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="table-row">
+                <td class="table-cell">Tech Industry Analysis</td>
+                <td class="table-cell">
+                  <div class="domain-tags">
+                    <span class="domain-tag">Technology</span>
+                    <span class="domain-tag">Industry</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <span class="category-badge category-news">News Article</span>
+                </td>
+                <td class="table-cell">
+                  <div class="examiners-count">
+                    <img src="../static/images/img_icon_cyan_700.svg" alt="Examiners" class="examiner-icon">
+                    <span>1</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <button class="status-btn status-completed">Completed</button>
+                </td>
+                <td class="table-cell">
+                  <div class="actions-cell">
+                    <button class="view-btn">View</button>
+                    <img src="../static/images/img_button_black_900.svg" alt="Edit" class="action-icon">
+                    <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete" class="action-icon">
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="table-row">
+                <td class="table-cell">Food & Culinary Content Review</td>
+                <td class="table-cell">
+                  <div class="domain-tags">
+                    <span class="domain-tag">Food</span>
+                    <span class="domain-tag">Entertainment</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <span class="category-badge category-news">News Article</span>
+                </td>
+                <td class="table-cell">
+                  <div class="examiners-count">
+                    <img src="../static/images/img_icon_cyan_700.svg" alt="Examiners" class="examiner-icon">
+                    <span>1</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <button class="status-btn status-completed">Completed</button>
+                </td>
+                <td class="table-cell">
+                  <div class="actions-cell">
+                    <button class="view-btn">View</button>
+                    <img src="../static/images/img_button_black_900.svg" alt="Edit" class="action-icon">
+                    <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete" class="action-icon">
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="table-row">
+                <td class="table-cell">Automotive Industry News</td>
+                <td class="table-cell">
+                  <div class="domain-tags">
+                    <span class="domain-tag">Cars</span>
+                    <span class="domain-tag">Technology</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <span class="category-badge category-news">News Article</span>
+                </td>
+                <td class="table-cell">
+                  <div class="examiners-count">
+                    <img src="../static/images/img_icon_cyan_700.svg" alt="Examiners" class="examiner-icon">
+                    <span>2</span>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <button class="status-btn status-completed">Completed</button>
+                </td>
+                <td class="table-cell">
+                  <div class="actions-cell">
+                    <button class="view-btn">View</button>
+                    <img src="../static/images/img_button_black_900.svg" alt="Edit" class="action-icon">
+                    <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete" class="action-icon">
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </div>
+  
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('active');
+    }
+    
+    function filterProjects(filter) {
+      const chips = document.querySelectorAll('.chip-item');
+      chips.forEach(chip => chip.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      
+      const rows = document.querySelectorAll('.table-row');
+      
+      rows.forEach(row => {
+        const statusBtn = row.querySelector('.status-btn');
+        const status = statusBtn.textContent.toLowerCase();
+        
+        let show = false;
+        
+        switch(filter) {
+          case 'all':
+            show = true;
+            break;
+          case 'pending':
+            show = status.includes('pending');
+            break;
+          case 'progress':
+            show = status.includes('progress');
+            break;
+          case 'completed':
+            show = status.includes('completed');
+            break;
+        }
+        
+        row.style.display = show ? 'table-row' : 'none';
+      });
+    }
+    
+    // Add click handlers for menu items
+    document.querySelectorAll('.menu-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+    
+    // Add click handlers for action buttons
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    window.location.href = 'ProjectDetailsOwner.html';
+  });
+});
+    
+    document.querySelectorAll('.action-icon').forEach(icon => {
+      icon.addEventListener('click', function() {
+        console.log('Action clicked');
+      });
+    });
+    
+    document.querySelectorAll('.status-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        console.log('Status dropdown clicked');
+      });
+    });
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      const sidebar = document.getElementById('sidebar');
+      const hamburger = document.querySelector('.hamburger');
+      
+      if (window.innerWidth <= 1023 && 
+          !sidebar.contains(event.target) && 
+          !hamburger.contains(event.target) && 
+          sidebar.classList.contains('active')) {
+        sidebar.classList.remove('active');
+      }
+    });
+    // 🔹 Sidebar navigation links
+document.getElementById('menu-home').addEventListener('click', () => {
+  window.location.href = 'HomePage.html';
+});
+
+document.getElementById('menu-dashboard').addEventListener('click', () => {
+  window.location.href = 'Ownerdashboard.html';
+});
+
+document.getElementById('menu-create').addEventListener('click', () => {
+  window.location.href = 'CraetProject.html';
+});
+
+document.querySelector('.menu-item.active').addEventListener('click', () => {
+  window.location.href = 'myprojectowner.html'; // صفحة My Projects الحالية
+});
+
+document.getElementById('menu-Explain').addEventListener('click', () => {
+  window.location.href = 'Explainability.html'; // غيّري الاسم إذا صفحتك اسمها مختلف
+});
+
+  </script>
+</body>
+</html>

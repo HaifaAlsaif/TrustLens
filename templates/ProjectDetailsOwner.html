@@ -1,0 +1,830 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustLens Project Details - AI Conversation Detection Dashboard | Customer Service Analytics</title>
+  <meta name="description" content="Manage and analyze AI-generated conversations in customer service interactions with TrustLens project dashboard. Track team progress, assign tasks, and monitor conversation analysis.">
+  <meta name="keywords" content="AI conversation detection, customer service analytics, TrustLens, project management, conversation analysis, team dashboard">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="TrustLens Project Details - AI Conversation Detection Dashboard">
+  <meta property="og:description" content="Manage and analyze AI-generated conversations in customer service interactions with TrustLens project dashboard.">
+
+  <style>
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #f8f9fb 0%, #eef5fe 50%, #ebfdfe 100%);
+      color: #0a0a0a;
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 16px 0;
+    }
+
+    /* Layout components */
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      gap: 26px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 1252px;
+      padding: 0 16px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+    }
+
+    .brand-text {
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 23px;
+      background: linear-gradient(90deg, #00b8da 0%, #155cfb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .language-selector {
+      padding: 6px;
+      font-size: 14px;
+      color: #0a0a0a;
+    }
+
+    .settings-icon {
+      width: 36px;
+      height: 36px;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #00b8da 0%, #155cfb 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 14px;
+      color: #0a0a0a;
+    }
+
+    .user-role {
+      font-size: 12px;
+      color: #717182;
+      text-transform: capitalize;
+    }
+
+    .content-wrapper {
+      width: 100%;
+      max-width: 1280px;
+      padding: 0 16px;
+    }
+
+    .page-header {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 42px;
+      color: #0e162b;
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 12px;
+      text-decoration: none;
+      color: #0a0a0a;
+      font-size: 14px;
+    }
+
+    .back-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .project-card {
+      background: linear-gradient(135deg, #fffefee5 0%, #fffefe7f 100%);
+      border: 0 solid #0000000d;
+      border-radius: 14px;
+      padding: 30px;
+      box-shadow: 0px 8px 10px #00000019;
+      margin-bottom: 24px;
+    }
+
+    .project-title {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 19px;
+      color: #0a0a0a;
+      margin-bottom: 24px;
+    }
+
+    .project-description {
+      font-size: 16px;
+      color: #717182;
+      margin-bottom: 24px;
+    }
+
+    .project-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-top: 1px solid #0000000d;
+      padding-top: 12px;
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .meta-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .meta-label {
+      font-size: 14px;
+      color: #717182;
+    }
+
+    .meta-value {
+      font-size: 14px;
+      color: #0a0a0a;
+    }
+
+    .tag {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 8px;
+      border: 0 solid;
+    }
+
+    .tag-purple {
+      color: #8200da;
+      background-color: #ad46ff19;
+      border-color: #ac46ff4c;
+    }
+
+    .tag-green {
+      color: #008235;
+      background-color: #00c95019;
+      border-color: #00c85066;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 28px;
+      position: relative;
+    }
+
+    .tag-green::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      width: 12px;
+      height: 12px;
+      background-image: url('../assets/images/img_icon_teal_800.svg');
+      background-size: contain;
+    }
+
+    .team-section {
+      background-color: #ffffff;
+      border: 0 solid #0000000d;
+      border-radius: 14px;
+      padding: 22px 24px;
+      box-shadow: 0px 4px 6px #00000019;
+      margin-bottom: 24px;
+    }
+
+    .team-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+
+    .team-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+    }
+
+    .team-info h3 {
+      font-size: 16px;
+      color: #0a0a0a;
+      margin-bottom: 2px;
+    }
+
+    .team-info p {
+      font-size: 14px;
+      color: #717182;
+    }
+
+    .team-member {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background-color: #ececf033;
+      border: 0 solid #0000000d;
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .member-avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #2b7fff 0%, #0092b8 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 14px;
+    }
+
+    .member-info h4 {
+      font-size: 14px;
+      color: #0a0a0a;
+      margin-bottom: 2px;
+    }
+
+    .member-status {
+      font-size: 12px;
+      color: #008235;
+      background-color: #00c95019;
+      border: 0 solid #00c8504c;
+      border-radius: 8px;
+      padding: 2px 8px;
+    }
+
+    .tasks-section {
+      background-color: #ffffff;
+      border: 0 solid #0000000d;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0px 4px 6px #00000019;
+    }
+
+    .tasks-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .tasks-title-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tasks-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #00b8da 0%, #155cfb 100%);
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .tasks-info h3 {
+      font-size: 16px;
+      color: #0a0a0a;
+      margin-bottom: 2px;
+    }
+
+    .tasks-info p {
+      font-size: 14px;
+      color: #717182;
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      font-size: 14px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn.active {
+      background-color: #030213;
+      color: #ffffff;
+    }
+
+    .filter-btn:not(.active) {
+      background-color: #ffffff;
+      color: #0a0a0a;
+      border: 0 solid #00000019;
+    }
+
+    .filter-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .tasks-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .task-card {
+      background-color: #ffffff;
+      border: 1px solid #00b8da;
+      border-left: 4px solid #00b8da;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0px 2px 4px #00000019;
+    }
+
+    .task-title {
+      font-size: 16px;
+      color: #0a0a0a;
+      margin-bottom: 36px;
+    }
+
+    .task-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+
+    .task-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .task-meta-label {
+      font-size: 14px;
+      color: #717182;
+    }
+
+    .tag-blue {
+      color: #1347e5;
+      background-color: #2b7fff19;
+      border-color: #2b7fff4c;
+    }
+
+    .tag-green-alt {
+      color: #008235;
+      background-color: #00c95019;
+      border-color: #00c8504c;
+    }
+
+    .assignment-box {
+      background-color: #eff6ff;
+      border: 0 solid #bddaff;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 60px;
+    }
+
+    .assignment-label {
+      font-size: 12px;
+      color: #717182;
+      margin-bottom: 4px;
+    }
+
+    .assignment-value {
+      font-size: 14px;
+      color: #0a0a0a;
+    }
+
+    .task-button {
+      width: 100%;
+      font-size: 14px;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 34px 8px 66px;
+      margin-top: 60px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .task-button.primary {
+      background: linear-gradient(90deg, #00b8da 0%, #155cfb 100%);
+    }
+
+    .task-button.completed {
+      background: linear-gradient(90deg, #00b8da87 0%, #155cfb87 100%);
+    }
+
+    .task-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .task-button::before {
+      content: '';
+      position: absolute;
+      left: 34px;
+      width: 16px;
+      height: 16px;
+      background-size: contain;
+    }
+
+    .task-button.join::before {
+      background-image: url('../static/images/img_icon_white_a700.svg');
+    }
+
+    .task-button.continue::before {
+      background-image: url('../static/images/img_icon_white_a700_16x16.svg');
+    }
+
+    .task-button.completed-btn::before {
+      background-image: url('../static/images/img_icon_16x16.svg');
+    }
+
+    /* Typography */
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #0e162b;
+    }
+
+    /* Responsive media queries */
+    @media (min-width: 640px) {
+      .page-title {
+        font-size: 32px;
+      }
+
+      .tasks-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .header {
+        padding: 0 24px;
+      }
+
+      .content-wrapper {
+        padding: 0 24px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .page-title {
+        font-size: 36px;
+      }
+
+      .tasks-header {
+        flex-wrap: nowrap;
+      }
+
+      .filter-buttons {
+        flex-wrap: nowrap;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .tasks-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .header {
+        padding: 0 32px;
+      }
+
+      .content-wrapper {
+        padding: 0 32px;
+      }
+
+      .header-right {
+        width: auto;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      body {
+        padding: 16px;
+      }
+    }
+
+    /* Interactive states */
+    .back-link:hover {
+      color: #155cfb;
+    }
+
+    .back-link:focus {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+    }
+
+    .filter-btn:focus {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+    }
+
+    .task-button:focus {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+    }
+
+    .task-button:active {
+      transform: scale(0.95);
+    }
+  </style>
+  
+  </head>
+<body>
+  <main class="main-container">
+    <header class="header">
+      <div class="header-left">
+        <img src="../static/images/img_header.svg" alt="TrustLens logo" class="logo">
+        <div class="brand-text">TrustLens</div>
+      </div>
+      <div class="header-right">
+        <div class="language-selector">EN</div>
+        <img src="../static/images/img_button.svg" alt="Settings" class="settings-icon">
+        <div class="user-profile">
+          <div class="user-avatar">L</div>
+          <div class="user-info">
+            <div class="user-name">Lina</div>
+            <div class="user-role">examiner</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+      <section class="page-header">
+        <h1 class="page-title">Project Details</h1>
+        <a href="Ownerdashboard.html" class="back-link">
+          <img src="../static/images/img_icon.svg" alt="Back arrow" class="back-icon">
+          Back to Dashboard
+        </a>
+
+        <div class="project-card">
+          <h2 class="project-title">Customer Service Chat Detection</h2>
+          <p class="project-description">Detecting AI-generated conversations in customer service and support interactions</p>
+          
+          <div class="project-meta">
+            <div class="meta-row">
+              <img src="../static/images/img_icon_blue_a700_01.svg" alt="Owner icon" class="meta-icon">
+              <span class="meta-label">Owner:</span>
+              <span class="meta-value">Ahmed Al-Mansour</span>
+              <span class="meta-label">•</span>
+              <span class="meta-label">ahmed.mansour@example.com</span>
+            </div>
+            
+            <div class="meta-row">
+              <img src="../static/images/img_icon_purple_a700.svg" alt="Domain icon" class="meta-icon">
+              <span class="meta-label">Domain:</span>
+              <span class="tag tag-purple">Customer Service</span>
+              <span class="tag tag-purple">Technology</span>
+            </div>
+            
+            <div class="meta-row">
+              <img src="../static/images/img_icon_green_a700.svg" alt="Category icon" class="meta-icon">
+              <span class="meta-label">Category:</span>
+              <span class="tag tag-green">Conversation</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="team-section">
+          <div class="team-header">
+            <img src="../static/images/img_container.png" alt="Team icon" class="team-icon">
+            <div class="team-info">
+              <h3>All Examiners</h3>
+              <p>Team members working on this project</p>
+            </div>
+          </div>
+          
+          <div class="team-member">
+            <div class="member-avatar">L</div>
+            <div class="member-info">
+              <h4>Lina@hotmail.com</h4>
+              <span class="member-status">You</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tasks-section">
+        <div class="tasks-header">
+          <div class="tasks-title-section">
+            <div class="tasks-icon">
+              <img src="../static/images/img_container_white_a700.svg" alt="Tasks icon" style="width: 100%; height: 100%;">
+            </div>
+            <div class="tasks-info">
+              <h3>Tasks</h3>
+              <p>Conversations to analyze</p>
+            </div>
+          </div>
+          
+          <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterTasks('all')">All</button>
+            <button class="filter-btn" onclick="filterTasks('pending')">Pending</button>
+            <button class="filter-btn" onclick="filterTasks('progress')">In Progress</button>
+            <button class="filter-btn" onclick="filterTasks('completed')">Completed</button>
+          </div>
+        </div>
+
+        <div class="tasks-grid">
+          <article class="task-card" data-status="pending">
+            <h4 class="task-title">Customer Support Chat #1</h4>
+            <div class="task-meta">
+              <div class="task-meta-row">
+                <span class="task-meta-label">Type:</span>
+                <span class="tag tag-blue">Human ↔ AI</span>
+              </div>
+              <div class="task-meta-row">
+                <span class="task-meta-label">Turns:</span>
+                <span class="tag tag-purple">5 Messages</span>
+              </div>
+            </div>
+            <button class="task-button primary join">Join</button>
+          </article>
+
+          <article class="task-card" data-status="progress">
+            <h4 class="task-title">Tech Support Dialogue #2</h4>
+            <div class="task-meta">
+              <div class="task-meta-row">
+                <span class="task-meta-label">Type:</span>
+                <span class="tag tag-green-alt">Human ↔ Human</span>
+              </div>
+              <div class="task-meta-row">
+                <span class="task-meta-label">Turns:</span>
+                <span class="tag tag-purple">3 Messages</span>
+              </div>
+            </div>
+            <div class="assignment-box">
+              <div class="assignment-label">Assigned to:</div>
+              <div class="assignment-value">Lina@hotmail.com</div>
+            </div>
+            <button class="task-button primary continue">Continue</button>
+          </article>
+
+          <article class="task-card" data-status="completed">
+            <h4 class="task-title">Sales Chat #3</h4>
+            <div class="task-meta">
+              <div class="task-meta-row">
+                <span class="task-meta-label">Type:</span>
+                <span class="tag tag-blue">Human ↔ AI</span>
+              </div>
+              <div class="task-meta-row">
+                <span class="task-meta-label">Turns:</span>
+                <span class="tag tag-purple">7 Messages</span>
+              </div>
+            </div>
+            <div class="assignment-box">
+              <div class="assignment-label">Assigned to:</div>
+              <div class="assignment-value">Lina@hotmail.com</div>
+            </div>
+            <button class="task-button completed completed-btn">Completed</button>
+          </article>
+
+          <article class="task-card" data-status="pending">
+            <h4 class="task-title">Help Desk Chat #4</h4>
+            <div class="task-meta">
+              <div class="task-meta-row">
+                <span class="task-meta-label">Type:</span>
+                <span class="tag tag-blue">Human ↔ AI</span>
+              </div>
+              <div class="task-meta-row">
+                <span class="task-meta-label">Turns:</span>
+                <span class="tag tag-purple">4 Messages</span>
+              </div>
+            </div>
+            <button class="task-button primary join">Join</button>
+          </article>
+
+          <article class="task-card" data-status="pending">
+            <h4 class="task-title">Product Inquiry Chat #5</h4>
+            <div class="task-meta">
+              <div class="task-meta-row">
+                <span class="task-meta-label">Type:</span>
+                <span class="tag tag-green-alt">Human ↔ Human</span>
+              </div>
+              <div class="task-meta-row">
+                <span class="task-meta-label">Turns:</span>
+                <span class="tag tag-purple">6 Messages</span>
+              </div>
+            </div>
+            <button class="task-button primary join">Join</button>
+          </article>
+
+          <article class="task-card" data-status="progress">
+            <h4 class="task-title">Complaint Resolution #6</h4>
+            <div class="task-meta">
+              <div class="task-meta-row">
+                <span class="task-meta-label">Type:</span>
+                <span class="tag tag-blue">Human ↔ AI</span>
+              </div>
+              <div class="task-meta-row">
+                <span class="task-meta-label">Turns:</span>
+                <span class="tag tag-purple">2 Messages</span>
+              </div>
+            </div>
+            <div class="assignment-box">
+              <div class="assignment-label">Assigned to:</div>
+              <div class="assignment-value">Lina@hotmail.com</div>
+            </div>
+            <button class="task-button primary continue">Continue</button>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    function filterTasks(status) {
+      const buttons = document.querySelectorAll('.filter-btn');
+      const cards = document.querySelectorAll('.task-card');
+      
+      // Update active button
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      // Filter cards
+      cards.forEach(card => {
+        if (status === 'all') {
+          card.style.display = 'block';
+        } else {
+          const cardStatus = card.getAttribute('data-status');
+          card.style.display = cardStatus === status ? 'block' : 'none';
+        }
+      });
+    }
+
+    // Add click handlers for task buttons
+    document.querySelectorAll('.task-button').forEach(button => {
+      button.addEventListener('click', function() {
+        const action = this.textContent.trim();
+        console.log(`${action} button clicked for task`);
+        // Add your task action logic here
+      });
+    });
+  </script>
+</body>
+</html>
