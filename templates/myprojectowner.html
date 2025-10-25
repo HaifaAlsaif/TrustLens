@@ -12,6 +12,7 @@
   <meta property="og:description" content="Manage and track your AI detection projects with TrustLens dashboard. Monitor content analysis across multiple domains with comprehensive project tracking tools.">
   
   <style>
+    
     /* Reset and base styles */
     * {
       margin: 0;
@@ -629,6 +630,160 @@
         max-width: 1252px;
       }
     }
+    /* ===== FINAL OVERRIDES (force exact dashboard layout) ===== */
+.main-container{
+  justify-content:flex-start !important;
+  align-items:center !important;
+}
+
+/* Header نفس الداشبورد */
+.header{
+  max-width:none !important;
+  width:100% !important;
+  padding:16px !important;
+  margin-top:16px !important;
+  margin-left:140px !important;
+  margin-right:128px !important;
+}
+
+/* Wrapper: الغِ أي max-width/margins */
+.content-wrapper{
+  display:flex !important;
+  width:100% !important;
+  flex:1 !important;
+  gap:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  max-width:none !important;
+}
+
+/* Sidebar: نفس العرض وحدّ فاصل */
+.sidebar{
+  width:256px !important;
+  background:#fff !important;
+  border-right:1px solid #ddd !important;
+  padding:16px !important;
+  min-height:calc(100vh - 80px) !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+}
+
+/* العنصر النشط في السايدبار */
+.sidebar-menu .menu-item.active{
+  background-color:#f2f2f2 !important;
+  border-right:3px solid #4c84ff !important;
+  cursor:default !important;
+}
+
+/* Main content spacing */
+.main-content{
+  flex:1 !important;
+  padding:32px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:32px !important;
+}
+
+/* Banner “Welcome” */
+.welcome-section{
+  background:linear-gradient(90deg,#00b8da19 0%,#2b7fff19 50%,#ac46ff19 100%) !important;
+  border-radius:16px !important;
+  padding:24px !important;
+  box-shadow:0 4px 128px #888888ff !important;
+}
+
+/* كرت “My Projects” بنفس ستايل كروت الداشبورد */
+.projects-section{
+  background:linear-gradient(135deg,#eef5fe4c 0%,#ffffff 50%,#ebfdfe4c 100%) !important;
+  border-radius:14px !important;
+  padding:24px !important;
+  border:0 solid #0000000d !important;
+  box-shadow:0 8px 10px #00000019 !important;
+}
+
+/* جدول المشاريع */
+.projects-table{
+  width:100% !important;
+  border-collapse:collapse !important;
+  border-radius:10px !important;
+  overflow:hidden !important;
+  border:0 solid #0000000d !important;
+}
+.table-header{background:#ececf04c !important; border-bottom:1px solid #00000019 !important;}
+.table-header th{
+  padding:10px 8px !important;
+  text-align:left !important;
+  font-size:14px !important;
+  font-weight:700 !important;
+  color:#0a0a0a !important;
+}
+.table-row{border-bottom:1px solid #00000007 !important;}
+.table-row:hover{background:#f9fafb !important;}
+.table-cell{padding:22px 8px !important; vertical-align:middle !important;}
+
+/* زر New Project */
+.new-project-btn{
+  background:linear-gradient(90deg,#00b8da 0%,#155cfb 100%) !important;
+  color:#fff !important;
+  border:none !important;
+  border-radius:8px !important;
+  padding:8px 12px 8px 44px !important;
+  font-size:14px !important;
+  position:relative !important;
+}
+
+/* موبايل */
+@media (max-width:639px){
+  .header{ margin:16px !important; padding:12px !important; }
+  .content-wrapper{ flex-direction:column !important; }
+  .sidebar{ width:100% !important; padding:16px !important; min-height:auto !important; }
+  .main-content{ padding:16px !important; gap:24px !important; }
+  .projects-header{ flex-direction:column !important; gap:16px !important; align-items:flex-start !important; }
+  .projects-table{ font-size:12px !important; }
+  .table-cell{ padding:12px 4px !important; }
+}
+.new-project-btn::before{
+  content:"+";
+  position:absolute;
+  left:18px;
+  top:50%;
+  transform:translateY(-52%);
+  font-size:20px;
+  line-height:1;
+  font-weight:600;
+}
+.view-btn{
+  background-color:#ffffff;
+  border:1px solid #ddd;
+  border-radius:8px;
+  padding:6px 14px 6px 40px; /* مساحة للأيقونة */
+  font-size:14px;
+  color:#0a0a0a;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  position:relative;
+  transition:background-color 0.3s ease;
+  font-weight:500;
+}
+.view-btn:hover{
+  background-color:#f3f4f6;
+}
+
+/* أيقونة العين */
+.view-btn::before{
+  content:"";
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  width:18px;
+  height:18px;
+  background:url('../static/images/eye.svg') center/contain no-repeat;
+  opacity:0.9;
+}
+
   </style>
   
   </head>
@@ -1167,7 +1322,7 @@ document.getElementById('menu-dashboard').addEventListener('click', () => {
 });
 
 document.getElementById('menu-create').addEventListener('click', () => {
-  window.location.href = 'CraetProject.html';
+  window.location.href = 'CreateProject.html';
 });
 
 document.querySelector('.menu-item.active').addEventListener('click', () => {
@@ -1176,6 +1331,10 @@ document.querySelector('.menu-item.active').addEventListener('click', () => {
 
 document.getElementById('menu-Explain').addEventListener('click', () => {
   window.location.href = 'Explainability.html'; // غيّري الاسم إذا صفحتك اسمها مختلف
+});
+// 🔹 New Project button navigation
+document.querySelector('.new-project-btn').addEventListener('click', () => {
+  window.location.href = 'CreateProject.html'; // أو CreateProject.html لو غيّرتي الاسم
 });
 
   </script>
