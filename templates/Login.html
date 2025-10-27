@@ -607,7 +607,7 @@ body{background:var(--bg);color:var(--text);}
           <span class="nav-item language-selector">EN</span>
 <!-- زر التبديل -->
 <img id="theme-toggle" src="../static/images/img_buttonDark.svg" alt="theme" class="theme-toggle">
-<a href="HomePage.html" class="home-btn">
+<a href="/" class="home-btn">
   <img src="../static/images/home.png" alt="Home" width="24" height="24">
 </a>
         </div>
@@ -622,14 +622,19 @@ body{background:var(--bg);color:var(--text);}
         <p class="welcome-subtitle">Log in to your TrustLens account</p>
       </div>
 
-      <form class="login-form" role="form">
+      {% if error %}
+      <div class="error-banner">{{ error }}</div>
+      {% endif %}
+
+      <form action="/api/signin" method="POST" class="login-form" role="form">
         <div class="form-group">
           <label for="email" class="form-label">Email or Username</label>
           <div class="input-wrapper">
             <img src="../static/images/img_icon.svg" alt="" class="input-icon">
             <input 
               type="text" 
-              id="email" 
+              id="email"
+              name="email"  
               class="form-input" 
               placeholder="Enter your email or username"
               required
@@ -643,7 +648,8 @@ body{background:var(--bg);color:var(--text);}
             <img src="../static/images/img_icon_gray_600.svg" alt="" class="input-icon">
             <input 
               type="password" 
-              id="password" 
+              id="password"
+              name="password"  
               class="form-input" 
               placeholder="Enter your password"
               required
@@ -655,11 +661,11 @@ body{background:var(--bg);color:var(--text);}
       </form>
 
       <div class="login-footer">
-        <a href=ForgotPassword.html class="forgot-password">Forgot Password?</a>
+        <a href="/forgot" class="forgot-password">Forgot Password?</a>
         
         <div class="signup-section">
           <span class="signup-text">Don't have an account?</span>
-          <a href=Signup.html class="signup-link">Create Account</a>
+          <a href="/signup" class="signup-link">Create Account</a>
         </div>
       </div>
     </main>
@@ -723,33 +729,28 @@ body{background:var(--bg);color:var(--text);}
       const passwordInput = document.getElementById('password');
       const loginBtn = document.querySelector('.login-btn');
 
-      // Form submission handler
-      form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Basic validation
-        if (!emailInput.value.trim()) {
-          alert('Please enter your email or username');
-          emailInput.focus();
-          return;
-        }
-        
-        if (!passwordInput.value.trim()) {
-          alert('Please enter your password');
-          passwordInput.focus();
-          return;
-        }
-        
-        // Simulate login process
-        loginBtn.textContent = 'Logging in...';
-        loginBtn.disabled = true;
-        
-        setTimeout(() => {
-          alert('Login functionality would be implemented here');
-          loginBtn.textContent = 'Log In';
-          loginBtn.disabled = false;
-        }, 1500);
-      });
+     // Form submission handler
+form.addEventListener('submit', function(e) {
+  // لا تمنع الإرسال (لا تكتب e.preventDefault())
+
+  // Basic validation
+  if (!emailInput.value.trim()) {
+    alert('Please enter your email');
+    emailInput.focus();
+    e.preventDefault(); // يمنع فقط الإرسال إذا فيه خطأ
+    return;
+  }
+
+  if (!passwordInput.value.trim()) {
+    alert('Please enter your password');
+    passwordInput.focus();
+    e.preventDefault();
+    return;
+  }
+
+  // تغيير نص الزر مؤقتًا أثناء الإرسال
+  loginBtn.textContent = 'Logging in...';
+});
 
       // Input focus effects
       const inputs = document.querySelectorAll('.form-input');
