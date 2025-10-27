@@ -645,7 +645,7 @@
 
     <!-- يسار: لوقو كصورة واحدة (مطابق للصورة الثانية) -->
     <div class="logo-section">
-      <a href="HomePage.html" aria-label="TrustLens Home">
+      <a href="/" aria-label="TrustLens Home">
         <img src="../static/images/img_header_logo.png" alt="TrustLens" class="brand-img">
       </a>
     </div>
@@ -654,7 +654,7 @@
     <div class="header-actions">
       <span class="nav-item language-selector">EN</span>
       <img id="theme-toggle" src="../static/images/img_buttonDark.svg" alt="theme" class="theme-toggle">
-      <a href="HomePage.html" class="home-btn" aria-label="Home">
+      <a href="/" class="home-btn" aria-label="Home">
         <img src="../static/images/home.png" alt="Home">
       </a>
     </div>
@@ -798,30 +798,24 @@
         </div>
 
         <!-- Step 1: Basic Info -->
-        <form id="signupForm">
+        <form id="signupForm" method="POST" action="/api/signup">
+          <input type="hidden" name="role" id="roleField" />
+          <input type="hidden" name="volunteerOptIn" id="volunteerOptIn" value="false" />
           <div class="form-section active" data-section="1">
             <div class="form-group">
               <label>Username</label>
-              <input
-                type="text"
-                id="username"
-                placeholder="Choose a unique username"
-              />
+              <input type="text" id="username" name="displayName" placeholder="Choose a unique username" />
               <div class="error-message" id="username-error"></div>
             </div>
             <div class="form-group">
               <label>Email</label>
-              <input
-                type="email"
-                id="email"
-                placeholder="your.email@example.com"
-              />
+              <input type="email" id="email" name="email" placeholder="your.email@example.com" />
               <div class="error-message" id="email-error"></div>
             </div>
             <div class="form-group">
               <label>Password</label>
               <div class="password-wrapper">
-                <input type="text" id="password" placeholder="••••••••" />
+                <input type="password" id="password" name="password" placeholder="••••••••" />
                 <span
                   class="password-toggle"
                   onclick="togglePassword('password')"
@@ -896,7 +890,7 @@
               <button
                 type="button"
                 class="btn-secondary"
-                onclick="window.location.href='#'"
+                onclick="window.location.href='/login'"
               >
                 ← Back to Login
               </button>
@@ -908,7 +902,7 @@
             <div class="divider">OR</div>
             <div style="text-align: center">
               Already have an account?
-              <a href="#" class="login-link">Log in →</a>
+              <a href="/login" class="login-link">Log in →</a>
             </div>
           </div>
 
@@ -920,7 +914,7 @@
             </p>
 
             <div class="role-selection">
-              <div class="role-card" onclick="selectRole('owner')">
+              <div class="role-card" onclick="selectRole('owner' , this)">
                 <div>
                   <svg
                     width="104"
@@ -1042,7 +1036,7 @@
                 <h3>Project Owner</h3>
                 <p>Create and manage projects</p>
               </div>
-              <div class="role-card" onclick="selectRole('examiner')">
+              <div class="role-card" onclick="selectRole('examiner' , this)">
                 <div>
                   <svg
                     width="108"
@@ -1176,7 +1170,8 @@
                 <input
                   type="checkbox"
                   id="volunteerCheck"
-                  onchange="toggleVolunteerFields()"
+                  onchange="toggleVolunteerFields();
+                   document.getElementById('volunteerOptIn').value = this.checked ? 'true' : 'false';"
                 />
                 <label for="volunteerCheck" style="margin: 0">
                   I want to be a volunteer on the platform (your profile will be
@@ -1216,18 +1211,12 @@
                   <label>Self Description (Optional)</label>
                   <textarea
                     id="selfDescription"
+                    name="description"
                     rows="3"
                     placeholder="Tell us about yourself and your experience"
                   ></textarea>
                 </div>
-                <div class="form-group">
-                  <label>LinkedIn (Optional)</label>
-                  <input
-                    type="url"
-                    id="linkedin"
-                    placeholder="https://linkedin.com/in/yourprofile"
-                  />
-                </div>
+
               </div>
             </div>
 
@@ -1246,18 +1235,18 @@
             <div class="form-row">
               <div class="form-group">
                 <label>First Name</label>
-                <input type="text" id="firstName" placeholder="First name" />
+                <input type="text" id="firstName" name="firstName" placeholder="First name" />
                 <div class="error-message" id="firstName-error"></div>
               </div>
               <div class="form-group">
                 <label>Last Name</label>
-                <input type="text" id="lastName" placeholder="Last name" />
+                <input type="text" id="lastName" name="lastName" placeholder="Last name" />
                 <div class="error-message" id="lastName-error"></div>
               </div>
             </div>
             <div class="form-group">
               <label>Gender (Optional)</label>
-              <select id="gender">
+              <select id="gender" name="gender">
                 <option value="">Select gender</option>
                 <option>Male</option>
                 <option>Female</option>
@@ -1268,6 +1257,7 @@
               <input
                 type="text"
                 id="interests"
+                name="interests"
                 placeholder="AI, NLP, Content Analysis"
               />
             </div>
@@ -1276,6 +1266,7 @@
               <input
                 type="url"
                 id="github"
+                name="github"
                 placeholder="https://github.com/yourusername"
               />
             </div>
@@ -1285,6 +1276,7 @@
   <input
     type="url"
     id="linkedin"
+    name="linkedin"
     placeholder="https://linkedin.com/in/yourprofile"
   />
 </div>
@@ -1342,7 +1334,7 @@
         <div class="footer-section">
           <h3>Quick Links</h3>
           <ul class="footer-links">
-            <li><a href="#">Home</a></li>
+            <li><a href="/">Home</a></li>
             <li><a href="#">About</a></li>
             <li><a href="#">Features</a></li>
             <li><a href="#">Target Users</a></li>
@@ -1670,20 +1662,22 @@
         return isValid;
       }
 
-      function selectRole(role) {
-        selectedRole = role;
-        $(".role-card").removeClass("selected");
-        event.currentTarget.classList.add("selected");
-        clearError("role");
+     function selectRole(role, el) {
+  selectedRole = role;
+  $(".role-card").removeClass("selected");
+  if (el) el.classList.add("selected");
+  $("#roleField").val(role);
+  clearError("role");
+  if (role === "examiner") {
+    $("#volunteerSection").slideDown();
+  } else {
+    $("#volunteerSection").slideUp();
+    $("#volunteerCheck").prop("checked", false).trigger("change");
+    $("#volunteerFields").removeClass("active");
+  }
+}
 
-        if (role === "examiner") {
-          $("#volunteerSection").slideDown();
-        } else {
-          $("#volunteerSection").slideUp();
-          $("#volunteerCheck").prop("checked", false);
-          $("#volunteerFields").removeClass("active");
-        }
-      }
+
 
       function toggleVolunteerFields() {
         if ($("#volunteerCheck").is(":checked")) {
@@ -1703,47 +1697,30 @@
       }
 
       $("#signupForm").on("submit", function (e) {
-        e.preventDefault();
+    // تحقّق الخطوة الثالثة قبل الإرسال
+    if (!validateStep3()) {
+      e.preventDefault();
+      return false;
+    }
 
-        // Validate step 3 before submission
-        if (!validateStep3()) {
-          return false;
-        }
+    // خزّلي الدور المختار في الحقل المخفي (لو ما انخزّن سابقًا)
+    if (selectedRole) {
+      $("#roleField").val(selectedRole);
+    }
 
-        const formData = {
-          username: $("#username").val(),
-          email: $("#email").val(),
-          password: $("#password").val(),
-          role: selectedRole,
-          firstName: $("#firstName").val(),
-          lastName: $("#lastName").val(),
-          gender: $("#gender").val(),
-          interests: $("#interests").val(),
-          github: $("#github").val(),
-        };
+    // مهم: لا تستخدمين preventDefault هنا بعد النجاح،
+    // خلّي المتصفح يرسل POST لـ /api/signup حسب action+method
+    // وسيستقبل الباك-إند البيانات مباشرة (displayName, email, password, role ...)
+  });
 
-        if (
-          selectedRole === "examiner" &&
-          $("#volunteerCheck").is(":checked")
-        ) {
-          formData.volunteer = {
-            specialization: $("#specialization").val(),
-            description: $("#selfDescription").val(),
-            linkedin: $("#linkedin").val(),
-          };
-        }
-console.log("Form submitted:", formData);
+  // حافظي على تصدير الدوال للأزرار onclick
+  window.nextStep = nextStep;
+window.prevStep = prevStep;
+window.selectRole = selectRole;
+window.togglePassword = togglePassword;
 
-// إذا الدور Owner حوّلي لصفحة الـ Owner dashboard
-if (selectedRole === 'owner') {
-  window.location.href = 'Ownerdashboard.html'; // أو './Ownerdashboard.html' حسب مسار الملف
-} else {
-  // باقي الأدوار (مثل Examiner) يبقى التنبيه كما هو
-  alert("Account created successfully!");
-}
-      });
-
-      updateProgress();
+  // شغّلي شريط التقدم بدايةً
+  updateProgress();
     </script>
   </body>
 
