@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from firebase_admin_setup import db
 from firebase_admin import auth as admin_auth
@@ -32,7 +33,18 @@ def forgot_page():
 def profile_page():
     if not session.get("idToken"):
         return redirect(url_for("login_page"))
-    return render_template("Profile.html")
+
+    uid = session.get("uid")
+    user_doc = db.collection("users").document(uid).get()
+    if not user_doc.exists:
+        return redirect(url_for("login_page"))
+
+    user_data = user_doc.to_dict()
+    first_name = user_data.get("profile", {}).get("firstName", "")
+    last_name  = user_data.get("profile", {}).get("lastName", "")
+    full_name  = f"{first_name} {last_name}".strip() or "User"
+
+    return render_template("Profile.html", user_data=user_data, user_name=full_name)
 
 @app.route("/createproject")
 def create_project_page():
@@ -40,7 +52,20 @@ def create_project_page():
 
 @app.route("/myprojectowner")
 def my_project_owner_page():
-    return render_template("myprojectowner.html")
+    if not session.get("idToken"):
+        return redirect(url_for("login_page"))
+
+    uid = session.get("uid")
+    user_doc = db.collection("users").document(uid).get()
+    if not user_doc.exists:
+        return redirect(url_for("login_page"))
+
+    user_data  = user_doc.to_dict()
+    first_name = user_data.get("profile", {}).get("firstName", "")
+    last_name  = user_data.get("profile", {}).get("lastName", "")
+    full_name  = f"{first_name} {last_name}".strip() or "User"
+
+    return render_template("myprojectowner.html", user_name=full_name)
 
 @app.route("/myprojectexaminer")
 def my_project_examiner_page():
@@ -48,7 +73,26 @@ def my_project_examiner_page():
 
 @app.route("/ownerdashboard")
 def owner_dashboard_page():
-    return render_template("Ownerdashboard.html")
+    # 1) نتحقق أن المستخدم مسجل دخول
+    if not session.get("idToken"):
+        return redirect(url_for("login_page"))
+
+    # 2) نجيب الـ UID من الـ session
+    uid = session.get("uid")
+
+    # 3) نجيب بيانات المستخدم من Firestore
+    user_doc = db.collection("users").document(uid).get()
+    if not user_doc.exists:
+        return redirect(url_for("login_page"))
+
+    # 4) نستخرج الاسم
+    user_data  = user_doc.to_dict()
+    first_name = user_data.get("profile", {}).get("firstName", "")
+    last_name  = user_data.get("profile", {}).get("lastName", "")
+    full_name  = f"{first_name} {last_name}".strip() or "User"
+
+    # 5) نرسل الاسم للصفحة
+    return render_template("Ownerdashboard.html", user_name=full_name)
 
 @app.route("/projectdetailsowner")
 def project_details_owner_page():
@@ -117,13 +161,21 @@ def api_signup():
 
         session["idToken"] = res["idToken"]
         session["uid"] = uid
-        return redirect(url_for("profile_page"))
+
+        # التوجيه حسب الدور
+        if role == "owner":
+            return redirect(url_for("owner_dashboard_page"))
+        elif role == "examiner":
+            return redirect(url_for("my_project_examiner_page"))
+        else:
+            return redirect(url_for("profile_page"))
 
     except Exception as e:
         try:
             return jsonify(e.response.json()), e.response.status_code
         except:
             return jsonify({"error": str(e)}), 500
+
 
 # تسجيل الدخول
 @app.route("/api/signin", methods=["POST"])
@@ -133,22 +185,38 @@ def api_signin():
     password = data.get("password")
 
     if not email or not password:
-        # ما نكشف تفاصيل كثيرة للمستخدم
         return render_template("Login.html",
                                error="Email and password are required."), 400
     try:
         res = rest_signin(email, password)
+        uid = res["localId"]
+
+        # جلب بيانات المستخدم من Firestore
+        user_doc = db.collection("users").document(uid).get()
+        if not user_doc.exists:
+            # مستخدم مسجل في Auth لكن مافيه document في Firestore
+            session.clear()
+            return render_template("Login.html",
+                                   error="User data not found."), 401
+
+        role = user_doc.to_dict().get("role", "user")  # افتراضي "user" إذا مافيش role
+
+        # حفظ التوكن والـ UID في الجلسة
         session["idToken"] = res["idToken"]
-        session["uid"] = res["localId"]
-        return redirect(url_for("profile_page"))
+        session["uid"] = uid
+
+        # التوجيه حسب الدور
+        if role == "owner":
+            return redirect(url_for("owner_dashboard_page"))
+        elif role == "examiner":
+            return redirect(url_for("my_project_examiner_page"))
+        else:
+            return redirect(url_for("profile_page"))
+
     except Exception:
-        # نسجّل التفاصيل في اللوق لكن ما نعرضها للمستخدم
         app.logger.exception("Signin failed")
-        # رسالة موحّدة وآمنة (لا تفصح هل الإيميل موجود أو لا)
         return render_template("Login.html",
                                error="Invalid email or password. Please try again."), 401
-
-
 
 # تسجيل الخروج
 @app.route("/logout")

@@ -1,110 +1,93 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="initial-scale=1, width=device-width" />
-<title>Profile • TrustLens</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Profile • TrustLens</title>
+  <style>
+    :root{
+      --bg:#fff; --text:#0A0A0A; --muted:#717182; --line:rgba(0,0,0,.10);
+      --primary1:#00B8DB; --primary2:#155DFC; --card:rgba(255,255,255,.7);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;line-height:1.45;background:#fff;color:var(--text)}
+    .page{min-height:100vh;background:linear-gradient(135deg,#fff 0 50%,rgba(0,184,219,.05) 50%), #fff;}
 
-<!-- Inline CSS (single file) -->
-<style>
-  :root{
-    --bg:#fff; --text:#0A0A0A; --muted:#717182; --line:rgba(0,0,0,.10);
-    --primary1:#00B8DB; --primary2:#155DFC; --card:rgba(255,255,255,.7);
-    --radius:14px; --r8:8px; --r10:10px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0;font-family:Arial,Helvetica,sans-serif;line-height:1.45;background:#fff;color:var(--text)}
-  .page{min-height:100vh;background:
-    linear-gradient(135deg,#fff 0 50%,rgba(0,184,219,.05) 50%), #fff;}
+    /* Masthead */
+    .mast{display:flex;align-items:center;justify-content:space-between;gap:20px;height:40px;padding:16px clamp(16px,6vw,134.8px);}  
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand img{width:32px;height:32px}
+    .brand-name{font-size:20px;background:linear-gradient(90deg,var(--primary1),var(--primary2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .mast-right{display:flex;align-items:center;gap:12px;font-size:14px}
+    .lang{height:32px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;padding:0 12px}
+    .avatar-pill{position:relative;width:160px;height:40px}
+    .avatar-circle{position:absolute;inset:0;width:40px;height:40px;border-radius:9999px;background:linear-gradient(135deg,var(--primary1),var(--primary2));display:grid;place-items:center;color:#fff;font-weight:700}
+    .user-meta{position:absolute;left:48px;top:2px;display:flex;flex-direction:column}
+    .small{font-size:12px}
+    .muted{color:var(--muted)}
 
-  /* Masthead (logo + user) */
-  .mast{display:flex;align-items:center;justify-content:space-between;gap:20px;
-        height:40px;padding:16px clamp(16px,6vw,134.8px);}
-  .brand{display:flex;align-items:center;gap:10px}
-  .brand img{width:32px;height:32px}
-  .brand-name{font-size:20px;background:linear-gradient(90deg,var(--primary1),var(--primary2));
-              -webkit-background-clip:text;-webkit-text-fill-color:transparent}
-  .mast-right{display:flex;align-items:center;gap:12px;font-size:14px}
-  .lang{height:32px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;padding:0 12px}
-  .avatar-pill{position:relative;width:83px;height:40px}
-  .avatar-circle{position:absolute;inset:0;width:40px;height:40px;border-radius:9999px;
-                 background:linear-gradient(135deg,var(--primary1),var(--primary2));
-                 display:grid;place-items:center;color:#fff;font-weight:700}
-  .user-meta{position:absolute;left:48px;top:2px;display:flex;flex-direction:column}
-  .small{font-size:12px}
-  .muted{color:var(--muted)}
+    /* Layout */
+    .wrap{padding:96px clamp(16px,6vw,246.8px) 40px;display:grid;gap:24px}
+    @media(min-width:980px){ .wrap{grid-template-columns:330px 1fr;align-items:start} }
+    @media(max-width:979px){ .wrap{grid-template-columns:1fr} }
 
-  /* Content frame */
-  .wrap{padding:96px clamp(16px,6vw,246.8px) 40px;display:grid;gap:24px}
-  @media(min-width:980px){ .wrap{grid-template-columns:330px 1fr;align-items:start} }
-  @media(max-width:979px){ .wrap{grid-template-columns:1fr} }
+    /* Title row */
+    .headrow{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .h-title{display:flex;flex-direction:column;gap:8px}
+    .h-title h1{margin:0;font-size:24px;background:linear-gradient(90deg,var(--primary1),var(--primary2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .h-title p{margin:0;color:var(--muted)}
 
-  /* Title row */
-  .headrow{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:20px}
-  .h-title{display:flex;flex-direction:column;gap:8px}
-  .h-title h1{margin:0;font-size:24px;background:linear-gradient(90deg,var(--primary1),var(--primary2));
-              -webkit-background-clip:text;-webkit-text-fill-color:transparent}
-  .h-title p{margin:0;color:var(--muted)}
+    /* Buttons */
+    .btn{height:36px;border-radius:8px;border:0;cursor:pointer;display:inline-flex;align-items:center;gap:10px;padding:0 14px;font-size:14px}
+    .btn-primary{color:#fff;background:linear-gradient(90deg,var(--primary1),var(--primary2))}
+    .btn-ghost{background:#fff;border:0.8px solid var(--line);color:var(--text)}
+    .btn .ic{width:16px;height:16px;display:block}
 
-  /* Buttons */
-  .btn{height:36px;border-radius:8px;border:0;cursor:pointer;display:inline-flex;align-items:center;gap:10px;padding:0 14px;font-size:14px}
-  .btn-primary{color:#fff;background:linear-gradient(90deg,var(--primary1),var(--primary2))}
-  .btn-ghost{background:#fff;border:0.8px solid var(--line);color:var(--text)}
-  .btn .ic{width:16px;height:16px;display:block}
+    /* Cards */
+    .card{box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);background:var(--card);border:0.8px solid rgba(0,0,0,.05);border-radius:var(--radius)}
+    .card-pad{padding:24px}
 
-  /* Cards */
-  .card{box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);
-        background:var(--card);border:0.8px solid rgba(0,0,0,.05);border-radius:var(--radius)}
-  .card-pad{padding:24px}
+    /* Left: profile summary */
+    .p-sum{display:flex;flex-direction:column;gap:16px;text-align:center}
+    .p-avatar{width:128px;height:128px;border-radius:9999px;margin:0 auto;border:4px solid rgba(0,184,219,.2);background:linear-gradient(135deg,var(--primary1),var(--primary2));color:#fff;display:grid;place-items:center;font-size:30px}
+    .pill{display:inline-flex;align-items:center;justify-content:center;border-radius:8px;padding:2px 8px;height:20px;background:linear-gradient(90deg,var(--primary1),var(--primary2));color:#fff;font-size:12px;text-transform:capitalize;margin:6px auto 0}
+    .p-line{height:1px;background:var(--line);margin:12px 0}
+    .row-center{display:flex;align-items:center;justify-content:center;gap:8px}
 
-  /* Left: profile summary */
-  .p-sum{display:flex;flex-direction:column;gap:16px;text-align:center}
-  .p-avatar{width:128px;height:128px;border-radius:9999px;margin:0 auto;
-            border:4px solid rgba(0,184,219,.2);background:linear-gradient(135deg,var(--primary1),var(--primary2));
-            color:#fff;display:grid;place-items:center;font-size:30px}
-  .pill{display:inline-flex;align-items:center;justify-content:center;border-radius:8px;padding:2px 8px;height:20px;
-        background:linear-gradient(90deg,var(--primary1),var(--primary2));color:#fff;font-size:12px;text-transform:capitalize;margin:6px auto 0}
-  .p-line{height:1px;background:var(--line);margin:12px 0}
-  .row-center{display:flex;align-items:center;justify-content:center;gap:8px}
+    /* Right: details */
+    .section{display:flex;flex-direction:column;gap:24px}
+    .sec-title{display:flex;align-items:center;gap:8px}
+    .sec-title .ic20{width:20px;height:20px;object-fit:contain}
+    .grid-2{display:grid;gap:16px}
+    @media(min-width:720px){ .grid-2{grid-template-columns:1fr 1fr} }
+    .field{display:flex;flex-direction:column;gap:8px}
+    .label{font-size:14px}
+    .value{color:var(--muted)}
+    .separator{height:1px;background:var(--line)}
 
-  /* Right: details */
-  .section{display:flex;flex-direction:column;gap:24px}
-  .sec-title{display:flex;align-items:center;gap:8px}
-  .sec-title .ic20{width:20px;height:20px}
-  .grid-2{display:grid;gap:16px}
-  @media(min-width:720px){ .grid-2{grid-template-columns:1fr 1fr} }
-  .field{display:flex;flex-direction:column;gap:8px}
-  .label{font-size:14px}
-  .value{color:var(--muted)}
-  .separator{height:1px;background:var(--line)}
+    /* Inputs (edit mode) */
+    .input, .textarea{width:100%;height:36px;border-radius:8px;border:0.8px solid var(--line);background:#F3F3F5;padding:6px 10px;font-size:14px}
+    .textarea{height:auto;min-height:90px;resize:vertical}
+    .editing .value{display:none}
+    .editing .input, .editing .textarea{display:block}
+    .input, .textarea{display:none}
+    .actions{display:flex;gap:12px;align-items:center}
 
-  /* Inputs (edit mode) */
-  .input, .textarea{width:100%;height:36px;border-radius:8px;border:0.8px solid var(--line);
-                    background:#F3F3F5;padding:6px 10px;font-size:14px}
-  .textarea{height:auto;min-height:90px;resize:vertical}
-  .editing .value{display:none}
-  .editing .input, .editing .textarea{display:block}
-  .input, .textarea{display:none}
-  /* In view mode, we show text values only */
-  .actions{display:flex;gap:12px;align-items:center}
+    /* Save bar */
+    .savebar{grid-column:1/-1;display:none;justify-content:flex-start;gap:10px}
+    .editing .savebar{display:flex}
 
-  /* Save bar (appears only in editing) */
-  .savebar{grid-column:1/-1;display:none;justify-content:flex-start;gap:10px}
-  .editing .savebar{display:flex}
+    /* Chips */
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{padding:4px 8px;border-radius:9999px;background:rgba(0,184,219,.08);border:1px solid rgba(0,184,219,.3);font-size:12px}
 
-  /* Helper tag list for interests */
-  .chips{display:flex;flex-wrap:wrap;gap:8px}
-  .chip{padding:4px 8px;border-radius:9999px;background:rgba(0,184,219,.08);border:1px solid rgba(0,184,219,.3);font-size:12px}
-
-  /* Icons img base */
-  img.ic, img.ic20{object-fit:contain}
-</style>
+    img.ic, img.ic20{object-fit:contain}
+  </style>
 </head>
 <body>
 <div class="page">
-
   <!-- Masthead -->
   <div class="mast">
     <div class="brand">
@@ -112,12 +95,12 @@
       <div class="brand-name">TrustLens</div>
     </div>
     <div class="mast-right">
-      <div class="lang">EN</div>
+      <div class="lang" aria-label="Language">EN</div>
       <div class="avatar-pill">
-        <div class="avatar-circle">H</div>
+        <div class="avatar-circle" aria-hidden="true">{{ user_data.profile.firstName[:1] or 'U' }}</div>
         <div class="user-meta">
-          <div>Haifa</div>
-          <div class="small muted" style="text-transform:capitalize">owner</div>
+          <div id="headerName">{{ user_name }}</div>
+          <div class="small muted">{{ user_data.email }}</div>
         </div>
       </div>
     </div>
@@ -132,11 +115,9 @@
         <p>Manage your personal information and settings</p>
       </div>
       <div class="actions">
-        <!-- Edit button (hidden in editing) -->
         <button id="btnEdit" class="btn btn-primary">
           <img class="ic" src="../static/images/icon_edit.svg" alt=""> Edit Profile
         </button>
-        <!-- Save / Cancel (show in editing) -->
         <div class="savebar">
           <button id="btnSave" class="btn btn-primary">
             <img class="ic" src="../static/images/icon_save.svg" alt=""> Save Changes
@@ -150,15 +131,16 @@
 
     <!-- Left summary -->
     <aside class="card card-pad p-sum">
-      <div class="p-avatar" aria-hidden="true">H</div>
-      <div style="font-size:16px">Haifa Alsaif</div>
-      <div class="muted">@Haifa</div>
-      <div class="pill">owner</div>
+      <div class="p-avatar" aria-hidden="true">{{ user_data.profile.firstName[:1] or 'U' }}</div>
+      <div style="font-size:16px" id="sideName">{{ user_name }}</div>
+      <div class="muted">@{{ user_data.profile.firstName or 'user' }}</div>
+      <div class="pill">{{ user_data.role or 'user' }}</div>
       <div class="row-center">
         <img class="ic" src="../static/images/icon_mail.svg" alt="">
-        <div class="muted">hss.1438@hotmail.com</div>
+        <div class="muted">{{ user_data.email }}</div>
       </div>
       <div class="p-line"></div>
+      <div id="chipWrap" class="chips" aria-label="Interests" style="display:none"></div>
     </aside>
 
     <!-- Right details -->
@@ -173,35 +155,33 @@
         <div class="grid-2">
           <div class="field">
             <div class="label">First Name</div>
-            <div class="value" data-k="firstName">Haifa</div>
-            <input class="input" type="text" value="Haifa" data-k="firstName">
+            <div class="value" data-k="firstName">{{ user_data.profile.firstName or '' }}</div>
+            <input class="input" type="text" value="{{ user_data.profile.firstName or '' }}" data-k="firstName" id="firstName">
           </div>
           <div class="field">
             <div class="label">Last Name</div>
-            <div class="value" data-k="lastName">Alsaif</div>
-            <input class="input" type="text" value="Alsaif" data-k="lastName">
+            <div class="value" data-k="lastName">{{ user_data.profile.lastName or '' }}</div>
+            <input class="input" type="text" value="{{ user_data.profile.lastName or '' }}" data-k="lastName" id="lastName">
           </div>
-
           <div class="field">
             <div class="label">Username</div>
-            <div class="value" data-k="username">@Haifa</div>
-            <input class="input" type="text" value="@Haifa" data-k="username">
+            <div class="value" data-k="username">@{{ user_data.profile.firstName or 'user' }}</div>
+            <input class="input" type="text" value="@{{ user_data.profile.firstName or 'user' }}" data-k="username" id="username">
           </div>
           <div class="field">
             <div class="label">Email</div>
-            <div class="value" data-k="email">hss.1438@hotmail.com</div>
-            <input class="input" type="email" value="hss.1438@hotmail.com" data-k="email">
+            <div class="value" data-k="email">{{ user_data.email }}</div>
+            <input class="input" type="email" value="{{ user_data.email }}" data-k="email" id="email">
           </div>
-
           <div class="field">
             <div class="label">Gender</div>
-            <div class="value" data-k="gender">Not specified</div>
-            <input class="input" type="text" value="Not specified" data-k="gender">
+            <div class="value" data-k="gender">{{ user_data.profile.gender or 'Not specified' }}</div>
+            <input class="input" type="text" value="{{ user_data.profile.gender or '' }}" data-k="gender" id="gender">
           </div>
           <div class="field">
             <div class="label">Specialization</div>
-            <div class="value" data-k="spec">Not specified</div>
-            <input class="input" type="text" value="Not specified" data-k="spec">
+            <div class="value" data-k="spec">{{ user_data.profile.specialization or 'Not specified' }}</div>
+            <input class="input" type="text" value="{{ user_data.profile.specialization or '' }}" data-k="spec" id="spec">
           </div>
         </div>
       </div>
@@ -217,137 +197,140 @@
         <div class="grid-2">
           <div class="field">
             <div class="label">GitHub</div>
-            <div class="value" data-k="github">Not specified</div>
-            <input class="input" type="url" placeholder="https://github.com/username" data-k="github">
+            <div class="value" data-k="github">{{ user_data.profile.github or 'Not specified' }}</div>
+            <input class="input" type="url" placeholder="https://github.com/username" data-k="github" id="github" value="{{ user_data.profile.github or '' }}">
           </div>
           <div class="field">
             <div class="label">LinkedIn</div>
-            <div class="value" data-k="linkedin">Not specified</div>
-            <input class="input" type="url" placeholder="https://linkedin.com/in/username" data-k="linkedin">
+            <div class="value" data-k="linkedin">{{ user_data.profile.linkedin or 'Not specified' }}</div>
+            <input class="input" type="url" placeholder="https://linkedin.com/in/username" data-k="linkedin" id="linkedin" value="{{ user_data.profile.linkedin or '' }}">
           </div>
         </div>
       </div>
 
       <div class="separator"></div>
 
-      <!-- Bio -->
+      <!-- Bio & Interests -->
       <div class="field">
         <div class="label">Bio</div>
-        <div class="value" data-k="bio">No bio added yet</div>
-        <textarea class="textarea" placeholder="Tell us about yourself..." data-k="bio"></textarea>
+        <div class="value" data-k="bio">{{ user_data.profile.description or 'No bio added yet' }}</div>
+        <textarea class="textarea" placeholder="Tell us about yourself..." data-k="bio" id="description">{{ user_data.profile.description or '' }}</textarea>
       </div>
-
-      <!-- Interests -->
-      <div>
-        <div class="sec-title">
-          <img class="ic" style="width:16px;height:16px" src="../static/images/icon_heart.svg" alt="">
-          <div>Interests</div>
-        </div>
-        <div class="value" data-k="interests">No interests added yet</div>
-        <div class="chips" id="chipWrap" style="display:none"></div>
-        <textarea class="textarea" placeholder="Enter interests separated by commas (e.g., AI, Programming, Design)" data-k="interests" style="display:none"></textarea>
+      <div class="field">
+        <div class="label">Interests</div>
+        <div class="value" data-k="interests">{{ user_data.profile.interests or 'No interests added yet' }}</div>
+        <textarea class="textarea" placeholder="Enter interests separated by commas..." data-k="interests" id="interests">{{ user_data.profile.interests or '' }}</textarea>
       </div>
     </main>
   </div>
 </div>
+
 <script>
-    /* ========= Basic profile editing logic =========
-       - Edit toggles .editing on the page root.
-       - Cancel restores original values and exits edit mode.
-       - Save copies inputs -> view text; updates chips for Interests; exits edit mode.
-       - NOTE: Hook btnSave to backend later if needed.
-    */
-    const root = document.getElementById('profileRoot');
-    const detail = document.getElementById('detailCard');
-    const btnEdit = document.getElementById('btnEdit');
-    const btnSave = document.getElementById('btnSave');
-    const btnCancel = document.getElementById('btnCancel');
-    
-    const state = {};      // original values snapshot for Cancel
-    const viewEls = {};    // map key -> view element
-    const inputEls = {};   // map key -> input/textarea
-    document.querySelectorAll('[data-k]').forEach(el=>{
-      const k = el.getAttribute('data-k');
-      if(el.classList.contains('value')) viewEls[k] = el;
-      else inputEls[k] = el;
-      // capture initial state only from view text if present; fall back to input value
-      if(!(k in state)){
-        state[k] = el.classList.contains('value') ? el.textContent.trim() :
-                   (el.value ?? '').trim();
+  const root = document.getElementById('profileRoot');
+  const btnEdit = document.getElementById('btnEdit');
+  const btnSave = document.getElementById('btnSave');
+  const btnCancel = document.getElementById('btnCancel');
+
+  const state = {};      // snapshot for cancel
+  const viewEls = {};    // key -> view element
+  const inputEls = {};   // key -> input/textarea
+
+  document.querySelectorAll('[data-k]').forEach(el=>{
+    const k = el.getAttribute('data-k');
+    if(el.classList.contains('value')) viewEls[k] = el; else inputEls[k] = el;
+    if(!(k in state)){
+      state[k] = el.classList.contains('value') ? el.textContent.trim() : (el.value ?? '').trim();
+    }
+  });
+
+  /* chips */
+  const chipWrap = document.getElementById('chipWrap');
+  function renderChips(list){
+    chipWrap.innerHTML = '';
+    if(!list || list.length===0){ chipWrap.style.display='none'; return; }
+    chipWrap.style.display='flex';
+    list.forEach(v=>{
+      const c = document.createElement('span'); c.className='chip'; c.textContent=v.trim();
+      chipWrap.appendChild(c);
+    });
+  }
+
+  // enter edit mode
+  btnEdit.addEventListener('click', ()=>{
+    root.classList.add('editing');
+    document.querySelector('.savebar').style.display='flex';
+    btnEdit.style.display='none';
+    Object.keys(inputEls).forEach(k=>{
+      const input = inputEls[k];
+      const v = (viewEls[k]?.textContent || input.value || '').trim();
+      input.value = v.replace(/^No bio added yet$|^No interests added yet$|^Not specified$/i,'');
+      input.style.display='';
+    });
+  });
+
+  // cancel -> restore snapshot
+  btnCancel.addEventListener('click', ()=>{
+    Object.keys(viewEls).forEach(k=>{ viewEls[k].textContent = state[k] || ''; });
+    renderChips([]);
+    document.querySelector('.savebar').style.display='none';
+    btnEdit.style.display='';
+    root.classList.remove('editing');
+    // hide inputs again
+    Object.values(inputEls).forEach(i=> i.style.display='none');
+  });
+
+  // save -> call API
+  btnSave.addEventListener('click', async () => {
+    // copy values to view first (optimistic UI)
+    Object.keys(inputEls).forEach(k=>{
+      const val = (inputEls[k].value || '').trim();
+      if(k==='bio'){
+        viewEls[k].textContent = val || 'No bio added yet';
+        state[k] = viewEls[k].textContent;
+      }else if(k==='interests'){
+        const arr = val ? val.split(',').map(s=>s.trim()).filter(Boolean) : [];
+        if(arr.length){ viewEls[k].textContent = ''; renderChips(arr); } else { viewEls[k].textContent = 'No interests added yet'; renderChips([]); }
+        state[k] = val;
+      }else{
+        const fallback = (k==='github'||k==='linkedin') ? 'Not specified' : '';
+        viewEls[k].textContent = val || fallback;
+        state[k] = viewEls[k].textContent;
       }
     });
-    
-    // interests chip UI helpers
-    const chipWrap = document.getElementById('chipWrap');
-    function renderChips(list){
-      chipWrap.innerHTML = '';
-      if(!list || list.length===0){ chipWrap.style.display='none'; return; }
-      chipWrap.style.display='flex';
-      list.forEach(v=>{
-        const c = document.createElement('span'); c.className='chip'; c.textContent=v.trim();
-        chipWrap.appendChild(c);
+
+    const payload = {
+      firstName: (inputEls.firstName?.value || '').trim(),
+      lastName:  (inputEls.lastName?.value || '').trim(),
+      gender:    (inputEls.gender?.value || '').trim(),
+      specialization: (inputEls.spec?.value || '').trim(),
+      username:  (inputEls.username?.value || '').trim(),
+      email:     (inputEls.email?.value || '').trim(),
+      interests: (inputEls.interests?.value || '').trim(),
+      github:    (inputEls.github?.value || '').trim(),
+      linkedin:  (inputEls.linkedin?.value || '').trim(),
+      description: (inputEls.description?.value || '').trim()
+    };
+
+    try {
+      const res = await fetch('/api/update-profile', {
+        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
       });
+      if (!res.ok) throw new Error('update failed');
+
+      // update header/sidebar names inline
+      document.getElementById('headerName').textContent = payload.firstName ? `${payload.firstName} ${payload.lastName}`.trim() : (payload.username || '{{ user_name }}');
+      document.getElementById('sideName').textContent = document.getElementById('headerName').textContent;
+    } catch (e) {
+      alert('Update failed');
+      return;
     }
-    
-    // enter edit mode
-    btnEdit.addEventListener('click', ()=>{
-      root.classList.add('editing');
-      document.querySelector('.savebar').style.display='flex';
-      btnEdit.style.display='none';
-    
-      // show inputs, seed current values from views
-      Object.keys(inputEls).forEach(k=>{
-        const input = inputEls[k];
-        const v = (viewEls[k]?.textContent || input.value || '').trim();
-        input.value = v.replace(/^No bio added yet$|^No interests added yet$|^Not specified$/i,'');
-        input.style.display = (input.tagName==='INPUT' || input.tagName==='TEXTAREA') ? '' : '';
-      });
-    
-      // interests textarea visible in edit
-      inputEls['interests'].style.display='';
-    });
-    
-    // cancel -> restore snapshot
-    btnCancel.addEventListener('click', ()=>{
-      Object.keys(viewEls).forEach(k=>{
-        viewEls[k].textContent = state[k] || '';
-      });
-      renderChips([]); // hide chips until saved again
-      document.querySelector('.savebar').style.display='none';
-      btnEdit.style.display='';
-      root.classList.remove('editing');
-    });
-    
-    // save -> copy inputs -> views
-    btnSave.addEventListener('click', ()=>{
-      Object.keys(inputEls).forEach(k=>{
-        const val = (inputEls[k].value || '').trim();
-        if(k==='bio'){
-          viewEls[k].textContent = val || 'No bio added yet';
-          state[k] = viewEls[k].textContent;
-        }else if(k==='interests'){
-          // build chips & view text
-          const arr = val ? val.split(',').map(s=>s.trim()).filter(Boolean) : [];
-          if(arr.length){
-            viewEls[k].textContent = ''; // hide text line
-            renderChips(arr);
-          }else{
-            viewEls[k].textContent = 'No interests added yet';
-            renderChips([]);
-          }
-          state[k] = val;
-        }else{
-          viewEls[k].textContent = val || (k==='github'||k==='linkedin' ? 'Not specified' : '');
-          state[k] = viewEls[k].textContent;
-        }
-      });
+
     // exit edit mode
     document.querySelector('.savebar').style.display='none';
-      btnEdit.style.display='';
-      root.classList.remove('editing');
-      // (optional) success toast
-      // alert("Changes saved.");
-    });
-    </script>
+    btnEdit.style.display='';
+    root.classList.remove('editing');
+    Object.values(inputEls).forEach(i=> i.style.display='none');
+  });
+</script>
 </body>
 </html>
