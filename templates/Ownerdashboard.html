@@ -1296,194 +1296,6 @@ body.dark {
         <!-- زر تبديل الوضع المظلم/الفاتح -->
 <img src="../static/images/img_buttonlight.png" alt="Toggle Dark Mode" id="themeToggle" class="notification-btn" style="cursor:pointer;">
 <div class="user-profile" onclick="toggleUserDropdown()">
-<<<<<<< HEAD
-    <img src="../static/images/user-profile.png" alt="Avatar" class="user-avatar">
-    <div class="user-info">
-      <h3>User</h3>
-      <p>Project Owner</p>
-    </div>
-  
-    <!-- القائمة داخل نفس الحاوية -->
-    <div class="user-dropdown" id="userDropdown">
-      <a href= HomePage.html class="dropdown-item">
-        <img src="../static/images/img_iconhome.svg" alt="Home" class="dropdown-icon"> Home
-      </a>
-      <div class="dropdown-divider"></div>
-      <a href=Profile.html class="dropdown-item">
-        <img src="../static/images/img_icon_gray_600_16x16.svg" alt="Profile" class="dropdown-icon"> Profile
-      </a>
-      <a href="Settings.html" class="dropdown-item">
-        <img src="../static/images/img_icon_Settings.svg" alt="Settings" class="dropdown-icon"> Settings
-      </a>
-      <div class="dropdown-divider"></div>
-      <a href= HomePage.html class="dropdown-item">
-        <img src="../static/images/img_icon_3.svg" alt="Logout" class="dropdown-icon"> Logout
-      </a>
-    </div>
-  </div>
-    </header>
-
-    <div class="content-wrapper">
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <nav class="sidebar-menu">
-          <!-- Home -->
-          <div class="menu-item" onclick="window.location.href='HomePage.html'" style="cursor: pointer;">
-            <img src="../static/images/img_iconhome.svg" alt="Home" class="menu-icon">
-            <span class="menu-text">Home</span>
-          </div>
-      
-          <div class="menu-item active" onclick="window.location.href='Ownerdashboard.html'">
-            <img src="../static/images/img_icon_black_900_01.svg" alt="Dashboard" class="menu-icon">
-            <span class="menu-text">Dashboard</span>
-          </div>
-      
-          <!-- Create Project -->
-          <div class="menu-item" onclick="window.location.href='CreateProject.html'" style="cursor: pointer;">
-            <img src="../static/images/img_iconAdd.svg" alt="Create Project" class="menu-icon">
-            <span class="menu-text">Create Project</span>
-          </div>
-      
-          <!-- My Projects -->
-          <div class="menu-item" onclick="window.location.href='MyProjectOwner.html'" style="cursor: pointer;">
-            <img src="../static/images/img_iconProject.svg" alt="My Projects" class="menu-icon">
-            <span class="menu-text">My Projects</span>
-          </div>
-      
-          <!-- Explainability -->
-          <div class="menu-item" onclick="window.location.href='Explainability.html'" style="cursor: pointer;">
-            <img src="../static/images/img_icon_16x16.svg" alt="Explainability" class="menu-icon">
-            <span class="menu-text">Explainability</span>
-          </div>
-        </nav>
-      </aside>
-
-      <!-- Main Content -->
-      <main class="main-content">
-        <!-- Welcome Section -->
-        <section class="welcome-section">
-          <h1 class="welcome-title">Welcome back, -- ! 👋</h1>
-          <p class="welcome-subtitle">Here's what's happening with your AI detection projects today</p>
-          
-          <!-- Statistics Grid -->
-          <div class="stats-grid">
-            <div class="stat-card stat-card-total">
-              <div class="stat-content">
-                <div class="stat-info">
-                  <div class="stat-label stat-label-total">Total Projects</div>
-                  <div class="stat-number">0</div>
-                  <div class="stat-description">All Projects</div>
-                </div>
-                <div class="stat-icon-btn stat-icon-btn-total">
-                  <img src="../static/images/img_icon_whiteproject.svg" alt="Total Projects" style="width: 24px; height: 24px;">
-                </div>
-              </div>
-            </div>
-            
-            <div class="stat-card stat-card-pending">
-              <div class="stat-content">
-                <div class="stat-info">
-                  <div class="stat-label stat-label-pending">Pending Projects</div>
-                  <div class="stat-number">0</div>
-                  <div class="stat-description pending">
-                    <img src="../static/images/img_icon_deep_orange_a400.svg" alt="Awaiting" style="width: 12px; height: 12px;">
-                    Awaiting Start
-                  </div>
-                </div>
-                <div class="stat-icon-btn stat-icon-btn-pending">
-                  <img src="../static/images/img_icon_white_a700_56x56.svg" alt="Pending Projects" style="width: 24px; height: 24px;">
-                </div>
-              </div>
-            </div>
-            
-            <div class="stat-card stat-card-active">
-              <div class="stat-content">
-                <div class="stat-info">
-                  <div class="stat-label stat-label-active">Active Projects</div>
-                  <div class="stat-number">0</div>
-                  <div class="stat-description active">
-                    <img src="../static/images/img_icon_blue_a700_01.svg" alt="In Progress" style="width: 12px; height: 12px;">
-                    In Progress
-                  </div>
-                </div>
-                <div class="stat-icon-btn stat-icon-btn-active">
-                  <img src="../static/images/img_icon_56x56.svg" alt="Active Projects" style="width: 24px; height: 24px;">
-                </div>
-              </div>
-            </div>
-            
-            <div class="stat-card stat-card-completed">
-              <div class="stat-content">
-                <div class="stat-info">
-                  <div class="stat-label stat-label-completed">Completed Projects</div>
-                  <div class="stat-number">0</div>
-                  <div class="stat-description completed">
-                    <img src="../static/images/img_icon_green_a700.svg" alt="Finished" style="width: 12px; height: 12px;">
-                    Finished
-                  </div>
-                </div>
-                <div class="stat-icon-btn stat-icon-btn-completed">
-                  <img src="../static/images/img_icon_1.svg" alt="Completed Projects" style="width: 24px; height: 24px;">
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Quick Actions -->
-        <section class="quick-actions">
-          <h2>Quick Actions</h2>
-          <div class="action-buttons">
-            <a href=CreatProject.html class="action-btn action-btn-create">
-              <img src="../static/images/img_iconAdd.svg" alt="Create" class="action-icon">
-              Create New Project
-            </a>
-            <a href=MyProjectOwner.html class="action-btn action-btn-projects">
-              <img src="../static/images/img_icon_whiteproject.svg" alt="Projects" class="action-icon">
-              My Projects
-            </a>
-            <a href="Explainability" class="action-btn action-btn-explain">
-              <img src="../static/images/img_icon_4.svg" alt="Explainability" class="action-icon">
-              View Explainability
-            </a>
-          </div>
-        </section>
-
-        <!-- Charts and Activity Section -->
-        <div class="charts-section">
-          <!-- Project Status Flow Chart -->
-          <div class="chart-card">
-            <div class="chart-header">
-              <div class="chart-info">
-                <img src="../static/images/img_container.png" alt="Chart Icon" class="chart-icon">
-                <div>
-                  <div class="chart-title">Project Status Flow</div>
-                  <div class="chart-subtitle">Track project progression over time</div>
-                </div>
-              </div>
-              <div class="chart-period">Last 4 Months</div>
-            </div>
-            
-            <div class="chart-container">
-              <canvas id="projectChart" role="img" aria-label="Project status flow chart showing completed, in progress, and pending projects over the last 4 months"></canvas>
-            </div>
-            
-            <div class="chart-legend">
-              <div class="legend-item">
-                <div class="legend-dot legend-dot-completed"></div>
-                <span class="legend-text">Completed</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-dot legend-dot-progress"></div>
-                <span class="legend-text legend-text-progress">In Progress</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-dot legend-dot-pending"></div>
-                <span class="legend-text legend-text-pending">Pending</span>
-              </div>
-            </div>
-          </div>
-=======
  <img src="../static/images/user-profile.png" alt="Avatar" class="user-avatar">
  <div class="user-info">
  <h3>{{ user_name }}</h3>
@@ -1497,14 +1309,14 @@ body.dark {
  </a>
  <div class="dropdown-divider"></div>
  <a href="/profile"class="dropdown-item">
- <img src="../static/images/img_profile.svg" alt="Profile" class="dropdown-icon"> Profile
+ <img src="../static/images/img_icon_gray_600_16x16.svg" alt="Profile" class="dropdown-icon"> Profile
  </a>
  <a href="Settings.html" class="dropdown-item">
  <img src="../static/images/img_icon_Settings.svg" alt="Settings" class="dropdown-icon"> Settings
  </a>
  <div class="dropdown-divider"></div>
  <a href= "/" class="dropdown-item">
- <img src="../static/images/img_logout.png" alt="Logout" class="dropdown-icon"> Logout
+ <img src="../static/images/img_icon_3.svg" alt="Logout" class="dropdown-icon"> Logout
  </a>
  </div>
  </div>
@@ -1522,26 +1334,26 @@ body.dark {
  
  
  <div class="menu-item active" onclick="window.location.href='Ownerdashboard.html'">
- <img src="../static/images/img_File.svg" alt="Dashboard" class="menu-icon">
+ <img src="../static/images/img_icon_black_900_01.svg" alt="Dashboard" class="menu-icon">
  <span class="menu-text">Dashboard</span>
  </div>
  
  <!-- Create Project -->
  <div class="menu-item" onclick="window.location.href='/createproject'" style="cursor: pointer;">
- <img src="../static/images/img_AddBlack.svg" alt="Create Project" class="menu-icon">
+ <img src="../static/images/img_iconAdd.svg" alt="Create Project" class="menu-icon">
  <span class="menu-text">Create Project</span>
  </div>
  
  
  <!-- My Projects -->
  <div class="menu-item" onclick="window.location.href='/myprojectowner'" style="cursor: pointer;">
- <img src="../static/images/img_File.svg" alt="My Projects" class="menu-icon">
+ <img src="../static/images/img_iconProject.svg" alt="My Projects" class="menu-icon">
  <span class="menu-text">My Projects</span>
  </div>
  
  <!-- Explainability -->
  <div class="menu-item" onclick="window.location.href='Explainability.html'" style="cursor: pointer;">
- <img src="../static/images/img_Explainability2.png" alt="Explainability" class="menu-icon">
+ <img src="../static/images/img_icon_16x16.svg" alt="Explainability" class="menu-icon">
  <span class="menu-text">Explainability</span>
  </div>
  </nav>
@@ -1575,12 +1387,12 @@ body.dark {
  <div class="stat-label stat-label-pending">Pending Projects</div>
  <div class="stat-number">0</div>
  <div class="stat-description pending">
- <img src="../static/images/img_time.svg" alt="Awaiting" style="width: 12px; height: 12px;">
+ <img src="../static/images/img_icon_deep_orange_a400.svg" alt="Awaiting" style="width: 12px; height: 12px;">
  Awaiting Start
  </div>
  </div>
  <div class="stat-icon-btn stat-icon-btn-pending">
- <img src="../static/images/img_Timewhitex.svg" alt="Pending Projects" style="width: 24px; height: 24px;">
+ <img src="../static/images/img_icon_white_a700_56x56.svg" alt="Pending Projects" style="width: 24px; height: 24px;">
  </div>
  </div>
  </div>
@@ -1591,7 +1403,7 @@ body.dark {
  <div class="stat-label stat-label-active">Active Projects</div>
  <div class="stat-number">0</div>
  <div class="stat-description active">
- <img src="../static/images/img_Man.svg" alt="In Progress" style="width: 12px; height: 12px;">
+ <img src="../static/images/img_icon_blue_a700_01.svg" alt="In Progress" style="width: 12px; height: 12px;">
  In Progress
  </div>
  </div>
@@ -1624,7 +1436,7 @@ body.dark {
  <h2>Quick Actions</h2>
  <div class="action-buttons">
  <a href="/createproject" class="action-btn action-btn-create">
- <img src="../static/images/img_AddWhite.svg" alt="Create" class="action-icon">
+ <img src="../static/images/img_iconAdd.svg" alt="Create" class="action-icon">
  Create New Project
  </a>
  <a href="/myprojectowner"class="action-btn action-btn-projects">
@@ -1632,12 +1444,12 @@ body.dark {
  My Projects
  </a>
  <a href="Explainability" class="action-btn action-btn-explain">
- <img src="../static/images/img_Explainability2.png" alt="Explainability" class="action-icon">
+ <img src="../static/images/img_icon_4.svg" alt="Explainability" class="action-icon">
  View Explainability
  </a>
  </div>
  </section>
- <!--
+
  <!-- Charts and Activity Section -->
  <div class="charts-section">
  <!-- Project Status Flow Chart -->
@@ -1672,7 +1484,6 @@ body.dark {
  </div>
  </div>
  </div>
->>>>>>> 3ed54bb (Edit)
 
           <!-- Recent Activity -->
           <div class="activity-card">
@@ -1759,101 +1570,6 @@ body.dark {
               </div>
             </div>
 
-<<<<<<< HEAD
-            <div class="invitations-total">
-              <img src="../static/images/img_icon_black_900_12x12.svg" alt="Total" style="width: 12px; height: 12px;">
-              11 Total
-            </div>
-          </div>
-          
-          <div class="invitations-grid">
-            <!-- Accepted Invitations -->
-            <div class="invitation-card invitation-card-accepted">
-              <div class="invitation-content">
-                <div class="invitation-header">
-                  <img src="../static/images/img_container_white_a700_64x64.png" alt="Accepted" class="invitation-avatar">
-                  <div class="invitation-number invitation-number-accepted">5</div>
-                </div>
-                <div class="invitation-label invitation-label-accepted">✓ Accepted Invitations</div>
-                <div class="invitation-description">Successfully joined your projects</div>
-                <div class="progress-bar-container">
-                  <div class="progress-bar progress-bar-accepted"></div>
-                </div>
-                <div class="invitation-stats">
-                  <div class="invitation-rate">
-                    <img src="../static/images/img_icon_green_a700_14x14.svg" alt="Rate" class="rate-icon">
-                    <span class="rate-label rate-label-accepted">Acceptance Rate</span>
-                  </div>
-                  <div class="rate-value rate-value-accepted">45%</div>
-                </div>
-                <div class="invitation-action invitation-action-accepted">
-                  Recent: Sarah, Michael, Emily
-                </div>
-              </div>
-            </div>
-            
-            <!-- Pending Response -->
-            <div class="invitation-card invitation-card-pending">
-              <div class="invitation-content">
-                <div class="invitation-header">
-                  <img src="../static/images/img_container_64x64.png" alt="Pending" class="invitation-avatar">
-                  <div class="invitation-number invitation-number-pending">4</div>
-                </div>
-                <div class="invitation-label invitation-label-pending">⏳ Pending Response</div>
-                <div class="invitation-description">Awaiting examiner decisions</div>
-                <div class="progress-bar-container progress-bar-container-pending">
-                  <div class="progress-bar progress-bar-pending"></div>
-                </div>
-                <div class="invitation-stats">
-                  <div class="invitation-rate">
-                    <img src="../static/images/img_icon_deep_orange_a400.svg" alt="Rate" class="rate-icon">
-                    <span class="rate-label rate-label-pending">Response Rate</span>
-                  </div>
-                  <div class="rate-value rate-value-pending">36%</div>
-                </div>
-                <div class="invitation-action invitation-action-pending">
-                  Action: Send follow-up reminders
-                </div>
-              </div>
-            </div>
-            
-            <!-- Declined Invitations -->
-            <div class="invitation-card invitation-card-declined">
-              <div class="invitation-content">
-                <div class="invitation-header">
-                  <img src="../static/images/img_container_3.png" alt="Declined" class="invitation-avatar">
-                  <div class="invitation-number invitation-number-declined">2</div>
-                </div>
-                <div class="invitation-label invitation-label-declined">✗ Declined Invitations</div>
-                <div class="invitation-description">Examiners who declined</div>
-                <div class="progress-bar-container progress-bar-container-declined">
-                  <div class="progress-bar progress-bar-declined"></div>
-                </div>
-                <div class="invitation-stats">
-                  <div class="invitation-rate">
-                    <img src="../static/images/img_icon_red_a700_01.svg" alt="Rate" class="rate-icon">
-                    <span class="rate-label rate-label-declined">Decline Rate</span>
-                  </div>
-                  <div class="rate-value rate-value-declined">18%</div>
-                </div>
-                <div class="invitation-action invitation-action-declined">
-                  Action: Invite alternative examiners
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
-  </div>
-
-  <script>
-    // User dropdown toggle
-    function toggleUserDropdown() {
-      const dropdown = document.getElementById('userDropdown');
-      dropdown.classList.toggle('show');
-    }
-=======
  <div class="invitations-total">
  <img src="../static/images/img_icon_black_900_12x12.svg" alt="Total" style="width: 12px; height: 12px;">
  11 Total
@@ -1937,18 +1653,16 @@ body.dark {
  </div>
  </div>
  </section>
- 
  </main>
  </div>
  </div>
- 
+
  <script>
  // User dropdown toggle
  function toggleUserDropdown() {
  const dropdown = document.getElementById('userDropdown');
  dropdown.classList.toggle('show');
  }
->>>>>>> 3ed54bb (Edit)
 
     // Close dropdown when clicking outside
     document.addEventListener('click', function(event) {
