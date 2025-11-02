@@ -10,12 +10,23 @@ app.secret_key = "CHANGE_THIS_SECRET_IN_ENV_OR_CONFIG"  # غيّريه لقيم�
 
 # ------------------ صفحات واجهة (GET) ------------------
 
+# 1) استبدلي دالة index() كاملة بهذا الكود
 @app.route("/")
 def index():
-    if session.get("idToken"):
-        return render_template("HomePage.html")
-    return render_template("index.html")
+    if not session.get("idToken"):
+        return render_template("index.html")
+    
 
+    uid      = session["uid"]
+    user_doc = db.collection("users").document(uid).get()
+    role     = user_doc.to_dict().get("role", "user")
+
+    if role == "examiner":
+        return redirect(url_for("examiner_dashboard_page"))
+    elif role == "owner":
+        return redirect(url_for("owner_dashboard_page"))
+    else:
+        return render_template("HomePage.html")
 @app.route("/login")
 def login_page():
     return render_template("Login.html")
@@ -32,7 +43,23 @@ def forgot_page():
 def profile_page():
     if not session.get("idToken"):
         return redirect(url_for("login_page"))
+<<<<<<< HEAD
     return render_template("Profile.html")
+=======
+    
+
+    uid = session.get("uid")
+    user_doc = db.collection("users").document(uid).get()
+    if not user_doc.exists:
+        return redirect(url_for("login_page"))
+
+    user_data = user_doc.to_dict()
+    first_name = user_data.get("profile", {}).get("firstName", "")
+    last_name  = user_data.get("profile", {}).get("lastName", "")
+    full_name  = f"{first_name} {last_name}".strip() or "User"
+
+    return render_template("Profile.html", user_data=user_data, user_name=full_name)
+>>>>>>> 3ed54bb (Edit)
 
 @app.route("/createproject")
 def create_project_page():
@@ -50,6 +77,23 @@ def my_project_examiner_page():
 def owner_dashboard_page():
     return render_template("Ownerdashboard.html")
 
+@app.route("/examinerdashboard")
+def examiner_dashboard_page():
+    if not session.get("idToken"):
+        return redirect(url_for("login_page"))
+
+    uid = session.get("uid")
+    user_doc = db.collection("users").document(uid).get()
+    if not user_doc.exists:
+        return redirect(url_for("login_page"))
+
+    user_data = user_doc.to_dict()
+    first_name = user_data.get("profile", {}).get("firstName", "")
+    last_name = user_data.get("profile", {}).get("lastName", "")
+    full_name = f"{first_name} {last_name}".strip() or "User"
+
+    return render_template("Examinerdashboard.html", user_name=full_name)
+
 @app.route("/projectdetailsowner")
 def project_details_owner_page():
     return render_template("ProjectDetailsOwner.html")
@@ -58,6 +102,13 @@ def project_details_owner_page():
 def project_details_examiner_page():
     return render_template("ProjectDetailsExaminer.html")
 
+@app.route("/invitation")
+def invitation_page():
+    return render_template("invitation.html")
+
+@app.route("/feedback")
+def feedback_page():
+    return render_template("feedback.html")
 
 # ------------------ مصادقة (POST APIs) ------------------
 
@@ -115,9 +166,22 @@ def api_signup():
 
         db.collection("users").document(uid).set(user_doc)
 
+             # حفظ التوكن والـ UID في الجلسة
         session["idToken"] = res["idToken"]
+<<<<<<< HEAD
         session["uid"] = uid
         return redirect(url_for("profile_page"))
+=======
+        session["uid"]     = uid
+
+        # التوجيه حسب الدور
+        if role == "owner":
+            return redirect(url_for("owner_dashboard_page"))
+        elif role == "examiner":
+            return redirect(url_for("examiner_dashboard_page")) 
+        else:
+            return redirect(url_for("profile_page"))
+>>>>>>> 3ed54bb (Edit)
 
     except Exception as e:
         try:
@@ -139,8 +203,21 @@ def api_signin():
     try:
         res = rest_signin(email, password)
         session["idToken"] = res["idToken"]
+<<<<<<< HEAD
         session["uid"] = res["localId"]
         return redirect(url_for("profile_page"))
+=======
+        session["uid"] = uid
+
+        # التوجيه حسب الدور
+        if role == "owner":
+            return redirect(url_for("owner_dashboard_page"))
+        elif role == "examiner":
+            return redirect(url_for("examiner_dashboard_page"))
+        else:
+            return redirect(url_for("profile_page"))
+
+>>>>>>> 3ed54bb (Edit)
     except Exception:
         # نسجّل التفاصيل في اللوق لكن ما نعرضها للمستخدم
         app.logger.exception("Signin failed")
