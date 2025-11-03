@@ -14,8 +14,7 @@ app.secret_key = "CHANGE_THIS_SECRET_IN_ENV_OR_CONFIG"  # غيّريه لقيم�
 # 1) استبدلي دالة index() كاملة بهذا الكود
 @app.route("/")
 def index():
-    if not session.get("idToken"):
-        return render_template("index.html")
+    return render_template("HomePage.html")
     
 
     uid      = session["uid"]
