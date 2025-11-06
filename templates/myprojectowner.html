@@ -81,13 +81,15 @@
       width: 10px;
       height: 10px;
     }
-    
-    .user-profile {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    
+    .user-profile{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  cursor:pointer;
+  position: relative;   /* ← هذا يحل المشكلة */
+  z-index: 1;           /* يخلي المنيو فوق أي عناصر قريبة */
+}
+
     .user-avatar {
       width: 40px;
       height: 40px;
@@ -100,12 +102,39 @@
       font-size: 16px;
       font-weight: 400;
     }
-    
-    .user-info h4 {
-      font-size: 14px;
-      color: #0a0a0a;
-      font-weight: 400;
-    }
+    /* ⚑ اجعلي h3 نفس تنسيق h4 حتى ما يصير Bold */
+.user-info h3{
+  font-size: 14px;
+  color: #0a0a0a;
+  font-weight: 400;  /* هذا يلغي البولد */
+  margin: 0;
+}
+
+/* خلي البروفايل نفسه قابل للنقر */
+.user-profile{ cursor:pointer; }
+
+/* تنسيقات بسيطة للقائمة المنسدلة */
+.user-dropdown{
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 190px;
+  background: #fff;
+  border: 1px solid #00000019;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px #00000019;
+  padding: 6px 0;
+  display: none;           /* افتراضي: مخفية */
+  z-index: 1000;
+}
+.user-dropdown.show{ display:block; }
+.dropdown-item{
+  display:flex; align-items:center; gap:10px;
+  padding:8px 12px; font-size:14px; color:#0a0a0a; text-decoration:none;
+}
+.dropdown-item:hover{ background:#f3f4f6; }
+.dropdown-divider{ height:1px; background:#00000019; margin:4px 0; }
+
     
     .user-info p {
       font-size: 12px;
@@ -803,13 +832,61 @@
         <span class="language-text">EN</span>
         <img src="../static/images/img_button.svg" alt="Theme Toggle" class="theme-icon">
         
-        <div class="user-profile">
-          <div class="user-avatar">H</div>
-          <div class="user-info">
-            <h4>Haifa</h4>
-            <p>owner</p>
-          </div>
+        <div class="user-profile" onclick="toggleUserDropdown()">
+ <img src="../static/images/user-profile.png" alt="Avatar" class="user-avatar">
+ <div class="user-info">
+ <h3>{{ user_name }}</h3>
+ <p>Project Owner</p>
+</div>
+
+
+
+
+
+  <!-- ▼▼ القائمة المنسدلة ▼▼ -->
+  <div class="user-dropdown" id="userDropdown">
+    <a href="/" class="dropdown-item">
+      <img src="../static/images/img_iconhome.svg" alt="Home" width="16" height="16"> Home
+    </a>
+    <div class="dropdown-divider"></div>
+    <a href="/profile" class="dropdown-item">
+      <img src="../static/images/img_profile.svg" alt="Profile" width="16" height="16"> Profile
+    </a>
+    <a href="/settings" class="dropdown-item">
+      <img src="../static/images/img_icon_Settings.svg" alt="Settings" width="16" height="16"> Settings
+    </a>
+    <div class="dropdown-divider"></div>
+    <a href="/logout" class="dropdown-item">
+      <img src="../static/images/img_logout.png" alt="Logout" width="16" height="16"> Logout
+    </a>
+  </div>
+  <!-- ▲▲ نهاية القائمة المنسدلة ▲▲ -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </div>
+
+
+
       </div>
     </header>
     
@@ -817,23 +894,23 @@
       <aside class="sidebar" id="sidebar">
         <nav class="sidebar-menu">
           <div class="menu-item" id="menu-home">
-            <img src="../static/images/img_icon_black_900.svg" alt="Home" class="menu-icon">
+            <img src="../static/images/img_iconhome.svg" alt="Home" class="menu-icon">
             <span class="menu-text">Home</span>
           </div>
           <div class="menu-item"  id="menu-dashboard">
-            <img src="../static/images/img_icon_black_900_16x16.svg" alt="Dashboard" class="menu-icon">
+            <img src="../static/images/img_File.svg" alt="Dashboard" class="menu-icon">
             <span class="menu-text">Dashboard</span>
           </div>
           <div class="menu-item" id="menu-create">
-            <img src="../static/images/img_icon_1.svg" alt="Create Project" class="menu-icon">
+            <img src="../static/images/img_AddBlack.svg" alt="Create Project" class="menu-icon">
             <span class="menu-text">Create Project</span>
           </div>
           <div class="menu-item  active">
-            <img src="../static/images/img_icon_black_900_01.svg" alt="My Projects" class="menu-icon">
+            <img src="../static/images/img_File.svg" alt="My Projects" class="menu-icon">
             <span class="menu-text">My Projects</span>
           </div>
           <div class="menu-item" id="menu-Explain">
-            <img src="../static/images/img_icon_2.svg" alt="Explainability" class="menu-icon">
+            <img src="../static/images/img_Explainability2.png" alt="Explainability" class="menu-icon">
             <span class="menu-text">Explainability</span>
           </div>
         </nav>
@@ -841,8 +918,8 @@
       
       <main class="main-content">
         <section class="welcome-section">
-          <h1 class="welcome-title">Welcome back, Haifa! 👋</h1>
-          <p class="welcome-subtitle">View and manage all your AI detection projects</p>
+        <h1 class="welcome-title">Welcome back, {{ user_name }}! 👋</h1>
+<p class="welcome-subtitle">View and manage all your AI detection projects</p>
         </section>
         
         <section class="projects-section">
@@ -1233,6 +1310,18 @@
   </div>
   
   <script>
+
+
+// إغلاق القائمة عند الضغط خارج البروفايل
+document.addEventListener('click', function (e) {
+  const profile = document.querySelector('.user-profile');
+  const dd = document.getElementById('userDropdown');
+  if (dd && !profile.contains(e.target)) dd.classList.remove('show');
+});
+
+
+
+
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
       sidebar.classList.toggle('active');
@@ -1270,6 +1359,11 @@
         row.style.display = show ? 'table-row' : 'none';
       });
     }
+    function toggleUserDropdown(){
+  const dd = document.getElementById('userDropdown');
+  dd.classList.toggle('show');
+}
+
     
     // Add click handlers for menu items
     document.querySelectorAll('.menu-item').forEach(item => {
@@ -1312,27 +1406,27 @@ document.querySelectorAll('.view-btn').forEach(btn => {
     });
     // 🔹 Sidebar navigation links
 document.getElementById('menu-home').addEventListener('click', () => {
-  window.location.href = 'HomePage.html';
+  window.location.href = '/';
 });
 
 document.getElementById('menu-dashboard').addEventListener('click', () => {
-  window.location.href = 'Ownerdashboard.html';
+  window.location.href = '/ownerdashboard';
 });
 
 document.getElementById('menu-create').addEventListener('click', () => {
-  window.location.href = 'CreateProject.html';
+  window.location.href = '/createproject';
 });
 
 document.querySelector('.menu-item.active').addEventListener('click', () => {
-  window.location.href = 'myprojectowner.html'; // صفحة My Projects الحالية
+  window.location.href = '/myprojectowner'; // صفحة My Projects الحالية
 });
 
 document.getElementById('menu-Explain').addEventListener('click', () => {
-  window.location.href = 'Explainability.html'; // غيّري الاسم إذا صفحتك اسمها مختلف
+  window.location.href = '/Explainability'; // غيّري الاسم إذا صفحتك اسمها مختلف
 });
 // 🔹 New Project button navigation
 document.querySelector('.new-project-btn').addEventListener('click', () => {
-  window.location.href = 'CreateProject.html'; // أو CreateProject.html لو غيّرتي الاسم
+  window.location.href = '/createproject'; // أو CreateProject.html لو غيّرتي الاسم
 });
 
   </script>
