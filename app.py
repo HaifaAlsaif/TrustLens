@@ -77,10 +77,23 @@ def my_project_owner_page():
     full_name  = f"{first_name} {last_name}".strip() or "User"
 
     return render_template("myprojectowner.html", user_name=full_name)
-
 @app.route("/myprojectexaminer")
 def my_project_examiner_page():
-    return render_template("myprojectexaminer.html")
+    if not session.get("idToken"):
+        return redirect(url_for("login_page"))
+
+    uid = session.get("uid")
+    user_doc = db.collection("users").document(uid).get()
+    if not user_doc.exists:
+        return redirect(url_for("login_page"))
+
+    user_data  = user_doc.to_dict()
+    first_name = user_data.get("profile", {}).get("firstName", "")
+    last_name  = user_data.get("profile", {}).get("lastName", "")
+    full_name  = f"{first_name} {last_name}".strip() or "User"
+
+    return render_template("myprojectexaminer.html", user_name=full_name)
+
 
 @app.route("/ownerdashboard")
 def owner_dashboard_page():

@@ -48,13 +48,13 @@
       width: 100px;
       height: 25px;
     }
-    
     .header-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
+  display: flex;
+  align-items: center;
+  gap: 8px;            /* أو 12px إذا تبين مسافة أكبر */
+  margin-left: auto;   /* هذا اللي يدزّه لليمين */
+}
+
     .language-selector {
       font-size: 12px;
       color: #0a0a0a;
@@ -545,59 +545,180 @@
         min-width: 1146px;
       }
     }
+
+
+    /* غطاء البروفايل */
+.user-profile{
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+/* صورة الأفاتار (نفس شكل الـ Owner) */
+.user-avatar-img{
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display:block;
+}
+
+/* اسم + دور */
+.user-info h3.user-name{
+  font-size: 14px;
+  color: #0a0a0a;
+font-weight: 400;
+  margin: 0;
+}
+.user-info .user-role{
+  font-size: 12px;
+  color: #717182;
+  margin: 0;
+}
+/* جعل القائمة تميل لليمين وتطلع بشكل أنيق */
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 200px;
+  background: #fff;
+  border: 1px solid #00000019;
+  border-radius: 10px;
+  box-shadow: 0 10px 20px #0000001a;
+  padding: 6px 0;
+  display: none;
+  z-index: 1000;
+  transform: translateX(15px); /* يميلها لليمين شوي */
+}
+
+/* لما تفتح */
+.user-dropdown.show {
+  display: block;
+}
+
+/* إزالة أي نقاط أو بولت */
+.user-dropdown ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+/* عناصر القائمة المنسدلة (روابط بشكل زر مع أيقونة) */
+.user-dropdown .dropdown-item{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #0a0a0a;        /* لون النص */
+  text-decoration: none; /* يشيل الخط */
+  line-height: 1;
+  white-space: nowrap;   /* يمنع الالتفاف */
+}
+
+.user-dropdown .dropdown-item:visited{
+  color: #0a0a0a;        /* لا تصير بنفسجي بعد الزيارة */
+}
+
+.user-dropdown .dropdown-item:hover{
+  background: #f3f4f6;   /* لون الهوفر مثل التصميم */
+}
+
+.user-dropdown .dropdown-divider{
+  height: 1px;
+  background: #00000019; /* خط فاصل خفيف */
+  margin: 4px 0;
+}
+
+/* صندوق القائمة: حواف وظل وميلان بسيط لليمين */
+.user-dropdown{
+  border-radius: 12px;
+  box-shadow: 0 10px 20px #0000001a;
+  transform: translateX(15px); /* يميل لليمين شوي */
+}
+.user-info h3.user-name { font-weight: 400 !important; }
+
   </style>
   
-  </head>
 <body>
+  
   <div class="main-container">
-    <header class="header">
-      <div style="display: flex; align-items: center; gap: 16px;">
-        <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
-        <img src="../static/images/img_header_logo.png" alt="TrustLens Logo" class="logo">
+ <header class="header">
+  <!-- اليسار: زر القائمة + لوقو -->
+  <div style="display:flex; align-items:center; gap:16px;">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
+    <img src="../static/images/img_header_logo.png" alt="TrustLens Logo" class="logo">
+  </div>
+
+  <!-- اليمين: EN + تبديل الثيم + بروفايل -->
+  <div class="header-right">
+    <span class="language-selector">EN</span>
+    <img src="../static/images/img_button.svg" alt="Theme toggle" class="theme-toggle">
+
+    <div class="user-profile" onclick="toggleUserDropdown()" id="userProfile">
+      <img src="../static/images/user-profile.png" alt="Avatar" class="user-avatar-img">
+      <div class="user-info">
+        <h3 class="user-name">{{ user_name }}</h3>
+        <p class="user-role">Examiner</p>
       </div>
-      <div class="header-right">
-        <span class="language-selector">EN</span>
-        <img src="../static/images/img_button.svg" alt="Theme toggle" class="theme-toggle">
-        <div class="user-profile">
-          <div class="user-avatar">L</div>
-          <div class="user-info">
-            <div class="user-name">Lina</div>
-            <div class="user-role">examiner</div>
-          </div>
-        </div>
+
+      <!-- القائمة المنسدلة -->
+      <div class="user-dropdown" id="userDropdown" aria-hidden="true">
+        <a href="/" class="dropdown-item">
+          <img src="../static/images/img_iconhome.svg" width="16" height="16" alt=""> Home
+        </a>
+        <div class="dropdown-divider"></div>
+        <a href="/profile" class="dropdown-item">
+          <img src="../static/images/img_profile.svg" width="16" height="16" alt=""> Profile
+        </a>
+        <a href="/settings" class="dropdown-item">
+          <img src="../static/images/img_icon_Settings.svg" width="16" height="16" alt=""> Settings
+        </a>
+        <div class="dropdown-divider"></div>
+        <a href="/logout" class="dropdown-item">
+          <img src="../static/images/img_logout.png" width="16" height="16" alt=""> Logout
+        </a>
       </div>
-    </header>
+    </div>
+  </div>
+</header>
+
+
 
     <div class="content-wrapper">
       <nav class="sidebar" id="sidebar">
-        <div class="menu-item">
-          <img src="../static/images/img_icon_black_900.svg" alt="" class="menu-icon">
-          <span class="menu-text">Home</span>
-        </div>
-        <div class="menu-item">
-          <img src="../static/images/img_icon_black_900_16x16.svg" alt="" class="menu-icon">
-          <span class="menu-text">Dashboard</span>
-        </div>
-        <div class="menu-item" style="margin-top: 32px;">
-          <img src="../static/images/img_icon_16x16_1.svg" alt="" class="menu-icon">
-          <span class="menu-text">Invitations</span>
-          <span class="notification-badge">2</span>
-        </div>
-        <div class="menu-item active">
-          <img src="../static/images/img_icon_black_900_01_1.svg" alt="" class="menu-icon">
-          <span class="menu-text">My Projects</span>
-        </div>
-        <div class="menu-item">
-          <img src="../static/images/img_icon_16x16_2.svg" alt="" class="menu-icon">
-          <span class="menu-text">Feedback</span>
-        </div>
-      </nav>
+  <div class="menu-item" id="menu-home">
+    <img src="../static/images/img_iconhome.svg" class="menu-icon" alt="">
+    <span class="menu-text">Home</span>
+  </div>
+
+  <div class="menu-item" id="menu-dashboard">
+    <img src="../static/images/img_File.svg" class="menu-icon" alt="">
+    <span class="menu-text">Dashboard</span>
+  </div>
+
+  <div class="menu-item" id="menu-invitations"> <!-- تم حذف الـ inline-style -->
+    <img src="../static/images/img_icon_16x16_1.svg" class="menu-icon" alt="">
+    <span class="menu-text">Invitations</span>
+    <span class="notification-badge">2</span>
+  </div>
+
+  <div class="menu-item active" id="menu-myprojects">
+    <img src="../static/images/img_File.svg" class="menu-icon" alt="">
+    <span class="menu-text">My Projects</span>
+  </div>
+
+  <div class="menu-item" id="menu-feedback">
+    <img src="../static/images/img_icon_16x16_2.svg" class="menu-icon" alt="">
+    <span class="menu-text">Feedback</span>
+  </div>
+</nav>
 
       <main class="main-content">
         <section class="welcome-section">
           <img src="../static/images/img_container_white_a700_1.png" alt="User avatar" class="welcome-avatar">
           <div class="welcome-text">
-            <h1>Welcome back, Lina!</h1>
+<h1>Welcome back, {{ user_name }}!</h1>
             <p>Examiner Dashboard</p>
           </div>
         </section>
@@ -948,7 +1069,6 @@
     }
 
     //
- Close sidebar when clicking outside on mobile
     document.addEventListener('click', function(event) {
 
       const sidebar = document.getElementById('sidebar');
@@ -968,7 +1088,6 @@
 );
 
     //
- Handle status dropdown changes
     document.querySelectorAll('.status-select').forEach(select => {
 
       select.addEventListener('change', function() {
@@ -982,7 +1101,6 @@
 );
 
     //
- Add hover effects to table rows
     document.querySelectorAll('.table-row').forEach(row => {
 
       row.addEventListener('mouseenter', function() {
@@ -1003,7 +1121,6 @@
 );
 
     //
- Handle view button clicks
     document.querySelectorAll('.view-button').forEach(button => {
 
       button.addEventListener('click', function() {
@@ -1012,14 +1129,58 @@
 
         console.log('Viewing project:', projectName);
 
-        //
- Add navigation logic here
       }
 );
 
     }
 );
+// 🔗 روابط القوائم — عدّلي المسارات لتوافق مسارات Flask عندك
+document.getElementById('menu-home')?.addEventListener('click', () => {
+  window.location.href = '/';                         // الصفحة الرئيسية
+});
+
+document.getElementById('menu-dashboard')?.addEventListener('click', () => {
+  window.location.href = '/examinerdashboard';       // عدّلي للمسار الصحيح
+});
+
+document.getElementById('menu-invitations')?.addEventListener('click', () => {
+  window.location.href = '/invitation';     // عدّلي للمسار الصحيح
+});
+
+document.getElementById('menu-myprojects')?.addEventListener('click', () => {
+  window.location.href = '/myprojectexaminer';      // هذه صفحتك الحالية
+});
+
+document.getElementById('menu-feedback')?.addEventListener('click', () => {
+  window.location.href = '/feedback';        // عدّلي للمسار الصحيح
+});
+
 
 </script>
+
+
+<script>
+  // فتح/إغلاق القائمة
+  function toggleUserDropdown(){
+    const dd = document.getElementById('userDropdown');
+    dd.classList.toggle('show');
+    dd.setAttribute('aria-hidden', dd.classList.contains('show') ? 'false' : 'true');
+  }
+
+  // إغلاق عند الضغط خارجها
+  document.addEventListener('click', function(e){
+    const profile = document.getElementById('userProfile');
+    const dd = document.getElementById('userDropdown');
+    if (!profile.contains(e.target)) dd.classList.remove('show');
+  });
+
+  // منع إغلاق فوري لو ضغطنا داخل البروفايل نفسه
+  document.getElementById('userProfile')?.addEventListener('click', function(e){
+    // لو ضغطتي على رابط داخل القائمة، خليه يشتغل بشكل طبيعي
+    if (e.target.closest('.dropdown-item')) return;
+    e.stopPropagation();
+  });
+</script>
+
 </body>
 </html>
