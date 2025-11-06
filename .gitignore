@@ -3,3 +3,7 @@ node_modules
 .idea
 package-lock.json
 service-account.json
+.venv/
+# Ignore Python cache files
+__pycache__/
+*.pyc
