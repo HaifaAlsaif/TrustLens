@@ -158,7 +158,7 @@
     <!-- Main frame -->
     <div class="frame">
       <div class="topbar">
-        <a class="back" href="Ownerdashboard.html">
+        <a class="back" href="/ownerdashboard">
           <img class="icon-16" src="../static/images/icon_back.svg" alt="">
           <div>Back to Dashboard</div>
         </a>
@@ -550,40 +550,65 @@
     cancelBtn.addEventListener("click", resetAll);
 
     /* ===== Submit validation + redirect ===== */
-    const submitBtn=$("#submit");
-    submitBtn.addEventListener("click", ()=>{
-      // Required: Name + Description
-      $("#nameErr").hidden = !!nameEl.value.trim();
-      $("#descErr").hidden = !!descEl.value.trim();
+   
+    const submitBtn = $("#submit");
 
-      // Required: Category
-      const hasCategory = catNews.checked || catConv.checked;
-      if(!hasCategory){
-        alert("Please select a category.");
-        return;
-      }
+submitBtn.addEventListener("click", async ()=>{
+  $("#nameErr").hidden = !!nameEl.value.trim();
+  $("#descErr").hidden = !!descEl.value.trim();
 
-      // Dataset rule
-      let datasetOK=true;
-      const hasFile=!!(fileInput.files&&fileInput.files[0]);
-      if(catNews.checked){
-        if(!hasFile){ datasetOK=false; fileErr.hidden=false; fileErr.textContent="For News Articles, a CSV file is required."; }
-        else datasetOK=validateFile(fileInput.files[0]);
-        gen.checked=false;
-      }else{ // Conversations
-        if(!hasFile && !gen.checked){
-          datasetOK=false; fileErr.hidden=false; fileErr.textContent="Upload a CSV or enable 'Generate from scratch'.";
-        }else if(hasFile){
-          datasetOK=validateFile(fileInput.files[0]);
-        }
-      }
+  const hasCategory = catNews.checked || catConv.checked;
+  if(!hasCategory){ alert("Please select a category."); return; }
 
-      const baseOK = !!nameEl.value.trim() && !!descEl.value.trim();
-      if(baseOK && datasetOK && hasCategory){
-    
-        window.location.href = "./Ownerdashboard.html";
+  const baseOK = !!nameEl.value.trim() && !!descEl.value.trim();
+  if(!baseOK) return;
+
+  const formData = new FormData();
+  formData.append("project_name", nameEl.value.trim());
+  formData.append("description", descEl.value.trim());
+  formData.append("category", catNews.checked ? "Article" : "Conversation");
+
+  selectedDomains.forEach(d => formData.append("domain", d));
+
+  if(fileInput.files && fileInput.files[0]){
+    formData.append("dataset", fileInput.files[0]);
+  }
+
+  // إنشاء المشروع أولاً
+  const res = await fetch("/api/create_project", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+
+  if(res.ok && data.project_ID){
+    // إرسال الدعوات واحدة تلو الأخرى
+    for(const ex of selectedExaminers){
+      const inviteRes = await fetch("/api/send_invitation", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          examiner_email: ex.email,
+          project_id: data.project_ID
+        })
+      });
+
+      // فقط للتحقق من نجاح إرسال الدعوة
+      const inviteData = await inviteRes.json();
+      if(!inviteRes.ok){
+        console.error("Failed to send invitation:", inviteData);
       }
-    });
+    }
+
+    alert("✅ Project created and invitations sent successfully!");
+    window.location.href = "/myprojectowner";
+  } else {
+    alert("❌ Error creating project: " + (data.error || "Unknown error"));
+  }
+});
+
+      
   </script>
 </body>
 </html>
