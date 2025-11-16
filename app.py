@@ -8,6 +8,8 @@ from datetime import datetime
 from google.cloud import storage
 import uuid
 import json
+import requests
+
 # إعداد Flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = "CHANGE_THIS_SECRET_IN_ENV_OR_CONFIG"  # غيّريه لقيمة آمنة
@@ -24,12 +26,6 @@ def index():
     user_doc = db.collection("users").document(uid).get()
     role     = user_doc.to_dict().get("role", "user")
 
-    if role == "examiner":
-        return redirect(url_for("examiner_dashboard_page"))
-    elif role == "owner":
-        return redirect(url_for("owner_dashboard_page"))
-    else:
-        return render_template("HomePage.html")
 @app.route("/login")
 def login_page():
     return render_template("Login.html")
@@ -37,6 +33,11 @@ def login_page():
 @app.route("/signup")
 def signup_page():
     return render_template("signup.html")
+
+@app.route("/verified")
+def verified():
+    # بعد التحقق، نعيد توجيهه لصفحة نجاح التفعيل
+    return render_template("Verified.html")
 
 @app.route("/forgot")
 def forgot_page():
@@ -144,15 +145,151 @@ def examiner_dashboard_page():
 def project_details_owner_page():
     return render_template("ProjectDetailsOwner.html")
 
-@app.route("/projectdetailsexaminer")
-def project_details_examiner_page():
-    return render_template("ProjectDetailsExaminer.html")
 
+# --------------------------------------------------
+# 1) مساعدة: نجيب اسم الـ owner من uid
+# --------------------------------------------------
+def _get_owner_info(owner_uid: str):
+    doc = db.collection("users").document(owner_uid).get()
+    if not doc.exists:
+        return {"name": "Unknown", "email": "—"}
+    d = doc.to_dict()
+    profile = d.get("profile", {})
+    name = f"{profile.get('firstName', '')} {profile.get('lastName', '')}".strip() or "Unknown"
+    return {"name": name, "email": d.get("email", "—")}
 
+# --------------------------------------------------
+# صفحة تفاصيل المشروع للمُقيّم (Examiner)
+# --------------------------------------------------
+@app.route("/projectdetailsexaminer/<project_id>")
+def project_details_examiner(project_id):
+   
+    if not session.get("idToken"):
+        return redirect(url_for("login_page"))
+
+    examiner_uid = session["uid"]
+
+    # نتحقق أن الم examiner قبل الدعوة
+    inv = (
+        db.collection("invitations")
+        .where("project_id", "==", project_id)
+        .where("examiner_id", "==", examiner_uid)
+        .where("status", "==", "accepted")
+        .limit(1)
+        .get()
+    )
+    if not inv:
+        abort(404)  # أو redirect 404 page
+
+    # نجيب بياناته لعرض الاسم بالهيدر
+    user_doc = db.collection("users").document(examiner_uid).get()
+    if not user_doc.exists:
+        abort(404)
+
+    user_data = user_doc.to_dict()
+    first_name = user_data.get("profile", {}).get("firstName", "")
+    last_name = user_data.get("profile", {}).get("lastName", "")
+    full_name = f"{first_name} {last_name}".strip() or "User"
+
+    return render_template("ProjectDetailsExaminer.html",
+                         user_name=full_name,
+                         project_id=project_id)
+
+@app.route("/api/project_json/<project_id>")
+def api_project_json(project_id):
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    examiner_uid = session["uid"]
+
+    # نتحقق أن ال examiner قبل الدعوة
+    inv = (
+        db.collection("invitations")
+        .where("project_id", "==", project_id)
+        .where("examiner_id", "==", examiner_uid)
+        .where("status", "==", "accepted")
+        .limit(1)
+        .get()
+    )
+    if not inv:
+        return jsonify({"error": "Project not found or you are not a member"}), 404
+
+    proj_doc = db.collection("projects").document(project_id).get()
+    if not proj_doc.exists:
+        return jsonify({"error": "Project not found"}), 404
+    proj = proj_doc.to_dict()
+
+    # نجيب بيانات الأونر
+    owner_info = _get_owner_info(proj["owner_id"])
+
+    # نعدّ عدد الـ examiners الذين قبلوا الدعوة
+    accepted_count = sum(
+        1
+        for _ in db.collection("invitations")
+        .where("project_id", "==", project_id)
+        .where("status", "==", "accepted")
+        .stream()
+    )
+
+    return jsonify(
+        {
+            "project_name": proj.get("project_name"),
+            "description": proj.get("description"),
+            "owner_name": owner_info["name"],
+            "owner_email": owner_info["email"],
+            "domain": proj.get("domain", []),
+            "category": proj.get("category"),
+            "examiners_accepted": accepted_count,
+            "dataset_url": proj.get("dataset_url", ""),
+        }
+    )
 @app.route("/feedback")
 def feedback_page():
     return render_template("feedback.html")
+# ------------- قائمة Examiners المقبولين في مشروع معين -------------
+@app.route("/api/project_examiners/<project_id>")
+def api_project_examiners(project_id):
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
 
+    # نتحقق أن السائل مقبول هو الآخر
+    examiner_uid = session["uid"]
+    inv = (
+        db.collection("invitations")
+        .where("project_id", "==", project_id)
+        .where("examiner_id", "==", examiner_uid)
+        .where("status", "==", "accepted")
+        .limit(1)
+        .get()
+    )
+    if not inv:
+        return jsonify({"error": "Forbidden"}), 403
+
+    # نجيب كل المقبولين
+    accepted = (
+        db.collection("invitations")
+        .where("project_id", "==", project_id)
+        .where("status", "==", "accepted")
+        .stream()
+    )
+
+    examiners = []
+    for a in accepted:
+        ex_id = a.to_dict().get("examiner_id")
+        ex_doc = db.collection("users").document(ex_id).get()
+        if not ex_doc.exists:
+            continue
+        prof = ex_doc.to_dict().get("profile", {})
+        name = f"{prof.get('firstName', '')} {prof.get('lastName', '')}".strip() or "Unknown"
+        email = ex_doc.to_dict().get("email", "")
+        examiners.append({
+            "id": ex_id,
+            "name": name,
+            "email": email,
+            "is_you": ex_id == examiner_uid
+        })
+
+    return jsonify({"examiners": examiners})
 # ============= INVITATIONS APIs =============
 
 @app.route("/invitation")
@@ -452,7 +589,7 @@ def api_signup():
     password     = data.get("password")
     display_name = data.get("displayName", "")
 
-    role         = data.get("role", "user")  # owner أو examiner
+    role         = data.get("role", "user")
     first_name   = data.get("firstName", "")
     last_name    = data.get("lastName", "")
     gender       = data.get("gender", "")
@@ -468,8 +605,11 @@ def api_signup():
         return jsonify({"error": "email and password are required"}), 400
 
     try:
-        res = rest_signup(email, password)  # إنشاء مستخدم في Firebase Auth
+        res = rest_signup(email, password)  # Firebase
         uid = res["localId"]
+
+        # إرسال رابط التحقق
+        send_verification_email(res["idToken"])
 
         user_doc = {
             "uid": uid,
@@ -489,26 +629,18 @@ def api_signup():
         }
 
         if role == "examiner":
-            # حقول إضافية للـ Examiner
             user_doc["profile"]["specialization"] = specialization
             user_doc["profile"]["description"]    = description
             user_doc["volunteer"] = {"optIn": volunteer_opt_in}
 
-       
-
         db.collection("users").document(uid).set(user_doc)
 
-             # حفظ التوكن والـ UID في الجلسة
-        session["idToken"] = res["idToken"]
-        session["uid"]     = uid
+        # حفظ بيانات التسجيل مؤقتاً
+        session["email"] = email
+        session["temp_password"] = password
 
-        # التوجيه حسب الدور
-        if role == "owner":
-            return redirect(url_for("owner_dashboard_page"))
-        elif role == "examiner":
-            return redirect(url_for("examiner_dashboard_page")) 
-        else:
-            return redirect(url_for("profile_page"))
+        # توجيه صفحة التحقق
+        return render_template("CheckEmail.html")
 
     except Exception as e:
         try:
@@ -516,6 +648,50 @@ def api_signup():
         except:
             return jsonify({"error": str(e)}), 500
 
+# verification_email هنا كل مايخص
+def send_verification_email(id_token):
+    url = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyChtQ2FaenDwe7k7bfRB8Cw5G_5C4f_xt4"
+    payload = {
+        "requestType": "VERIFY_EMAIL",
+        "idToken": id_token,
+        "continueUrl": "http://127.0.0.1:5000/verified"
+    }
+    headers = {"Content-Type": "application/json"}
+
+    r = requests.post(url, json=payload, headers=headers)
+
+    print("\n🔥 VERIFY EMAIL RESPONSE 🔥")
+    print("Status:", r.status_code)
+    print("Body:", r.text)
+    print("🔥 ----------------------🔥\n")
+
+    return r
+
+@app.route("/auto-login")
+def auto_login():
+    email = session.get("email")
+    password = session.get("temp_password")
+
+    if not email or not password:
+        return redirect(url_for("login_page"))
+
+    try:
+        res = rest_signin(email, password)
+
+        session["idToken"] = res["idToken"]
+        session["uid"] = res["localId"]
+
+        role = db.collection("users").document(res["localId"]).get().to_dict().get("role")
+
+        if role == "owner":
+            return redirect(url_for("owner_dashboard_page"))
+        elif role == "examiner":
+            return redirect(url_for("examiner_dashboard_page"))
+        else:
+            return redirect(url_for("profile_page"))
+
+    except:
+        return redirect(url_for("login_page"))
 
 # تسجيل الدخول
 @app.route("/api/signin", methods=["POST"])
@@ -528,24 +704,35 @@ def api_signin():
         return render_template("Login.html",
                                error="Email and password are required."), 400
     try:
+        # تسجيل الدخول أولاً
         res = rest_signin(email, password)
-        uid = res["localId"]
 
-        # جلب بيانات المستخدم من Firestore
+        # 🔄 تحديث حالة التفعيل من Firebase
+        url = "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyChtQ2FaenDwe7k7bfRB8Cw5G_5C4f_xt4"
+        r = requests.post(url, json={"idToken": res["idToken"]})
+        user_info = r.json()
+
+        email_verified = user_info["users"][0]["emailVerified"]
+
+        if not email_verified:
+            return render_template(
+                "Login.html",
+                error="Please verify your email before logging in."
+            )
+
+        # إذا مفعّل، كمّلي تسجيل الدخول
+        uid = res["localId"]
         user_doc = db.collection("users").document(uid).get()
         if not user_doc.exists:
-            # مستخدم مسجل في Auth لكن مافيه document في Firestore
             session.clear()
             return render_template("Login.html",
                                    error="User data not found."), 401
 
-        role = user_doc.to_dict().get("role", "user")  # افتراضي "user" إذا مافيش role
+        role = user_doc.to_dict().get("role", "user")
 
-        # حفظ التوكن والـ UID في الجلسة
         session["idToken"] = res["idToken"]
         session["uid"] = uid
 
-        # التوجيه حسب الدور
         if role == "owner":
             return redirect(url_for("owner_dashboard_page"))
         elif role == "examiner":
@@ -555,8 +742,10 @@ def api_signin():
 
     except Exception:
         app.logger.exception("Signin failed")
-        return render_template("Login.html",
-                               error="Invalid email or password. Please try again."), 401
+        return render_template(
+            "Login.html",
+            error="Invalid email or password. Please try again."
+        ), 401
 
 # تسجيل الخروج
 @app.route("/logout")
@@ -579,17 +768,7 @@ def api_reset():
         except:
             return jsonify({"error": str(e)}), 500
 
-# التحقق من idToken (للاستخدام داخل صفحات محمية/طلبات AJAX)
-@app.route("/api/verify", methods=["POST"])
-def api_verify():
-    id_token = request.form.get("idToken") or (request.json or {}).get("idToken") or session.get("idToken")
-    if not id_token:
-        return jsonify({"error": "idToken is required"}), 400
-    try:
-        decoded = admin_auth.verify_id_token(id_token)
-        return jsonify({"uid": decoded["uid"], "email": decoded.get("email")})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 401
+
 
 # صحة الخادم
 @app.route("/health")

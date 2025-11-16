@@ -618,35 +618,28 @@
     <div class="content-wrapper">
       <section class="page-header">
         <h1 class="page-title">Project Details</h1>
-        <a href="ExaminerDashord" class="back-link">
+        <a href="/examinerdashboard" class="back-link">
           <img src="../static/images/img_icon.svg" alt="Back arrow" class="back-icon">
           Back to Dashboard
         </a>
 
         <div class="project-card">
-          <h2 class="project-title">Customer Service Chat Detection</h2>
-          <p class="project-description">Detecting AI-generated conversations in customer service and support interactions</p>
-          
+          <h2 class="project-title" id="projectName">...</h2>
+          <p class="project-description" id="projectDesc">...</p>
+        
           <div class="project-meta">
             <div class="meta-row">
-              <img src="../static/images/img_icon_blue_a700_01.svg" alt="Owner icon" class="meta-icon">
               <span class="meta-label">Owner:</span>
-              <span class="meta-value">Ahmed Al-Mansour</span>
-              <span class="meta-label">•</span>
-              <span class="meta-label">ahmed.mansour@example.com</span>
+              <span class="meta-value" id="ownerName">...</span> •
+              <span class="meta-value" id="ownerEmail">...</span>
             </div>
-            
             <div class="meta-row">
-              <img src="../static/images/img_icon_purple_a700.svg" alt="Domain icon" class="meta-icon">
               <span class="meta-label">Domain:</span>
-              <span class="tag tag-purple">Customer Service</span>
-              <span class="tag tag-purple">Technology</span>
+              <span id="domainTags"></span>
             </div>
-            
             <div class="meta-row">
-              <img src="../static/images/img_icon_green_a700.svg" alt="Category icon" class="meta-icon">
               <span class="meta-label">Category:</span>
-              <span class="tag tag-green">Conversation</span>
+              <span id="categoryTag"></span>
             </div>
           </div>
         </div>
@@ -656,18 +649,14 @@
             <img src="../static/images/img_container.png" alt="Team icon" class="team-icon">
             <div class="team-info">
               <h3>All Examiners</h3>
-              <p>Team members working on this project</p>
+              <p id="examinerCount">Team members working on this project</p>
             </div>
           </div>
-          
-          <div class="team-member">
-            <div class="member-avatar">L</div>
-            <div class="member-info">
-              <h4>Lina@hotmail.com</h4>
-              <span class="member-status">You</span>
-            </div>
-          </div>
+        
+          <!-- سيتم ملؤها بالـ JS -->
+          <div id="examinersList"></div>
         </div>
+           
       </section>
 
       <section class="tasks-section">
@@ -825,6 +814,80 @@
         // Add your task action logic here
       });
     });
+    
+  </script>
+  <script>
+    async function loadProjectDetails() {
+      // استخراج project_id من الـ URL
+      const pathParts = window.location.pathname.split('/');
+      const projectId = pathParts[pathParts.length - 1];
+    
+      const res = await fetch(`/api/project_json/${projectId}`);
+      if (!res.ok) { alert("Failed to load project details"); return; }
+    
+      const data = await res.json();
+    
+      document.getElementById("projectName").textContent = data.project_name;
+      document.getElementById("projectDesc").textContent = data.description;
+      document.getElementById("ownerName").textContent   = data.owner_name;
+      document.getElementById("ownerEmail").textContent  = data.owner_email;
+    
+      // domain tags
+      const domainContainer = document.getElementById("domainTags");
+      domainContainer.innerHTML = "";
+      data.domain.forEach(d => {
+        const tag = document.createElement("span");
+        tag.className = "tag tag-purple";
+        tag.textContent = d;
+        domainContainer.appendChild(tag);
+      });
+    
+      // category tag
+      const catSpan = document.createElement("span");
+      catSpan.className = "tag tag-green";
+      catSpan.textContent = data.category;
+      document.getElementById("categoryTag").appendChild(catSpan);
+    }
+    
+  
+async function loadExaminers() {
+  const pathParts = window.location.pathname.split('/');
+  const projectId = pathParts[pathParts.length - 1];
+
+  const res = await fetch(`/api/project_examiners/${projectId}`);
+  if (!res.ok) { alert("Failed to load examiners"); return; }
+
+  const data = await res.json();
+
+  // عرض العدد
+  document.getElementById("examinerCount").textContent =
+    `${data.examiners.length} Team members working on this project`;
+
+  // عرض الأعضاء
+  const container = document.getElementById("examinersList");
+  container.innerHTML = "";
+
+  data.examiners.forEach(ex => {
+    const div = document.createElement("div");
+    div.className = "team-member";
+
+    // أول حرف الاسم للأفاتار
+    const initial = ex.name.charAt(0).toUpperCase();
+    const isYou   = ex.is_you ? '<span class="member-status">You</span>' : "";
+
+    div.innerHTML = `
+      <div class="member-avatar">${initial}</div>
+      <div class="member-info">
+        <h4>${ex.email}</h4>
+        ${isYou}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// استدعاءها بعد ما تتحمل الصفحة
+loadProjectDetails().then(() => loadExaminers());
   </script>
 </body>
 </html>

@@ -932,10 +932,12 @@ document.getElementById('menu-feedback')?.addEventListener('click', () => {
           </select>
         </td>
         <td class="table-cell" style="text-align:right;">
-          <button class="view-button">
-            <img src="../static/images/img_icon_4.svg" alt="" class="view-icon">
-            View
-          </button>
+          <button class="view-button" onclick="goToDetails('${p.project_id}')">
+    <img src="../static/images/img_icon_4.svg" alt="" class="view-icon">
+    View
+</button>
+
+
         </td>
       `;
       tbody.appendChild(tr);
@@ -948,5 +950,11 @@ document.getElementById('menu-feedback')?.addEventListener('click', () => {
   document.addEventListener("DOMContentLoaded", loadAcceptedProjects);
   
 </script>
+<script>
+  function goToDetails(id) {
+      window.location.href = "/projectdetailsexaminer/" + id;
+  }
+  </script>
+  
 </body>
 </html> 
