@@ -379,6 +379,23 @@ stepBtns.forEach(btn=>{
     turnInput.value=val;
   });
 });
+submitBtn.addEventListener("click",()=>{
+  const titleOk=!!titleEl.value.trim();
+  titleErr.style.display=titleOk?"none":"block";
+
+  const selected=exChecks.filter(cb=>cb.checked).length;
+  const req=requiredCount();
+
+  if(!titleOk){titleEl.focus();return;}
+  if(selected!==req){
+    const msg=req===2
+      ?"For Human to Human, you must select exactly 2 examiners."
+      :"For Human to AI, you must select exactly 1 examiner.";
+    alert(msg);
+    return;
+  }
+  alert("Task created successfully!");
+});
 
 
     
