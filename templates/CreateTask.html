@@ -397,7 +397,17 @@ submitBtn.addEventListener("click",()=>{
   alert("Task created successfully!");
 });
 
+cancelBtn.addEventListener("click",()=>{
+  titleEl.value="";
+  titleErr.style.display="none";
+  exChecks.forEach(cb=>cb.checked=false);
+  convTypeInput.value="human-ai";
+  $$(".conv-pill",convToggle).forEach(b=>b.classList.toggle("active",b.dataset.value==="human-ai"));
+  turnInput.value="2";
+  updateRule();
+});
 
+updateRule();
     
   </script>
 </body>
