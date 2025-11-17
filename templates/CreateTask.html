@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="initial-scale=1, width=device-width"/>
+  <title>Create Task • TrustLens</title>
+
+</head>
+
+<body>
+
+    <!-- ================== Back Bar ================== -->
+    <div class="back-bar">
+      <a class="back" href="ProjectDetailsOwner.html">
+        <img class="icon-16" src="../static/images/icon_back.svg" alt="">
+        <span>Back to Project</span>
+      </a>
+    </div>
+
+    <!-- ================== Card (Centered) ================== -->
+    <div class="content-wrapper">
+      <section class="card">
+        <div class="head">
+          <h1 class="title">Create Task</h1>
+          <p class="subtitle">Set up a new evaluation task</p>
+        </div>
+
+        <div class="content">
+          <!-- Task title -->
+          <div class="field">
+            <div class="label">Task Title / Topic</div>
+            <textarea id="taskTitle" class="textarea" placeholder="Enter task title or description..."></textarea>
+            <div id="titleErr" class="note error" style="display:none">Task title is required.</div>
+          </div>
+
+          <!-- Examiners -->
+          <div class="field">
+            <div class="label">Assign Examiners</div>
+            <div class="ex-box" id="exBox">
+              <label class="ex-row">
+                <input type="checkbox" name="examiner" value="haifa@gmail.com">
+                <span>Haifa@gmail.com</span>
+              </label>
+              <label class="ex-row">
+                <input type="checkbox" name="examiner" value="ex@gmail.com">
+                <span>Ex@gmail.com</span>
+              </label>
+            </div>
+            <div class="ex-rule note info">
+              <span id="exRuleText">Select exactly 1 examiner</span>
+              <span id="exSelectedCount" class="count">(0 selected)</span>
+            </div>
+          </div>
+
+          <!-- Number of turns -->
+          <div class="field">
+            <div class="label">Number of Turns</div>
+            <div class="stepper">
+              <button type="button" class="step-btn" data-dir="-1">−</button>
+              <input id="turns" class="step-input" type="number" min="2" max="7" value="2">
+              <button type="button" class="step-btn" data-dir="1">+</button>
+            </div>
+            <div class="step-hint">Choose between 2 and 7 turns.</div>
+          </div>
+
+          <!-- Conversation type -->
+          <div class="field">
+            <div class="label">Conversation Type</div>
+            <div class="conv-toggle" id="convToggle">
+              <button type="button" class="conv-pill active" data-value="human-ai">
+                <span class="pill-title">Human ↔ AI</span>
+                <span class="pill-sub">Exactly 1 examiner</span>
+              </button>
+              <button type="button" class="conv-pill" data-value="human-human">
+                <span class="pill-title">Human ↔ Human</span>
+                <span class="pill-sub">Exactly 2 examiners</span>
+              </button>
+            </div>
+            <input type="hidden" id="convType" value="human-ai">
+          </div>
+
+          <!-- Actions -->
+          <div class="actions">
+            <button id="submitTask" class="btn-primary" type="button">Create Task</button>
+            <button id="cancelTask" class="btn-ghost" type="button">Cancel</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
