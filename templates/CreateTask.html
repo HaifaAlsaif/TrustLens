@@ -336,6 +336,50 @@
     document.addEventListener("click",e=>{
       if(!e.target.closest("#userProfile")) userDropdown.classList.remove("show");
     });
+    function requiredCount(){return convTypeInput.value==="human-human"?2:1;}
+
+function updateRule(){
+  const req=requiredCount();
+  exRuleText.textContent=req===2?"Select exactly 2 examiners":"Select exactly 1 examiner";
+  updateSelectedCount();
+}
+function updateSelectedCount(){
+  const selected=exChecks.filter(cb=>cb.checked).length;
+  const req=requiredCount();
+  exCountSpan.textContent=`(${selected} selected)`;
+  if(selected===req){
+    exCountSpan.style.color="var(--success)";
+    exBox.style.borderColor="rgba(0,0,0,0.1)";
+    exBox.style.boxShadow="0 0 0 1px rgba(16,185,129,.25)";
+  }else{
+    exCountSpan.style.color="#f54900";
+    exBox.style.borderColor="rgba(180,35,24,0.4)";
+    exBox.style.boxShadow="none";
+  }
+}
+
+convToggle.addEventListener("click",e=>{
+  const btn=e.target.closest(".conv-pill");
+  if(!btn)return;
+  const value=btn.dataset.value;
+  convTypeInput.value=value;
+  $$(".conv-pill",convToggle).forEach(b=>b.classList.toggle("active",b===btn));
+  updateRule();
+});
+exChecks.forEach(cb=>cb.addEventListener("change",updateSelectedCount));
+
+stepBtns.forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const dir=parseInt(btn.dataset.dir,10);
+    let val=parseInt(turnInput.value||"2",10);
+    if(isNaN(val))val=2;
+    val+=dir;
+    if(val<2)val=2;
+    if(val>7)val=7;
+    turnInput.value=val;
+  });
+});
+
 
     
   </script>
