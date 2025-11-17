@@ -256,7 +256,7 @@
           </td>
           <td class="table-cell">
             <div class="actions-cell">
-             <button class="view-btn" onclick="goTo('ProjectDetailsOwner.html?pid=${p.project_id}')">View</button>
+            <button class="view-btn" onclick="goToOwner('${p.project_id}')">View</button>
             <img src="../static/images/img_button_black_900.svg" class="action-icon" onclick="editProject('${p.project_id}')" title="Edit">
             <img src="../static/images/img_button_black_900_32x36.svg" class="action-icon" onclick="deleteProject('${p.project_id}')" title="Delete">
             </div>
@@ -310,6 +310,10 @@ async function deleteProject(projectId) {
 function editProject(projectId) {
   window.location.href = `editproject.html?pid=${projectId}`;
 }
+function goToOwner(projectId) {
+  window.location.href = `/projectdetailsowner/${projectId}`;
+}
+
 </script>
 </body>
 </html>

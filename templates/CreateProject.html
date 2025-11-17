@@ -145,15 +145,7 @@
       </div>
       <div class="mast-right">
         <div class="lang">EN</div>
-        <div class="avatar-pill">
-          <div class="avatar-circle">H</div>
-          <div class="user-meta">
-            <div>Haifa</div>
-            <div class="small muted" style="text-transform:capitalize">owner</div>
-          </div>
-        </div>
-      </div>
-    </div>
+       
 
     <!-- Main frame -->
     <div class="frame">
@@ -267,7 +259,7 @@
 
               <div class="sel">
                 <div class="sel-head">
-                  <span class="checkbox" aria-hidden="true"></span>
+                
                   <div id="selTitle">Selected Examiners (0)</div>
                 </div>
                 <div id="exList"></div>
@@ -399,20 +391,41 @@
     fileInput.addEventListener("change", ()=>{ const f=fileInput.files?.[0]; if(f) validateFile(f); else { resetFileMessages(); dropTitle.textContent="Click to upload CSV file"; } });
 
     /* ===== Invite Examiners ===== */
-    const sampleUsers = [
-      {name:"John Doe", handle:"@john_doe", email:"john.doe@example.com", tag:"Computer Science"},
-      {name:"Maria Garcia", handle:"@maria_garcia", email:"maria.garcia@example.com", tag:"Journalism"},
-      {name:"Fatima Ali", handle:"@fatima_ali", email:"fatima.ali@example.com", tag:"Data Science"},
-      {name:"Omar Saleh", handle:"@omar_saleh", email:"omar.saleh@example.com", tag:"Healthcare"},
-      {name:"Sara Khan", handle:"@sara_khan", email:"sara.khan@example.com", tag:"Finance"},
-      {name:"Alex Kim", handle:"@alex_kim", email:"alex.kim@example.com", tag:"Design"},
-    ];
+    let sampleUsers = [];
+
+    async function loadVolunteers() {
+      try {
+        const res = await fetch("/api/volunteers");
+        const data = await res.json();
+        sampleUsers = data.volunteers || [];
+        console.log("Loaded volunteers:", sampleUsers);
+      } catch (err) {
+        console.error("Failed to load volunteers:", err);
+      }
+    }
+    
+    loadVolunteers();
+    
 
     const inviteInput = $("#inviteSearch"),
           suggestPop = $("#suggestPop"),
           addManual = $("#addManual"),
           exList = $("#exList"),
           selTitle = $("#selTitle");
+ // ⭐ أول ما يضغط على خانة الإدخال → تظهر كل القائمة
+inviteInput.addEventListener("focus", () => {
+  renderPopover(""); // عرض كل المتطوعين
+  suggestPop.classList.add("open");
+});
+
+// ⭐ بعد تحميل المتطوعين → افتحي القائمة تلقائيًا إذا دخل المستخدم الحقل
+loadVolunteers().then(() => {
+  inviteInput.addEventListener("focus", () => {
+    renderPopover("");
+    suggestPop.classList.add("open");
+  });
+});
+
 
     let selectedExaminers = [];
 
@@ -420,12 +433,38 @@
       suggestPop.innerHTML = "";
       const query = (q||"").trim().toLowerCase();
       if(!query){
-        const em = document.createElement("div");
-        em.className="empty";
-        em.textContent = "Browse volunteer examiners";
-        suggestPop.appendChild(em);
-        suggestPop.classList.add("open"); return;
+        const results = sampleUsers.slice(0, 10); // عرض الكل
+      
+        if(results.length === 0){
+          const em = document.createElement("div");
+          em.className="empty";
+          em.textContent = "No volunteers found";
+          suggestPop.appendChild(em);
+          suggestPop.classList.add("open");
+          return;
+        }
+      
+        results.forEach(u=>{
+          const row = document.createElement("div");
+          row.className="result";
+          row.innerHTML = `
+            <div class="avatar">${u.name.split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase()}</div>
+            <div style="flex:1">
+              <div style="display:flex;gap:8px;align-items:center">
+                <strong>${u.name}</strong><span class="muted">${u.handle}</span>
+              </div>
+              <div class="small muted">${u.email}</div>
+            </div>
+            <span class="tag">${u.tag}</span>
+          `;
+          row.onclick = ()=>{ addSelected(u); closePopover(); };
+          suggestPop.appendChild(row);
+        });
+      
+        suggestPop.classList.add("open");
+        return;
       }
+      
       const results = sampleUsers.filter(u =>
         u.name.toLowerCase().includes(query) ||
         u.handle.toLowerCase().includes(query) ||

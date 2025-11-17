@@ -100,7 +100,6 @@ def myprojectexaminer_page():
     return render_template("myprojectexaminer.html", user_name=full_name)
 
 
-
 @app.route("/ownerdashboard")
 def owner_dashboard_page():
     # 1) نتحقق أن المستخدم مسجل دخول
@@ -141,22 +140,132 @@ def examiner_dashboard_page():
 
     return render_template("Examinerdashboard.html", user_name=full_name)
 
-@app.route("/projectdetailsowner")
-def project_details_owner_page():
-    return render_template("ProjectDetailsOwner.html")
+@app.route("/projectdetailsowner/<project_id>")
+def project_details_owner(project_id):
+    if not session.get("idToken"):
+        return redirect(url_for("login_page"))
 
+    owner_uid = session["uid"]
 
-# --------------------------------------------------
-# 1) مساعدة: نجيب اسم الـ owner من uid
-# --------------------------------------------------
-def _get_owner_info(owner_uid: str):
-    doc = db.collection("users").document(owner_uid).get()
-    if not doc.exists:
-        return {"name": "Unknown", "email": "—"}
-    d = doc.to_dict()
-    profile = d.get("profile", {})
-    name = f"{profile.get('firstName', '')} {profile.get('lastName', '')}".strip() or "Unknown"
-    return {"name": name, "email": d.get("email", "—")}
+    # نتحقق أن المشروع فعلاً للـ owner
+    proj_doc = db.collection("projects").document(project_id).get()
+    if not proj_doc.exists:
+        abort(404)
+
+    proj_data = proj_doc.to_dict()
+    if proj_data.get("owner_id") != owner_uid:
+        abort(403)
+
+    # نجيب بيانات المستخدم لعرض الاسم في الهيدر
+    user_doc = db.collection("users").document(owner_uid).get()
+    if not user_doc.exists:
+        abort(404)
+
+    user_data = user_doc.to_dict()
+    first_name = user_data.get("profile", {}).get("firstName", "")
+    last_name  = user_data.get("profile", {}).get("lastName", "")
+    full_name  = f"{first_name} {last_name}".strip() or "User"
+
+    return render_template(
+        "ProjectDetailsOwner.html",
+        user_name=full_name,
+        project_id=project_id
+    )
+    
+@app.route("/api/project_json_owner/<project_id>")
+def api_project_json_owner(project_id):
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    owner_uid = session["uid"]
+
+    # نتأكد أن المشروع للـ owner
+    proj_doc = db.collection("projects").document(project_id).get()
+    if not proj_doc.exists:
+        return jsonify({"error": "Project not found"}), 404
+
+    proj = proj_doc.to_dict()
+    if proj.get("owner_id") != owner_uid:
+        return jsonify({"error": "Forbidden"}), 403
+
+    # 🔥 نجيب معلومات الـ Owner (نفس طريقة examiner)
+    owner_doc = db.collection("users").document(owner_uid).get()
+    if not owner_doc.exists:
+        return jsonify({"error": "Owner not found"}), 404
+
+    owner_data = owner_doc.to_dict()
+    prof = owner_data.get("profile", {})
+
+    owner_name = f"{prof.get('firstName', '')} {prof.get('lastName', '')}".strip()
+    owner_email = owner_data.get("email", "")
+
+    # 🔥 نجيب عدد المقبولين
+    accepted_count = sum(
+        1
+        for _ in db.collection("invitations")
+        .where("project_id", "==", project_id)
+        .where("status", "==", "accepted")
+        .stream()
+    )
+
+    return jsonify({
+        "project_name": proj.get("project_name"),
+        "description": proj.get("description"),
+        "domain": proj.get("domain", []),
+        "category": proj.get("category"),
+        "dataset_url": proj.get("dataset_url", ""),
+        "examiners_accepted": accepted_count,
+
+        # 🔥🔥 أهم شي أضفناهم:
+        "owner_name": owner_name,
+        "owner_email": owner_email
+    })
+# ------------- قائمة Examiners المقبولين (للـ Owner) -------------
+@app.route("/api/project_examiners_owner/<project_id>")
+def api_project_examiners_owner(project_id):
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    owner_uid = session["uid"]
+
+    # تأكيد أن المشروع ملك للـ owner
+    proj_doc = db.collection("projects").document(project_id).get()
+    if not proj_doc.exists:
+        return jsonify({"error": "Project not found"}), 404
+
+    proj_data = proj_doc.to_dict()
+    if proj_data.get("owner_id") != owner_uid:
+        return jsonify({"error": "Forbidden"}), 403
+
+    # نجيب جميع المقبولين
+    accepted = (
+        db.collection("invitations")
+        .where("project_id", "==", project_id)
+        .where("status", "==", "accepted")
+        .stream()
+    )
+
+    examiners = []
+    for inv in accepted:
+        d = inv.to_dict()
+        ex_id = d.get("examiner_id")
+        user_doc = db.collection("users").document(ex_id).get()
+        if not user_doc.exists:
+            continue
+
+        u = user_doc.to_dict()
+        prof = u.get("profile", {})
+
+        name = f"{prof.get('firstName', '')} {prof.get('lastName', '')}".strip()
+        email = u.get("email", "")
+
+        examiners.append({
+            "id": ex_id,
+            "name": name,
+            "email": email
+        })
+
+    return jsonify({"examiners": examiners})
 
 # --------------------------------------------------
 # صفحة تفاصيل المشروع للمُقيّم (Examiner)
@@ -194,7 +303,22 @@ def project_details_examiner(project_id):
     return render_template("ProjectDetailsExaminer.html",
                          user_name=full_name,
                          project_id=project_id)
+# ------------------ صفحة تفاصيل المشروع للمُقيّم (Examiner) ------------------
+# --------------------------------------------------
 
+def _get_owner_info(owner_uid):
+    owner_doc = db.collection("users").document(owner_uid).get()
+    if not owner_doc.exists:
+        return {"name": "Unknown", "email": ""}
+
+    data = owner_doc.to_dict()
+    prof = data.get("profile", {})
+    name = f"{prof.get('firstName', '')} {prof.get('lastName', '')}".strip()
+    email = data.get("email", "")
+
+    return {"name": name, "email": email}
+
+    
 @app.route("/api/project_json/<project_id>")
 def api_project_json(project_id):
     if not session.get("idToken"):
@@ -357,6 +481,28 @@ def api_update_invitation(invitation_id):
     inv_ref.update({"status": new_status})
     return jsonify({"message": f"Invitation {new_status}ed successfully"}), 200
 
+@app.route("/api/volunteers", methods=["GET"])
+def api_volunteers():
+    # نجيب المستخدمين اللي دورهم examiner واللي مفعلين volunteer.optIn
+    docs = (
+        db.collection("users")
+        .where("role", "==", "examiner")
+        .where("volunteer.optIn", "==", True)
+        .stream()
+    )
+
+    volunteers = []
+    for d in docs:
+        data = d.to_dict()
+        prof = data.get("profile", {})
+        volunteers.append({
+            "name": f"{prof.get('firstName','')} {prof.get('lastName','')}".strip(),
+            "handle": "@" + prof.get("firstName","").lower(),
+            "email": data.get("email", ""),
+            "tag": prof.get("specialization", "Volunteer")
+        })
+
+    return jsonify({"volunteers": volunteers})
 
 # ------------------ Examiner Accepted Projects ------------------
 @app.route("/api/accepted_projects", methods=["GET"])
