@@ -308,5 +308,36 @@
       </section>
     </div>
   </div>
+
+  
+  <!-- ================== JS ================== -->
+  <script>
+    const $=(s,e=document)=>e.querySelector(s);
+    const $$=(s,e=document)=>Array.from(e.querySelectorAll(s));
+
+    const titleEl=$("#taskTitle");
+    const titleErr=$("#titleErr");
+    const convTypeInput=$("#convType");
+    const exChecks=$$("input[name='examiner']");
+    const exRuleText=$("#exRuleText");
+    const exCountSpan=$("#exSelectedCount");
+    const exBox=$("#exBox");
+    const submitBtn=$("#submitTask");
+    const cancelBtn=$("#cancelTask");
+    const convToggle=$("#convToggle");
+    const turnInput=$("#turns");
+    const stepBtns=$$(".step-btn");
+
+    const userProfile=$("#userProfile");
+    const userDropdown=$("#userDropdown");
+    userProfile.addEventListener("click",()=>{
+      userDropdown.classList.toggle("show");
+    });
+    document.addEventListener("click",e=>{
+      if(!e.target.closest("#userProfile")) userDropdown.classList.remove("show");
+    });
+
+    
+  </script>
 </body>
 </html>
