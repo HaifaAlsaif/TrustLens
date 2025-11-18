@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -269,9 +268,14 @@
 
           <!-- Actions -->
           <div class="actions">
-            <button id="submit" class="btn-primary" type="button">Create Project</button>
-            <button id="cancelBtn" class="btn-ghost" type="button">Cancel</button>
-          </div>
+  <button id="submit" class="btn-primary" type="button">Create Project</button>
+  <button id="cancelBtn" class="btn-ghost" type="button">Cancel</button>
+  <!-- 👇 نص صغير نستخدمه لعرض حالة الرفع -->
+  <span id="submitStatus" class="note" style="margin-left:8px;" hidden>
+    Uploading dataset and creating project...
+  </span>
+</div>
+
         </div>
       </section>
     </div>
@@ -591,17 +595,27 @@ loadVolunteers().then(() => {
     /* ===== Submit validation + redirect ===== */
    
     const submitBtn = $("#submit");
+const submitStatus = $("#submitStatus");
+let isSubmitting = false;
 
-submitBtn.addEventListener("click", async ()=>{
+submitBtn.addEventListener("click", async () => {
+  // لو فيه request شغّال، لا تسوين شيء
+  if (isSubmitting) return;
+
+  // التحقق من الحقول الأساسية
   $("#nameErr").hidden = !!nameEl.value.trim();
   $("#descErr").hidden = !!descEl.value.trim();
 
   const hasCategory = catNews.checked || catConv.checked;
-  if(!hasCategory){ alert("Please select a category."); return; }
+  if (!hasCategory) {
+    alert("Please select a category.");
+    return;
+  }
 
   const baseOK = !!nameEl.value.trim() && !!descEl.value.trim();
-  if(!baseOK) return;
+  if (!baseOK) return;
 
+  // تجهيز البيانات
   const formData = new FormData();
   formData.append("project_name", nameEl.value.trim());
   formData.append("description", descEl.value.trim());
@@ -609,43 +623,73 @@ submitBtn.addEventListener("click", async ()=>{
 
   selectedDomains.forEach(d => formData.append("domain", d));
 
-  if(fileInput.files && fileInput.files[0]){
+  if (fileInput.files && fileInput.files[0]) {
     formData.append("dataset", fileInput.files[0]);
   }
 
-  // إنشاء المشروع أولاً
-  const res = await fetch("/api/create_project", {
-    method: "POST",
-    body: formData
-  });
+  // 🔵 تفعيل وضع التحميل
+  isSubmitting = true;
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Uploading dataset...";
+  submitStatus.hidden = false;
+  submitStatus.textContent = "Uploading dataset and creating project...";
 
-  const data = await res.json();
+  try {
+    // إنشاء المشروع
+    const res = await fetch("/api/create_project", {
+      method: "POST",
+      body: formData
+    });
 
-  if(res.ok && data.project_ID){
-    // إرسال الدعوات واحدة تلو الأخرى
-    for(const ex of selectedExaminers){
-      const inviteRes = await fetch("/api/send_invitation", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          examiner_email: ex.email,
-          project_id: data.project_ID
-        })
-      });
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (e) {
+      // لو الرد مو JSON
+      data = {};
+    }
 
-      // فقط للتحقق من نجاح إرسال الدعوة
-      const inviteData = await inviteRes.json();
-      if(!inviteRes.ok){
-        console.error("Failed to send invitation:", inviteData);
+    if (!res.ok || !data.project_ID) {
+      const msg = data.error || "Server error while creating project.";
+      throw new Error(msg);
+    }
+
+    // إرسال الدعوات (اختياري الآن)
+    for (const ex of selectedExaminers) {
+      try {
+        const inviteRes = await fetch("/api/send_invitation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            examiner_email: ex.email,
+            project_id: data.project_ID
+          })
+        });
+
+        if (!inviteRes.ok) {
+          console.error("Failed to send invitation for", ex.email);
+        }
+      } catch (e) {
+        console.error("Invite error:", e);
       }
     }
 
     alert("✅ Project created and invitations sent successfully!");
     window.location.href = "/myprojectowner";
-  } else {
-    alert("❌ Error creating project: " + (data.error || "Unknown error"));
+
+  } catch (err) {
+    console.error(err);
+    submitStatus.hidden = false;
+    submitStatus.textContent = "Network error while uploading dataset or creating project.";
+    alert("❌ " + (err.message || "Network error. Please try again."));
+  } finally {
+    // 🔵 رجوع لحالة الزر الطبيعية (بس لو ما صار redirect)
+    isSubmitting = false;
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Create Project";
   }
 });
+
 
       
   </script>
