@@ -750,6 +750,7 @@
     <span class="status-pill completed">Feedback Given</span>
   </div>
 </article>
+  <div id="reviewsListDynamic"></div>
 
         </section>
       </main>
@@ -801,8 +802,19 @@
     // ============================
     // تحميل المشاريع الـ Complete فقط وعرضها كـ View Feedback (أخضر)
     // ============================
+function getStatusOverrides() {
+  try {
+    return JSON.parse(localStorage.getItem("tl_examiner_status") || "{}");
+  } catch (e) {
+    return {};
+  }
+}
+
+
+
+
     async function loadCompletedReviews() {
-      const listEl = document.getElementById("reviewsList");
+const listEl = document.getElementById("reviewsListDynamic");
       const countEl = document.getElementById("feedbackCount");
 
       if (!listEl) return;
@@ -818,13 +830,23 @@
           return;
         }
 
-        const allProjects = data.projects || [];
+       const allProjects = data.projects || [];
+const overrides = getStatusOverrides();
 
-        // نفلتر بس اللي status = complete / completed
-        const completed = allProjects.filter((p) => {
-          const s = (p.status || "").toLowerCase();
-          return s === "complete" || s === "completed";
-        });
+// نعتبر المشروع "completed" إذا:
+// 1) الoverride في localStorage = completed
+// أو 2) الstatus اللي جاي من الـ API = complete/completed
+const completed = allProjects.filter((p) => {
+  const override = overrides[p.project_id];
+
+  if (override) {
+    return override.toLowerCase() === "completed";
+  }
+
+  const s = (p.status || "").toLowerCase();
+  return s === "complete" || s === "completed";
+});
+
 
         // نحدّث عدّاد الفيدباكات في الكرت البنفسجي
         if (countEl) {
