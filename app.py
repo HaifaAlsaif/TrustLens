@@ -6,6 +6,7 @@ from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 from auth_rest import signup as rest_signup, signin as rest_signin, send_password_reset
 from datetime import datetime
 from google.cloud import storage
+from flask import flash
 import uuid
 import json
 import csv
@@ -40,10 +41,6 @@ def signup_page():
 def verified():
     # بعد التحقق، نعيد توجيهه لصفحة نجاح التفعيل
     return render_template("Verified.html")
-
-@app.route("/forgot")
-def forgot_page():
-    return render_template("ForgotPassword.html")
 
 @app.route("/profile")
 def profile_page():
@@ -803,17 +800,42 @@ def api_send_invitation():
 @app.route("/api/signup", methods=["POST"])
 def api_signup():
     data = request.form if request.form else (request.json or {})
-    email        = data.get("email")
-    password     = data.get("password")
-    display_name = data.get("displayName", "")
 
-    role         = data.get("role", "user")
-    first_name   = data.get("firstName", "")
-    last_name    = data.get("lastName", "")
-    gender       = data.get("gender", "")
-    interests    = data.get("interests", "")
-    github       = data.get("github", "")
-    linkedin     = data.get("linkedin", "")
+    email    = data.get("email")
+    password = data.get("password")
+
+    # 👈 نقرأ اليوزر نيم من الفورم
+    username = data.get("username") or data.get("displayName", "")
+
+    role       = data.get("role", "user")
+    first_name = data.get("firstName", "")
+    last_name  = data.get("lastName", "")
+    gender     = data.get("gender", "")
+    interests  = data.get("interests", "")
+    github     = data.get("github", "")
+    linkedin   = data.get("linkedin", "")
+
+    volunteer_opt_in = str(data.get("volunteerOptIn", "false")).lower() == "true"
+    specialization   = data.get("specialization", "")
+    description      = data.get("description", "")
+
+    # ✅ نتأكد من كل القيم الأساسية
+    if not email or not password or not username:
+        return jsonify({"error": "email, password and username are required"}), 400
+
+    # ✅ نتأكد أن اليوزر نيم يونيك
+    existing = list(
+        db.collection("users")
+          .where("username", "==", username)
+          .limit(1)
+          .stream()
+    )
+    if existing:
+        return jsonify({
+            "error": "USERNAME_TAKEN",
+            "message": "This username is already in use."
+        }), 409
+
 
     volunteer_opt_in = str(data.get("volunteerOptIn", "false")).lower() == "true"
     specialization   = data.get("specialization", "")
@@ -832,7 +854,7 @@ def api_signup():
         user_doc = {
             "uid": uid,
             "email": email,
-            "displayName": display_name,
+             "username": username,  
             "role": role,
             "createdAt": SERVER_TIMESTAMP,
             "updatedAt": SERVER_TIMESTAMP,
@@ -915,36 +937,69 @@ def auto_login():
 @app.route("/api/signin", methods=["POST"])
 def api_signin():
     data = request.form if request.form else (request.json or {})
-    email = data.get("email")
-    password = data.get("password")
 
-    if not email or not password:
-        return render_template("Login.html",
-                               error="Email and password are required."), 400
+    # المستخدم يقدر يكتب email أو username في نفس الحقل
+    identifier = (data.get("identifier") or data.get("email") or "").strip()
+    password   = data.get("password")
+
+    if not identifier or not password:
+        return render_template(
+            "Login.html",
+            error="Email/username and password are required."
+        ), 400
+
+    # 1) نحدّد الإيميل
+    email = identifier
+
+    # لو ما فيه @ نفترض أنه Username ونبحث عنه في Firestore
+    if "@" not in identifier:
+        # تأكدّي أن عندك حقل اسمه "username" داخل وثيقة المستخدم في Firestore
+        user_q = (
+            db.collection("users")
+              .where("username", "==", identifier)
+              .limit(1)
+              .stream()
+        )
+        user_docs = list(user_q)
+        if not user_docs:
+            # Username غير صحيح
+            return render_template(
+                "Login.html",
+                error="Invalid username or password. Please try again."
+            ), 401
+
+        user_data = user_docs[0].to_dict()
+        email = user_data.get("email")
+        if not email:
+            return render_template(
+                "Login.html",
+                error="User record is missing email."
+            ), 500
+
     try:
-        # تسجيل الدخول أولاً
+        # 2) نسجّل الدخول في Firebase Auth باستخدام الإيميل اللي استخرجناه
         res = rest_signin(email, password)
 
-        # 🔄 تحديث حالة التفعيل من Firebase
+        # 3) نتأكد من تفعيل الإيميل من Firebase (نفس كودك السابق)
         url = "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyChtQ2FaenDwe7k7bfRB8Cw5G_5C4f_xt4"
         r = requests.post(url, json={"idToken": res["idToken"]})
         user_info = r.json()
 
         email_verified = user_info["users"][0]["emailVerified"]
-
         if not email_verified:
             return render_template(
                 "Login.html",
                 error="Please verify your email before logging in."
             )
 
-        # إذا مفعّل، كمّلي تسجيل الدخول
         uid = res["localId"]
         user_doc = db.collection("users").document(uid).get()
         if not user_doc.exists:
             session.clear()
-            return render_template("Login.html",
-                                   error="User data not found."), 401
+            return render_template(
+                "Login.html",
+                error="User data not found."
+            ), 401
 
         role = user_doc.to_dict().get("role", "user")
 
@@ -962,8 +1017,9 @@ def api_signin():
         app.logger.exception("Signin failed")
         return render_template(
             "Login.html",
-            error="Invalid email or password. Please try again."
+            error="Invalid email/username or password. Please try again."
         ), 401
+
 
 # تسجيل الخروج
 @app.route("/logout")
@@ -992,6 +1048,74 @@ def api_reset():
 @app.route("/health")
 def health():
     return jsonify({"status": "ok"})
+
+@app.route("/api/update-profile", methods=["POST"])
+def api_update_profile():
+    # لازم يكون مسجل دخول
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    uid = session.get("uid")
+    user_ref = db.collection("users").document(uid)
+    snap = user_ref.get()
+    if not snap.exists:
+        return jsonify({"error": 'User not found'}), 404
+
+    data = request.get_json() or {}
+
+    first_name     = (data.get("firstName") or "").strip()
+    last_name      = (data.get("lastName") or "").strip()
+    gender         = (data.get("gender") or "").strip()
+    specialization = (data.get("specialization") or "").strip()
+    github         = (data.get("github") or "").strip()
+    linkedin       = (data.get("linkedin") or "").strip()
+    description    = (data.get("description") or "").strip()
+    interests      = (data.get("interests") or "").strip()
+
+    updates = {
+        "updatedAt": SERVER_TIMESTAMP,
+        "profile.firstName": first_name,
+        "profile.lastName": last_name,
+        "profile.gender": gender,
+        "profile.specialization": specialization,
+        "profile.github": github,
+        "profile.linkedin": linkedin,
+        "profile.description": description,
+        "profile.interests": interests,
+    }
+
+   
+
+    user_ref.update(updates)
+
+    return jsonify({"message": "Profile updated successfully"}), 200
+
+
+
+@app.route("/forgot", methods=["GET", "POST"])
+def forgot_page():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+
+        if not email:
+            flash("Please enter your email address.", "error")
+            return render_template("ForgotPassword.html")
+
+        try:
+            # تستخدمين نفس الفنكشن اللي عندك في auth_rest
+            send_password_reset(email)
+            flash("If this email is registered, we’ve sent a reset link.", "success")
+        except Exception as e:
+            print("Reset error:", e)
+            flash("Something went wrong. Please try again.", "error")
+
+        return render_template("ForgotPassword.html", email=email)
+
+    # GET
+    return render_template("ForgotPassword.html")
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
