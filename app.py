@@ -1,6 +1,6 @@
-
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from firebase_admin_setup import db
+from firebase_admin import db as rtdb  # Realtime Database
 from firebase_admin import auth as admin_auth
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 from auth_rest import signup as rest_signup, signin as rest_signin, send_password_reset
@@ -8,6 +8,8 @@ from datetime import datetime
 from google.cloud import storage
 import uuid
 import json
+import csv
+import io
 import requests
 
 # إعداد Flask
@@ -567,7 +569,50 @@ def api_my_projects():
 
     return jsonify({"projects": projects})
 
+def ingest_owner_dataset_to_rtdb(category, owner_id, project_id, dataset_id, raw_bytes):
+    """
+    تخزّن ملف CSV في Realtime Database تحت:
+      datasets/uploaded_news أو datasets/uploaded_conversations
 
+    - كل ديتاست لها dataset_id واحد ثابت
+    - كل صف داخل الديتاست ينحفظ تحت auto key
+    - نستخدم payload للصف كامل زي ما هو من CSV
+    """
+    if not raw_bytes:
+        return 0
+
+    # نحدد الفرع حسب نوع الديتاست
+    cat = (category or "").strip().lower()
+    if cat in ("news", "article", "articles"):
+        branch = "uploaded_news"
+    elif cat in ("conversation", "conversations", "chat", "chats"):
+        branch = "uploaded_conversations"
+    else:
+        print(f"[ingest] Unknown category '{category}', skipping RTDB ingest.")
+        return 0
+
+    # نقرأ الـ CSV كنص
+    text = raw_bytes.decode("utf-8", errors="ignore")
+    f = io.StringIO(text)
+    reader = csv.DictReader(f)
+
+    base_ref = rtdb.reference("datasets").child(branch).child(dataset_id)
+    count = 0
+
+    for row in reader:
+        data = {
+            "dataset_id": dataset_id,      # 👈 ثابت لكل الصفوف اللي من نفس الديتاست
+            "project_id": project_id,
+            "owner_id": owner_id,
+            "payload": row,                # الصف كامل
+            "created_at": datetime.utcnow().isoformat() + "Z",
+            "source_type": "owner_upload",
+        }
+        base_ref.push(data)  # auto key من Realtime
+        count += 1
+
+    print(f"[ingest] Inserted {count} rows into datasets/{branch} for dataset_id={dataset_id}")
+    return count
 
 # ------------------ Create Project (مع إنشاء سجلات invitations منفصلة) ------------------
 @app.route("/api/create_project", methods=["POST"])
@@ -579,14 +624,20 @@ def api_create_project():
     if not uid:
         return jsonify({"error": "Missing user ID"}), 401
 
-    data = request.form if request.form else request.json or {}
+    # نقرأ البيانات سواء من form أو JSON
+    data = request.form if request.form else (request.json or {})
 
     project_name = data.get("project_name")
     description  = data.get("description")
     category     = data.get("category")
-    domains      = data.getlist("domain") if hasattr(data, "getlist") else data.get("domain", [])
+    dataset_id = str(uuid.uuid4())
+    
 
-    # ✅ هذا الجزء المهم
+    if hasattr(data, "getlist"):
+        domains = data.getlist("domain")
+    else:
+        domains = data.get("domain", [])
+
     examiners_raw = data.get("invited_examiners", "[]")
     try:
         examiners = json.loads(examiners_raw) if isinstance(examiners_raw, str) else examiners_raw
@@ -596,17 +647,16 @@ def api_create_project():
     if not project_name or not description or not category:
         return jsonify({"error": "Missing required fields"}), 400
 
-    dataset_url = ""
+    # نقرأ ملف الديتاست دون تخزينه في Storage
+    dataset_url = ""   # ما نستخدم Storage حالياً
+    raw_bytes   = None
+
     file = request.files.get("dataset")
     if file and file.filename:
-        storage_client = storage.Client()
-        bucket = storage_client.bucket("trustlens.appspot.com")
-        blob_name = f"datasets/{uid}/{uuid.uuid4()}_{file.filename}"
-        blob = bucket.blob(blob_name)
-        blob.upload_from_file(file, content_type="text/csv")
-        blob.make_public()
-        dataset_url = blob.public_url
+        raw_bytes = file.read()
+        file.seek(0)
 
+    # جلب بيانات الأونر من Firestore
     owner_doc = db.collection("users").document(uid).get()
     if not owner_doc.exists:
         return jsonify({"error": "Owner not found"}), 404
@@ -614,28 +664,38 @@ def api_create_project():
     owner_data = owner_doc.to_dict()
     owner_name = f"{owner_data.get('profile', {}).get('firstName', '')} {owner_data.get('profile', {}).get('lastName', '')}".strip()
 
+    # إنشاء سجل المشروع
     project_id = str(uuid.uuid4())
     project_doc = {
-        "project_ID": project_id,
-        "project_name": project_name,
-        "description": description,
-        "domain": domains,
-        "category": category,
-        "created_at": datetime.utcnow().isoformat() + "Z",
-        "owner_id": uid,
-        "dataset_url": dataset_url,
-        "invited_examiners": [ex.get("email") for ex in examiners],
-        "status": "active"
-    }
+    "project_ID": project_id,
+    "project_name": project_name,
+    "description": description,
+    "domain": domains,
+    "category": category,
+    "created_at": datetime.utcnow().isoformat() + "Z",
+    "owner_id": uid,
+    "dataset_id": dataset_id,
+    "invited_examiners": [ex.get("email") for ex in examiners],
+    "status": "active",
+}
 
-    # إنشاء الدعوات
+
+    db.collection("projects").document(project_id).set(project_doc)
+
+    # إنشاء الدعوات في Collection منفصل
     batch = db.batch()
     for ex in examiners:
         email = ex.get("email")
         if not email:
             continue
 
-        examiner_docs = list(db.collection("users").where("email", "==", email).where("role", "==", "examiner").limit(1).stream())
+        examiner_docs = list(
+            db.collection("users")
+              .where("email", "==", email)
+              .where("role", "==", "examiner")
+              .limit(1)
+              .stream()
+        )
         if not examiner_docs:
             continue
 
@@ -649,14 +709,26 @@ def api_create_project():
             "examiner_id": examiner_uid,
             "status": "pending",
             "created_at": SERVER_TIMESTAMP,
-            "examiner_email": email
+            "examiner_email": email,
         }
         batch.set(invitation_ref, invitation_data)
 
-    batch.commit()
-    db.collection("projects").document(project_id).set(project_doc)
+    if examiners:
+        batch.commit()
 
-    return jsonify({"message": "Project created successfully", "project_ID": project_id}), 201
+    # إدخال الديتاست إلى Realtime Database لو فيه ملف
+    if raw_bytes:
+        try:
+            ingest_owner_dataset_to_rtdb(category, uid, project_id, dataset_id, raw_bytes)
+        except Exception as e:
+            app.logger.exception("Failed to ingest owner dataset into Realtime: %s", e)
+
+    # ✅ في النهاية لازم نرجّع Response واضح دائماً
+    return jsonify({
+        "message": "Project created successfully",
+        "project_ID": project_id,
+        "dataset_id": dataset_id,
+    }), 201
 # ------------------ حذف مشروع ------------------
 @app.route("/api/delete_project/<project_id>", methods=["DELETE"])
 def api_delete_project(project_id):
