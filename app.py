@@ -667,17 +667,18 @@ def api_create_project():
     # إنشاء سجل المشروع
     project_id = str(uuid.uuid4())
     project_doc = {
-        "project_ID": project_id,
-        "project_name": project_name,
-        "description": description,
-        "domain": domains,
-        "category": category,
-        "created_at": datetime.utcnow().isoformat() + "Z",
-        "owner_id": uid,
-        "dataset_url": dataset_url,  # فاضي حالياً (البيانات نفسها في RTDB)
-        "invited_examiners": [ex.get("email") for ex in examiners],
-        "status": "active",
-    }
+    "project_ID": project_id,
+    "project_name": project_name,
+    "description": description,
+    "domain": domains,
+    "category": category,
+    "created_at": datetime.utcnow().isoformat() + "Z",
+    "owner_id": uid,
+    "dataset_id": dataset_id,
+    "invited_examiners": [ex.get("email") for ex in examiners],
+    "status": "active",
+}
+
 
     db.collection("projects").document(project_id).set(project_doc)
 
