@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="initial-scale=1, width=device-width"/>
+  <title>Create Task • TrustLens</title>
+
+  <style>
+    :root{
+      --bg:#fff;--text:#0a0a0a;--muted:#717182;
+      --line:rgba(0,0,0,.10);--primary1:#00B8DB;--primary2:#155DFC;
+      --radius:14px;--danger:#B42318;--success:#0A7A39;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;line-height:1.45;
+      font-family:Arial,Helvetica,sans-serif;
+      color:var(--text);background:#fff;
+    }
+
+    /* --------- Layout ---------- */
+    .page{
+      min-height:100vh;
+      background:linear-gradient(135deg,#f8fafc,#eff6ff 50%,#ecfeff);
+      display:flex;flex-direction:column;
+    }
+    /* Header */
+    .mast{
+      position:sticky;top:0;left:0;right:0;height:64px;
+      display:flex;align-items:center;justify-content:space-between;
+      padding-inline:clamp(16px,6vw,134.8px);
+      background:rgba(255,255,255,0.85);
+      backdrop-filter:saturate(180%) blur(14px);
+      box-shadow:0 1px 0 rgba(15,23,42,.05);
+      z-index:1000;
+    }
+    .brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+    .brand img{width:32px;height:32px}
+    .brand-name{
+      font-size:20px;font-weight:600;
+      background:linear-gradient(90deg,var(--primary1),var(--primary2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      transition:opacity .2s ease;
+    }
+    .brand:hover .brand-name{opacity:.85}
+
+    /* ---------- Back Button ---------- */
+    .back-bar{
+      height:36px;display:flex;align-items:center;
+      padding-inline:clamp(16px,6vw,134.8px);
+      margin-top:12px;
+    }
+    .back{
+      height:36px;display:inline-flex;align-items:center;gap:12px;
+      border-radius:8px;color:var(--text);text-decoration:none;font-size:14px;
+      padding:0 4px;
+    }
+    .back:hover{background:rgba(0,0,0,.03)}
+    .icon-16{width:16px;height:16px;display:block}
+
+    /* ---------- User Profile + Dropdown ---------- */
+    .user-profile{position:relative;display:flex;gap:8px;align-items:center;cursor:pointer}
+    .user-avatar{
+      width:40px;height:40px;border-radius:50%;
+      background:linear-gradient(135deg,var(--primary1),var(--primary2));
+      display:flex;align-items:center;justify-content:center;
+      color:#fff;font-size:16px;font-weight:400;
+    }
+    .user-info h3{margin:0;font-size:14px;font-weight:400;color:var(--text)}
+    .user-info p{margin:0;font-size:12px;color:var(--muted);text-transform:capitalize}
+    
+    .user-dropdown{
+      position:absolute;top:calc(100% + 8px);right:0;
+      width:200px;background:#fff;border:0.8px solid var(--line);
+      border-radius:var(--radius);box-shadow:0 10px 15px -3px rgba(0,0,0,.08);
+      display:none;flex-direction:column;z-index:1010;
+    }
+    .user-dropdown.show{display:flex}
+    .dropdown-item{
+      display:flex;align-items:center;gap:10px;padding:10px 14px;
+      font-size:14px;color:var(--text);text-decoration:none;
+    }
+    .dropdown-item:hover{background:#f3f4f6}
+    .dropdown-icon{width:16px;height:16px}
+    .dropdown-divider{height:1px;background:var(--line);margin:4px 0}
+
+    /* ---------- Centered Card ---------- */
+    .content-wrapper{
+      flex:1;
+      display:flex;align-items:center;justify-content:center;
+      padding:24px clamp(16px,6vw,134.8px) 40px;
+    }
+    .card{
+      width:100%;max-width:1220px;
+      border:0.8px solid var(--line);border-radius:var(--radius);
+      background:rgba(255,255,255,.98);
+      box-shadow:0 20px 25px -5px rgba(0,0,0,.1);
+      display:flex;flex-direction:column;gap:24px;
+      padding:32px 32px 28px;
+    }
+    .head,.content{width:100%;max-width:960px;margin:0 auto}
+    .head{display:flex;flex-direction:column;gap:8px}
+    .title{font-size:28px;margin:0;font-weight:600}
+    .subtitle{font-size:16px;margin:0;color:var(--muted)}
+    .content{font-size:14px}
+    .field{margin:16px 0}
+    .label{height:16px;display:flex;align-items:center;gap:6px;margin-bottom:6px;font-weight:500}
+    .note{margin-top:4px;font-size:13px}
+    .note.error{color:var(--danger)}
+    .note.info{color:var(--muted)}
+
+    /* ---------- Inputs & Steppers ---------- */
+    .textarea{
+      width:100%;min-height:96px;border-radius:8px;
+      background:#f3f3f5;border:0.8px solid transparent;
+      color:#717182;padding:10px 12px;resize:vertical;
+    }
+    .textarea:focus{
+      outline:none;border-color:rgba(21,93,252,.45);
+      box-shadow:0 0 0 1px rgba(59,130,246,.25);
+      background:#f9fafb;
+    }
+    .ex-box{
+      border-radius:8px;border:0.8px solid rgba(0,0,0,0.1);
+      background:rgba(236,236,240,0.1);
+      padding:14px 16px;display:flex;flex-direction:column;gap:8px;
+      transition:border-color .15s,box-shadow .15s;
+    }
+    .ex-row{display:flex;align-items:center;gap:8px}
+    .ex-row+.ex-row{margin-top:4px}
+    .ex-row input[type="checkbox"]{width:16px;height:16px;border-radius:4px}
+    .ex-rule{margin-top:4px;font-size:13px}
+    .ex-rule .count{margin-left:4px;color:#f54900}
+    .stepper{
+      width:220px;max-width:100%;
+      display:flex;align-items:stretch;
+      border-radius:8px;overflow:hidden;
+      border:0.8px solid rgba(148,163,184,.7);
+      background:#f3f3f5;
+    }
+    .step-btn{
+      width:40px;border:none;background:#e5e7eb;
+      display:flex;align-items:center;justify-content:center;
+      font-size:13px;cursor:pointer;user-select:none;
+    }
+    .step-btn:hover{background:#d4d7dd}
+    .step-input{
+      flex:1;border:none;background:transparent;text-align:center;
+      font-size:14px;outline:none;color:#111;
+    }
+    .step-input::-webkit-inner-spin-button,
+    .step-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    .step-input[type=number]{-moz-appearance:textfield}
+    .step-hint{font-size:12px;color:var(--muted);margin-top:4px}
+    /* ---------- Conversation Pills ---------- */
+    .conv-toggle{display:flex;gap:12px;flex-wrap:wrap}
+    .conv-pill{
+      flex:1 1 180px;min-height:56px;border-radius:9999px;
+      border:1px solid rgba(148,163,184,.8);background:#fff;
+      display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+      padding:8px 16px;cursor:pointer;transition:.18s all ease;
+      font-size:13px;color:#0f172a;
+    }
+    .conv-pill .pill-title{font-size:14px;font-weight:600}
+    .conv-pill .pill-sub{font-size:12px;color:var(--muted)}
+    .conv-pill:hover{background:rgba(148,163,184,.08)}
+    .conv-pill.active{
+      border-color:#00B8DB;
+      background:linear-gradient(90deg,rgba(0,184,219,.15),rgba(21,93,252,.10));
+      box-shadow:0 0 0 1px rgba(0,184,219,.35);
+    }
+    .conv-pill.active .pill-title{color:#075985}
+    .conv-pill.active .pill-sub{color:#0369a1}
+
+    /* ---------- Actions ---------- */
+    .actions{display:flex;gap:12px;margin-top:20px}
+    .btn-primary,.btn-ghost{
+      height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+      cursor:pointer;border:none;font-size:14px;
+    }
+    .btn-primary{
+      flex:1;background:linear-gradient(90deg,var(--primary1),var(--primary2));color:#fff;
+    }
+    .btn-primary:hover{filter:brightness(1.03)}
+    .btn-ghost{
+      flex:1;background:#fff;border:0.8px solid var(--line);color:#0a0a0a;
+    }
+    .btn-ghost:hover{background:#f9fafb}
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <!-- ================== Header ================== -->
+    <header class="mast">
+      <div class="brand">
+        <img src="../static/images/icon_logo.svg" alt="TrustLens logo">
+        <div class="brand-name">TrustLens</div>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="user-profile" id="userProfile">
+          <div class="user-avatar">H</div>
+          <div class="user-info">
+            <h3>Haifa</h3>
+            <p>owner</p>
+          </div>
+
+          <div class="user-dropdown" id="userDropdown">
+            <a href="HomePage.html" class="dropdown-item">
+              <img src="../static/images/img_iconhome.svg" alt="Home" class="dropdown-icon"> Home
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="Profile.html" class="dropdown-item">
+              <img src="../static/images/img_profile.svg" alt="Profile" class="dropdown-icon"> Profile
+            </a>
+            <a href="Settings.html" class="dropdown-item">
+              <img src="../static/images/img_icon_Settings.svg" alt="Settings" class="dropdown-icon"> Settings
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="index.html" class="dropdown-item">
+              <img src="../static/images/img_logout.png" alt="Logout" class="dropdown-icon"> Logout
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ================== Back Bar ================== -->
+    <div class="back-bar">
+      <a class="back" href="/projectdetailsowner/{{ project_id }}">
+        <img class="icon-16" src="../static/images/icon_back.svg" alt="">
+        <span>Back to Project</span>
+      </a>
+    </div>
+
+    <!-- ================== Card (Centered) ================== -->
+    <div class="content-wrapper">
+      <section class="card">
+        <div class="head">
+          <h1 class="title">Create Task</h1>
+          <p class="subtitle">Set up a new evaluation task</p>
+        </div>
+
+      
+    <!-- 👇👇 هنا -->
+    <form id="taskForm"
+          method="POST"
+          action="/projects/{{ project_id }}/tasks/create">
+
+      <div class="content">
+
+        <!-- Task title -->
+        <div class="field">
+          <div class="label">Task Title / Topic</div>
+          <textarea id="taskTitle"
+                    name="task_title"
+                    class="textarea"
+                    placeholder="Enter task title or description..."></textarea>
+          <div id="titleErr" class="note error" style="display:none">
+            Task title is required.
+          </div>
+        </div>
+
+        <!-- Assign Examiners -->
+        <div class="field">
+          <div class="label">Assign Examiners</div>
+          <div class="ex-box" id="exBox">
+            {% for ex in examiners %}
+            <label class="ex-row">
+              <input type="checkbox" name="examiner" value="{{ ex }}">
+              <span>{{ ex }}</span>
+            </label>
+            {% endfor %}
+          </div>
+          <div class="ex-rule note info">
+            <span id="exRuleText">Select exactly 1 examiner</span>
+            <span id="exSelectedCount" class="count">(0 selected)</span>
+          </div>
+        </div>
+
+        <!-- Number of Turns -->
+        <div class="field">
+          <div class="label">Number of Turns</div>
+          <div class="stepper">
+            <button type="button" class="step-btn" data-dir="-1">−</button>
+            <input id="turns"
+                   name="turns"
+                   class="step-input"
+                   type="number"
+                   min="2"
+                   max="7"
+                   value="2">
+            <button type="button" class="step-btn" data-dir="1">+</button>
+          </div>
+          <div class="step-hint">Choose between 2 and 7 turns.</div>
+        </div>
+
+        <!-- Conversation Type -->
+        <div class="field">
+          <div class="label">Conversation Type</div>
+          <div class="conv-toggle" id="convToggle">
+            <button type="button" class="conv-pill active" data-value="human-ai">
+              <span class="pill-title">Human ↔ AI</span>
+              <span class="pill-sub">Exactly 1 examiner</span>
+            </button>
+            <button type="button" class="conv-pill" data-value="human-human">
+              <span class="pill-title">Human ↔ Human</span>
+              <span class="pill-sub">Exactly 2 examiners</span>
+            </button>
+          </div>
+          <!-- 👈 مهم نحط name عشان يتقرأ في الـ POST -->
+          <input type="hidden" id="convType" name="conv_type" value="human-ai">
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button id="submitTask" class="btn-primary" type="button">
+            Create Task
+          </button>
+          <button id="cancelTask" class="btn-ghost" type="button">
+            Cancel
+          </button>
+        </div>
+
+      </div> <!-- /content -->
+    </form>
+  </section>
+</div>>
+
+  <!-- ================== JS ================== -->
+  <script>
+    const $=(s,e=document)=>e.querySelector(s);
+    const $$=(s,e=document)=>Array.from(e.querySelectorAll(s));
+
+    const titleEl=$("#taskTitle");
+    const titleErr=$("#titleErr");
+    const convTypeInput=$("#convType");
+    const exChecks=$$("input[name='examiner']");
+    const exRuleText=$("#exRuleText");
+    const exCountSpan=$("#exSelectedCount");
+    const exBox=$("#exBox");
+    const submitBtn=$("#submitTask");
+    const cancelBtn=$("#cancelTask");
+    const convToggle=$("#convToggle");
+    const turnInput=$("#turns");
+    const stepBtns=$$(".step-btn");
+
+    const userProfile=$("#userProfile");
+    const userDropdown=$("#userDropdown");
+    userProfile.addEventListener("click",()=>{
+      userDropdown.classList.toggle("show");
+    });
+    document.addEventListener("click",e=>{
+      if(!e.target.closest("#userProfile")) userDropdown.classList.remove("show");
+    });
+
+    function requiredCount(){return convTypeInput.value==="human-human"?2:1;}
+
+    function updateRule(){
+      const req=requiredCount();
+      exRuleText.textContent=req===2?"Select exactly 2 examiners":"Select exactly 1 examiner";
+      updateSelectedCount();
+    }
+    function updateSelectedCount(){
+      const selected=exChecks.filter(cb=>cb.checked).length;
+      const req=requiredCount();
+      exCountSpan.textContent=`(${selected} selected)`;
+      if(selected===req){
+        exCountSpan.style.color="var(--success)";
+        exBox.style.borderColor="rgba(0,0,0,0.1)";
+        exBox.style.boxShadow="0 0 0 1px rgba(16,185,129,.25)";
+      }else{
+        exCountSpan.style.color="#f54900";
+        exBox.style.borderColor="rgba(180,35,24,0.4)";
+        exBox.style.boxShadow="none";
+      }
+    }
+
+    convToggle.addEventListener("click",e=>{
+      const btn=e.target.closest(".conv-pill");
+      if(!btn)return;
+      const value=btn.dataset.value;
+      convTypeInput.value=value;
+      $$(".conv-pill",convToggle).forEach(b=>b.classList.toggle("active",b===btn));
+      updateRule();
+    });
+    exChecks.forEach(cb=>cb.addEventListener("change",updateSelectedCount));
+
+    stepBtns.forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const dir=parseInt(btn.dataset.dir,10);
+        let val=parseInt(turnInput.value||"2",10);
+        if(isNaN(val))val=2;
+        val+=dir;
+        if(val<2)val=2;
+        if(val>7)val=7;
+        turnInput.value=val;
+      });
+    });
+   submitBtn.addEventListener("click", () => {
+  const titleOk = !!titleEl.value.trim();
+  titleErr.style.display = titleOk ? "none" : "block";
+
+  const selected = exChecks.filter(cb => cb.checked).length;
+  const req = requiredCount();
+
+  if (!titleOk) {
+    titleEl.focus();
+    return;
+  }
+  if (selected !== req) {
+    const msg = req === 2
+      ? "For Human to Human, you must select exactly 2 examiners."
+      : "For Human to AI, you must select exactly 1 examiner.";
+    alert(msg);
+    return;
+  }
+
+  // ✅ كل شيء تمام → نرسل الفورم للباك إند
+  taskForm.submit();
+});
+
+
+    cancelBtn.addEventListener("click",()=>{
+      titleEl.value="";
+      titleErr.style.display="none";
+      exChecks.forEach(cb=>cb.checked=false);
+      convTypeInput.value="human-ai";
+      $$(".conv-pill",convToggle).forEach(b=>b.classList.toggle("active",b.dataset.value==="human-ai"));
+      turnInput.value="2";
+      updateRule();
+    });
+
+    updateRule();
+    const taskForm = $("#taskForm");
+
+  </script>
+</body>
+</html>
