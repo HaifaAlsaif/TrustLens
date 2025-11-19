@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, abort
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from firebase_admin_setup import db
 from firebase_admin import db as rtdb  # Realtime Database
 from firebase_admin import auth as admin_auth
@@ -12,16 +12,12 @@ import json
 import csv
 import io
 import requests
-from tasks_routes import init_task_routes
 
 # إعداد Flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
-app.secret_key = "CHANGE_THIS_SECRET_IN_ENV_OR_CONFIG"  
+app.secret_key = "CHANGE_THIS_SECRET_IN_ENV_OR_CONFIG"  # غيّريه لقيمة آمنة
 
-# ✅ تسجيل راوتس التاسكات
-init_task_routes(app)
-
-
+# ------------------ صفحات واجهة (GET) ------------------
 
 # 1) استبدلي دالة index() كاملة بهذا الكود
 @app.route("/")
