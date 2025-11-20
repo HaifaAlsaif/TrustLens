@@ -1,4 +1,3 @@
-<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1132,12 +1131,11 @@
       </div>
     </div>
 
-    <div class="task-header-right">
     <button class="create-task-btn" onclick="goToCreateTask()">
-  <span class="create-task-plus">+</span>
-  <span>Create Task</span>
-</button>
-
+      <span class="create-task-plus">+</span>
+      <span>Create Task</span>
+    </button>
+    
 
       <div class="task-filters">
         <button class="task-filter-btn active" onclick="filterTasks('all')">All Tasks</button>
@@ -1147,18 +1145,16 @@
       </div>
     </div>
   </div>
+
   <div class="tasks-grid" id="tasksGrid"></div>
   <p id="noTasksMsg" style="font-size:14px;color:#6b7280;margin-top:8px;display:none;">
     No tasks yet. Click "Create Task" to add one.
   </p>
-</section>
-
+  
 </section>
 
     </div>
   </main>
-
-  
 <script>
   function filterTasks(status) {
     const buttons = document.querySelectorAll('.task-filter-btn');
@@ -1378,7 +1374,7 @@
     <div style="margin-top: 20px; display:flex; justify-content:flex-end; gap:10px;">
       <button onclick="closeAddExaminerModal()" style="
         padding:6px 14px; border-radius:6px; border:1px solid #ddd; background:#fff;">
-        Cancel 
+        Cancel
       </button>
       <button onclick="manualAddExaminer()" style="
         padding:6px 14px; border-radius:6px;
@@ -1388,85 +1384,63 @@
     </div>
   </div>
 </div>
+
 <script>
- function goToCreateTask() {
-  window.location.href = "/projects/" + projectId + "/tasks/create";
-}
-
-
-</script>
-<script>
-  // projectId من الفلاسك
-  //const projectId = "{{ project_id }}";
-
-  // دالة ترجّع النص والـ class حق حالة التاسك
   function getStatusConfig(status) {
     status = (status || "pending").toLowerCase();
-    if (status === "completed") {
-      return { text: "Completed", cls: "status-completed" };
-    }
-    if (status === "progress" || status === "in_progress") {
+    if (status === "completed") return { text: "Completed", cls: "status-completed" };
+    if (status === "progress" || status === "in_progress")
       return { text: "In Progress", cls: "status-progress" };
-    }
     return { text: "Pending", cls: "status-pending" };
   }
 
-  // تحميل التاسكات من الـ API
   async function loadTasks() {
     const grid = document.getElementById("tasksGrid");
     const noMsg = document.getElementById("noTasksMsg");
 
-    grid.innerHTML = ""; // نفرّغ
+    grid.innerHTML = "";
     noMsg.style.display = "none";
 
     try {
       const res = await fetch(`/api/project_tasks/${projectId}`);
       const data = await res.json();
 
-      if (data.error) {
-        console.error(data.error);
-        noMsg.textContent = data.error;
+      if (!data.tasks || !data.tasks.length) {
         noMsg.style.display = "block";
         return;
       }
 
-      const tasks = data.tasks || [];
-      if (!tasks.length) {
-        noMsg.style.display = "block";
-        return;
-      }
-
-      tasks.forEach(t => {
+      data.tasks.forEach(t => {
         const cfg = getStatusConfig(t.status);
+
         const card = document.createElement("article");
         card.className = "article-card";
-        card.dataset.status = (t.status || "pending").toLowerCase();
+        card.dataset.status = t.status || "pending";
         card.dataset.taskId = t.id;
 
-        const convText =
-          t.conversationType === "human-human"
-            ? `Human ↔ Human • ${t.turns || 2} turns`
-            : `Human ↔ AI • ${t.turns || 2} turns`;
-
-        const examinerCount = t.examinerCount || 0;
-        const countLabel = examinerCount === 1
-          ? "1 examiner"
-          : `${examinerCount} examiners`;
+        let convText = "";
+        if (t.category !== "article" && t.conversationType) {
+          convText =
+            t.conversationType === "human-human"
+              ? `Human ↔ Human • ${t.turns || 2} turns`
+              : `Human ↔ AI • ${t.turns || 2} turns`;
+        }
+        
+        const examinerCount = t.examinerCount ?? 0;
 
         card.innerHTML = `
           <div class="article-card-header">
-            <h4 class="article-title">${t.title || "Untitled task"}</h4>
+            <h4 class="article-title">${t.title}</h4>
             <div class="article-actions">
-              <!-- Edit (لسه ما فعلناه) -->
               <button class="article-icon-btn" disabled>
-                <img src="../static/images/img_button_black_900.svg" alt="Edit">
+                <img src="../static/images/img_button_black_900.svg">
               </button>
-              <!-- Delete -->
               <button class="article-icon-btn js-delete-task">
-                <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete">
+                <img src="../static/images/img_button_black_900_32x36.svg">
               </button>
             </div>
           </div>
+
           <p class="article-description">${convText}</p>
           <span class="status-pill ${cfg.cls}">${cfg.text}</span>
 
@@ -1478,78 +1452,42 @@
           </div>
 
           <div class="article-footer">
-            <span class="article-footer-text">${countLabel}</span>
+            <span class="article-footer-text">${examinerCount} examiners</span>
           </div>
         `;
 
         grid.appendChild(card);
       });
 
-      attachDeleteHandlers(); // بعد ما نضيف الكروت
+      attachDeleteHandlers();
     } catch (err) {
-      console.error(err);
-      noMsg.textContent = "Failed to load tasks.";
+      console.error("Failed to load tasks:", err);
       noMsg.style.display = "block";
     }
   }
 
-  // فلترة الكروت (All / Pending / In Progress / Completed)
-  function filterTasks(status) {
-    const buttons = document.querySelectorAll('.task-filter-btn');
-    const cards = document.querySelectorAll('.article-card');
-
-    buttons.forEach(btn => btn.classList.remove('active'));
-    if (event && event.target) {
-      event.target.classList.add('active');
-    }
-
-    cards.forEach(card => {
-      const cardStatus = card.getAttribute('data-status');
-      if (status === 'all' || status === cardStatus) {
-        card.style.display = 'block';
-      } else {
-        card.style.display = 'none';
-      }
-    });
-  }
-
-  // تفعيل زر الحذف
   function attachDeleteHandlers() {
     document.querySelectorAll(".js-delete-task").forEach(btn => {
       btn.onclick = async () => {
         const card = btn.closest(".article-card");
-        const taskId = card.dataset.taskId;
-        if (!taskId) return;
-
+        const id = card.dataset.taskId;
         if (!confirm("Delete this task?")) return;
 
-        try {
-          const res = await fetch(`/api/tasks/${taskId}/delete`, {
-            method: "POST"
-          });
-          const data = await res.json();
-          if (data.success) {
-            card.remove();
-          } else {
-            alert(data.error || "Failed to delete task");
-          }
-        } catch (err) {
-          console.error(err);
-          alert("Failed to delete task");
-        }
+        const res = await fetch(`/api/tasks/${id}/delete`, { method: "POST" });
+        const data = await res.json();
+
+        if (data.success) card.remove();
       };
     });
   }
 
-  // زر Create Task (نفس ما عندك)
-  function goToCreateTask() {
-    window.location.href = "/projects/" + projectId + "/tasks/create";
-  }
-
-  // أول ما تفتح الصفحة
   document.addEventListener("DOMContentLoaded", loadTasks);
 </script>
-
-
+<script>
+  function goToCreateTask() {
+    window.location.href = `/projects/${projectId}/tasks/create`;
+  }
+  </script>
+  
 </body>
-</html> 
+</html>  

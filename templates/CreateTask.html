@@ -153,8 +153,8 @@
     .step-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
     .step-input[type=number]{-moz-appearance:textfield}
     .step-hint{font-size:12px;color:var(--muted);margin-top:4px}
-    /* ---------- Conversation Pills ---------- */
-    .conv-toggle{display:flex;gap:12px;flex-wrap:wrap}
+ /* ---------- Conversation Pills ---------- */
+ .conv-toggle{display:flex;gap:12px;flex-wrap:wrap}
     .conv-pill{
       flex:1 1 180px;min-height:56px;border-radius:9999px;
       border:1px solid rgba(148,163,184,.8);background:#fff;
@@ -195,11 +195,12 @@
     <!-- ================== Header ================== -->
     <header class="mast">
       <div class="brand">
-        <img src="../static/images/icon_logo.svg" alt="TrustLens logo">
+        <img src="/static/images/icon_logo.svg" alt="TrustLens logo">
         <div class="brand-name">TrustLens</div>
       </div>
 
       <div style="display:flex;gap:12px;align-items:center">
+    
         <div class="user-profile" id="userProfile">
           <div class="user-avatar">H</div>
           <div class="user-info">
@@ -207,6 +208,7 @@
             <p>owner</p>
           </div>
 
+        
           <div class="user-dropdown" id="userDropdown">
             <a href="HomePage.html" class="dropdown-item">
               <img src="../static/images/img_iconhome.svg" alt="Home" class="dropdown-icon"> Home
@@ -228,12 +230,19 @@
     </header>
 
     <!-- ================== Back Bar ================== -->
-    <div class="back-bar">
-      <a class="back" href="/projectdetailsowner/{{ project_id }}">
-        <img class="icon-16" src="../static/images/icon_back.svg" alt="">
-        <span>Back to Project</span>
-      </a>
+    <div class="frame">
+      <div class="topbar">
+        <div class="back-bar">
+          <a class="back" href="/projectdetailsowner/{{ project_id }}">
+            <img class="icon-16" src="/static/images/icon_back.svg" alt="">
+
+            <span>Back to Project</span>
+          </a>
+        </div>
+      </div>
     </div>
+    
+    
 
     <!-- ================== Card (Centered) ================== -->
     <div class="content-wrapper">
@@ -242,102 +251,97 @@
           <h1 class="title">Create Task</h1>
           <p class="subtitle">Set up a new evaluation task</p>
         </div>
+<!-- Task Title -->
+<div class="field">
+  <div class="label">Task Title</div>
+  <input id="taskTitle" 
+         type="text" 
+         placeholder="Enter task title..."
+         style="
+           width:100%;
+           height:40px;
+           padding:8px 12px;
+           border-radius:8px;
+           border:1px solid #d4d4d8;
+           background:#f9f9fb;
+           font-size:14px;
+           outline:none;
+         ">
+         
+  <div id="titleErr" class="note error" style="display:none;">
+    Please enter a task title.
+  </div>
+</div>
 
-      
-    <!-- 👇👇 هنا -->
-    <form id="taskForm"
-          method="POST"
-          action="/projects/{{ project_id }}/tasks/create">
+        <div class="content">
+          <!-- Task title -->
+          <!-- Examiners -->
+<div class="field">
+  <div class="label">Assign Examiners</div>
 
-      <div class="content">
+  <!-- الصندوق الصحيح للـ checkboxes -->
+  <div class="ex-box" id="exBox"></div>
 
-        <!-- Task title -->
-        <div class="field">
-          <div class="label">Task Title / Topic</div>
-          <textarea id="taskTitle"
-                    name="task_title"
-                    class="textarea"
-                    placeholder="Enter task title or description..."></textarea>
-          <div id="titleErr" class="note error" style="display:none">
-            Task title is required.
+  <div class="ex-rule note info">
+    <span id="exRuleText">Select exactly 1 examiner</span>
+    <span id="exSelectedCount" class="count">(0 selected)</span>
+  </div>
+</div>
+
+
+          <!-- Number of turns -->
+          <div class="field">
+            <div class="label">Number of Turns</div>
+            <div class="stepper">
+              <button type="button" class="step-btn" data-dir="-1">−</button>
+              <input id="turns" class="step-input" type="number" min="2" max="7" value="2">
+              <button type="button" class="step-btn" data-dir="1">+</button>
+            </div>
+            <div class="step-hint">Choose between 2 and 7 turns.</div>
+          </div>
+
+          <!-- Conversation type -->
+          <div class="field">
+            <div class="label">Conversation Type</div>
+            <div class="conv-toggle" id="convToggle">
+              <button type="button" class="conv-pill active" data-value="human-ai">
+                <span class="pill-title">Human ↔ AI</span>
+                <span class="pill-sub">Exactly 1 examiner</span>
+              </button>
+              <button type="button" class="conv-pill" data-value="human-human">
+                <span class="pill-title">Human ↔ Human</span>
+                <span class="pill-sub">Exactly 2 examiners</span>
+              </button>
+            </div>
+            <input type="hidden" id="convType" value="human-ai">
+          </div>
+
+          <!-- Actions -->
+          <div class="actions">
+            <button id="submitTask" class="btn-primary" type="button">Create Task</button>
+            <button id="cancelTask" class="btn-ghost" type="button">Cancel</button>
           </div>
         </div>
+      </section>
+    </div>
+  </div>
 
-        <!-- Assign Examiners -->
-        <div class="field">
-          <div class="label">Assign Examiners</div>
-          <div class="ex-box" id="exBox">
-            {% for ex in examiners %}
-            <label class="ex-row">
-              <input type="checkbox" name="examiner" value="{{ ex }}">
-              <span>{{ ex }}</span>
-            </label>
-            {% endfor %}
-          </div>
-          <div class="ex-rule note info">
-            <span id="exRuleText">Select exactly 1 examiner</span>
-            <span id="exSelectedCount" class="count">(0 selected)</span>
-          </div>
-        </div>
-
-        <!-- Number of Turns -->
-        <div class="field">
-          <div class="label">Number of Turns</div>
-          <div class="stepper">
-            <button type="button" class="step-btn" data-dir="-1">−</button>
-            <input id="turns"
-                   name="turns"
-                   class="step-input"
-                   type="number"
-                   min="2"
-                   max="7"
-                   value="2">
-            <button type="button" class="step-btn" data-dir="1">+</button>
-          </div>
-          <div class="step-hint">Choose between 2 and 7 turns.</div>
-        </div>
-
-        <!-- Conversation Type -->
-        <div class="field">
-          <div class="label">Conversation Type</div>
-          <div class="conv-toggle" id="convToggle">
-            <button type="button" class="conv-pill active" data-value="human-ai">
-              <span class="pill-title">Human ↔ AI</span>
-              <span class="pill-sub">Exactly 1 examiner</span>
-            </button>
-            <button type="button" class="conv-pill" data-value="human-human">
-              <span class="pill-title">Human ↔ Human</span>
-              <span class="pill-sub">Exactly 2 examiners</span>
-            </button>
-          </div>
-          <!-- 👈 مهم نحط name عشان يتقرأ في الـ POST -->
-          <input type="hidden" id="convType" name="conv_type" value="human-ai">
-        </div>
-
-        <!-- Actions -->
-        <div class="actions">
-          <button id="submitTask" class="btn-primary" type="button">
-            Create Task
-          </button>
-          <button id="cancelTask" class="btn-ghost" type="button">
-            Cancel
-          </button>
-        </div>
-
-      </div> <!-- /content -->
-    </form>
-  </section>
-</div>>
-
+  
   <!-- ================== JS ================== -->
   <script>
+    const projectId = "{{ project_id }}";
+const projectCategory = "{{ category }}";
+if (projectCategory === "article") {
+  document.querySelector(".stepper").closest(".field").style.display = "none";
+  document.getElementById("convToggle").closest(".field").style.display = "none";
+}
     const $=(s,e=document)=>e.querySelector(s);
     const $$=(s,e=document)=>Array.from(e.querySelectorAll(s));
 
     const titleEl=$("#taskTitle");
     const titleErr=$("#titleErr");
     const convTypeInput=$("#convType");
-    const exChecks=$$("input[name='examiner']");
+ 
     const exRuleText=$("#exRuleText");
     const exCountSpan=$("#exSelectedCount");
     const exBox=$("#exBox");
@@ -355,87 +359,180 @@
     document.addEventListener("click",e=>{
       if(!e.target.closest("#userProfile")) userDropdown.classList.remove("show");
     });
-
-    function requiredCount(){return convTypeInput.value==="human-human"?2:1;}
-
-    function updateRule(){
-      const req=requiredCount();
-      exRuleText.textContent=req===2?"Select exactly 2 examiners":"Select exactly 1 examiner";
-      updateSelectedCount();
+    function requiredCount() {
+      if (projectCategory === "article") return 1; 
+      return convTypeInput.value === "human-human" ? 2 : 1;
     }
-    function updateSelectedCount(){
-      const selected=exChecks.filter(cb=>cb.checked).length;
-      const req=requiredCount();
-      exCountSpan.textContent=`(${selected} selected)`;
-      if(selected===req){
-        exCountSpan.style.color="var(--success)";
-        exBox.style.borderColor="rgba(0,0,0,0.1)";
-        exBox.style.boxShadow="0 0 0 1px rgba(16,185,129,.25)";
-      }else{
-        exCountSpan.style.color="#f54900";
-        exBox.style.borderColor="rgba(180,35,24,0.4)";
-        exBox.style.boxShadow="none";
-      }
-    }
+    
+    let exChecks = [];   
 
-    convToggle.addEventListener("click",e=>{
-      const btn=e.target.closest(".conv-pill");
-      if(!btn)return;
-      const value=btn.dataset.value;
-      convTypeInput.value=value;
-      $$(".conv-pill",convToggle).forEach(b=>b.classList.toggle("active",b===btn));
-      updateRule();
-    });
-    exChecks.forEach(cb=>cb.addEventListener("change",updateSelectedCount));
-
-    stepBtns.forEach(btn=>{
-      btn.addEventListener("click",()=>{
-        const dir=parseInt(btn.dataset.dir,10);
-        let val=parseInt(turnInput.value||"2",10);
-        if(isNaN(val))val=2;
-        val+=dir;
-        if(val<2)val=2;
-        if(val>7)val=7;
-        turnInput.value=val;
-      });
-    });
-   submitBtn.addEventListener("click", () => {
-  const titleOk = !!titleEl.value.trim();
-  titleErr.style.display = titleOk ? "none" : "block";
-
-  const selected = exChecks.filter(cb => cb.checked).length;
-  const req = requiredCount();
-
-  if (!titleOk) {
-    titleEl.focus();
-    return;
+function updateRule(){
+  const req=requiredCount();
+  exRuleText.textContent=req===2?"Select exactly 2 examiners":"Select exactly 1 examiner";
+  updateSelectedCount();
+}
+function updateSelectedCount(){
+  const selected=exChecks.filter(cb=>cb.checked).length;
+  const req=requiredCount();
+  exCountSpan.textContent=`(${selected} selected)`;
+  if(selected===req){
+    exCountSpan.style.color="var(--success)";
+    exBox.style.borderColor="rgba(0,0,0,0.1)";
+    exBox.style.boxShadow="0 0 0 1px rgba(16,185,129,.25)";
+  }else{
+    exCountSpan.style.color="#f54900";
+    exBox.style.borderColor="rgba(180,35,24,0.4)";
+    exBox.style.boxShadow="none";
   }
-  if (selected !== req) {
-    const msg = req === 2
-      ? "For Human to Human, you must select exactly 2 examiners."
-      : "For Human to AI, you must select exactly 1 examiner.";
-    alert(msg);
-    return;
-  }
+}
 
-  // ✅ كل شيء تمام → نرسل الفورم للباك إند
-  taskForm.submit();
+convToggle.addEventListener("click",e=>{
+  const btn=e.target.closest(".conv-pill");
+  if(!btn)return;
+  const value=btn.dataset.value;
+  convTypeInput.value=value;
+  $$(".conv-pill",convToggle).forEach(b=>b.classList.toggle("active",b===btn));
+  updateRule();
 });
 
 
-    cancelBtn.addEventListener("click",()=>{
-      titleEl.value="";
-      titleErr.style.display="none";
-      exChecks.forEach(cb=>cb.checked=false);
-      convTypeInput.value="human-ai";
-      $$(".conv-pill",convToggle).forEach(b=>b.classList.toggle("active",b.dataset.value==="human-ai"));
-      turnInput.value="2";
-      updateRule();
+stepBtns.forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const dir=parseInt(btn.dataset.dir,10);
+    let val=parseInt(turnInput.value||"2",10);
+    if(isNaN(val))val=2;
+    val+=dir;
+    if(val<2)val=2;
+    if(val>7)val=7;
+    turnInput.value=val;
+  });
+});
+submitBtn.addEventListener("click", async () => {
+  const title = titleEl.value.trim();
+  const turns = parseInt(turnInput.value);
+  const convType = convTypeInput.value;
+
+  const selectedExaminers = exChecks
+    .filter(cb => cb.checked)
+    .map(cb => cb.value); // UID now
+
+  const required = requiredCount();
+
+  if (!title) {
+    titleErr.style.display = "block";
+    return;
+  }
+
+  if (selectedExaminers.length !== required) {
+    if (projectCategory === "article") {
+        alert("Please assign exactly 1 examiner to evaluate the article.");
+    } else {
+        alert(required === 2 
+            ? "Please select exactly 2 examiners for Human ↔ Human conversation."
+            : "Please select exactly 1 examiner for Human ↔ AI conversation."
+        );
+    }
+    return;
+}
+
+
+  // Create payload
+  let payload = {
+    project_id: projectId,
+    task_name: title,
+    examiner_ids: selectedExaminers
+  };
+  
+  if (projectCategory !== "article") {
+      payload.conversation_type = convType;
+      payload.number_of_turns = turns;
+  }
+  
+
+  try {
+    const res = await fetch("/api/create_task", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(payload)
     });
 
-    updateRule();
-    const taskForm = $("#taskForm");
+    const data = await res.json();
 
+    if (data.error) {
+      alert("Error: " + data.error);
+      return;
+    }
+
+    alert("Task created!");
+    window.location.href = `/projectdetailsowner/${projectId}`;
+
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to create task.");
+  }
+});
+
+ 
+
+
+cancelBtn.addEventListener("click",()=>{
+  titleEl.value="";
+  titleErr.style.display="none";
+  exChecks.forEach(cb=>cb.checked=false);
+  convTypeInput.value="human-ai";
+  $$(".conv-pill",convToggle).forEach(b=>b.classList.toggle("active",b.dataset.value==="human-ai"));
+  turnInput.value="2";
+  updateRule();
+});
+
+updateRule();
+
+
+
+
+  async function loadProjectExaminers() {
+    try {
+      const res = await fetch(`/api/project_examiners_for_task/${projectId}`);
+      const data = await res.json();
+  
+      if (data.error) {
+        console.error(data.error);
+        return;
+      }
+  
+      const box = document.getElementById("exBox");
+      box.innerHTML = "";
+  
+      data.examiners.forEach(ex => {
+        box.innerHTML += `
+          <label class="ex-row">
+            <input type="checkbox" name="examiner" value="${ex.uid}">
+            <span>${ex.email}</span>
+          </label>
+        `;
+        console.log("Loaded examiners:", data);  
+
+      })
+  
+        // تحديث الواجهة
+        updateSelectedCount();
+  
+    } catch (err) {
+      console.error("Failed to load examiners:", err);
+    }
+  }
+  document.addEventListener("DOMContentLoaded", () => {
+    loadProjectExaminers().then(() => {
+      exChecks = Array.from(document.querySelectorAll("input[name='examiner']"));
+      exChecks.forEach(cb => cb.addEventListener("change", updateSelectedCount));
+      updateSelectedCount();
+    });
+  });
+  
+  
+
+ 
   </script>
 </body>
-</html>
+</html> 

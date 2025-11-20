@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, abort
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from firebase_admin_setup import db
 from firebase_admin import db as rtdb  # Realtime Database
 from firebase_admin import auth as admin_auth
@@ -12,16 +12,12 @@ import json
 import csv
 import io
 import requests
-from tasks_routes import init_task_routes
 
 # إعداد Flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
-app.secret_key = "CHANGE_THIS_SECRET_IN_ENV_OR_CONFIG"  
+app.secret_key = "CHANGE_THIS_SECRET_IN_ENV_OR_CONFIG"  # غيّريه لقيمة آمنة
 
-# ✅ تسجيل راوتس التاسكات
-init_task_routes(app)
-
-
+# ------------------ صفحات واجهة (GET) ------------------
 
 # 1) استبدلي دالة index() كاملة بهذا الكود
 @app.route("/")
@@ -1118,8 +1114,260 @@ def forgot_page():
     # GET
     return render_template("ForgotPassword.html")
 
+#CraetaTask
+@app.route("/api/create_task", methods=["POST"])
+def api_create_task():
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    owner_uid = session.get("uid")
+
+    data = request.get_json() or {}
+    project_id = data.get("project_id")
+    task_name = data.get("task_name")
+    examiner_uids = data.get("examiner_ids", [])
 
 
+    if not project_id or not task_name:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    # ---- نجيب بيانات المشروع ----
+    proj_doc = db.collection("projects").document(project_id).get()
+    if not proj_doc.exists:
+        return jsonify({"error": "Project not found"}), 404
+
+    proj_data = proj_doc.to_dict()
+
+    # نتأكد أن هذا المشروع ملك للـ Owner الحالي
+    if proj_data.get("owner_id") != owner_uid:
+        return jsonify({"error": "Forbidden"}), 403
+
+    category = proj_data.get("category", "").lower()
+
+
+    if not examiner_uids:
+        return jsonify({"error": "No valid examiners selected"}), 400
+
+    # ---- تجهيز بيانات الـ Task ----
+    task_id = str(uuid.uuid4())
+
+    task_doc = {
+        "task_ID": task_id,
+        "project_ID": project_id,
+        "task_name": task_name,
+        "examiner_ids": examiner_uids,
+        "created_at": datetime.utcnow().isoformat() + "Z",
+        "created_by": owner_uid,
+        "status": "pending",
+    }
+
+    # ----------- لو المشروع Conversation فقط -----------
+    if category != "article":
+        conversation_type = data.get("conversation_type")
+        number_of_turns = data.get("number_of_turns")
+
+        if conversation_type not in ["human-ai", "human-human"]:
+            return jsonify({"error": "Invalid conversation_type"}), 400
+
+        if not (2 <= number_of_turns <= 7):
+            return jsonify({"error": "number_of_turns must be 2–7"}), 400
+
+        task_doc["conversation_type"] = conversation_type
+        task_doc["number_of_turns"] = number_of_turns
+
+    # ---- حفظ الـ Task ----
+    db.collection("tasks").document(task_id).set(task_doc)
+
+    return jsonify({
+        "message": "Task created successfully",
+        "task_id": task_id
+    }), 201
+
+@app.route("/projects/<project_id>/tasks/create")
+def create_task_page(project_id):
+    if not session.get("idToken"):
+        return redirect(url_for("login_page"))
+
+    owner_uid = session.get("uid")
+    proj_doc = db.collection("projects").document(project_id).get()
+
+    if not proj_doc.exists:
+        abort(404)
+
+    proj_data = proj_doc.to_dict()
+
+    if proj_data.get("owner_id") != owner_uid:
+        abort(403)
+
+   
+    category = proj_data.get("category", "").lower()
+
+
+    return render_template("CreateTask.html", project_id=project_id, category=category)
+
+@app.route("/api/project_examiners_for_task/<project_id>")
+def get_project_examiners_for_task(project_id):
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    # تأكيد أن المشروع موجود
+    project_doc = db.collection("projects").document(project_id).get()
+    if not project_doc.exists:
+        return jsonify({"error": "Project not found"}), 404
+
+    # 🟦 نجيب جميع الـ examiners اللي قبلوا الدعوة
+    accepted = (
+        db.collection("invitations")
+        .where("project_id", "==", project_id)
+        .where("status", "==", "accepted")
+        .stream()
+    )
+
+    examiners_list = []
+
+    for inv in accepted:
+        data = inv.to_dict()
+        uid = data.get("examiner_id")
+
+        # جلب بيانات اليوزر
+        user_doc = db.collection("users").document(uid).get()
+        if user_doc.exists:
+            info = user_doc.to_dict()
+            prof = info.get("profile", {})
+
+            examiners_list.append({
+                "uid": uid,
+                "email": info.get("email", ""),
+                "name": f"{prof.get('firstName','')} {prof.get('lastName','')}".strip()
+            })
+
+    return jsonify({"examiners": examiners_list})
+@app.route("/api/project_tasks/<project_id>")
+def api_project_tasks(project_id):
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    owner_uid = session.get("uid")
+
+    proj_doc = db.collection("projects").document(project_id).get()
+    if not proj_doc.exists:
+        return jsonify({"error": "Project not found"}), 404
+
+    if proj_doc.to_dict().get("owner_id") != owner_uid:
+        return jsonify({"error": "Forbidden"}), 403
+
+    tasks_ref = (
+        db.collection("tasks")
+        .where("project_ID", "==", project_id)
+        .stream()
+    )
+
+    tasks = []
+    for t in tasks_ref:
+        data = t.to_dict()
+
+        primary_email = None
+        if data.get("examiner_ids"):
+            ex_id = data["examiner_ids"][0]
+            ex_doc = db.collection("users").document(ex_id).get()
+            if ex_doc.exists:
+                primary_email = ex_doc.to_dict().get("email", "")
+
+        tasks.append({
+            "id": data.get("task_ID"),
+            "title": data.get("task_name"),
+            "status": data.get("status", "pending"),
+            "conversationType": data.get("conversation_type"),
+            "turns": data.get("number_of_turns"),
+            "examinerCount": len(data.get("examiner_ids", [])),
+            "primaryExaminerEmail": primary_email,
+        })
+
+    return jsonify({"tasks": tasks})
+
+# ------------------ Examiner Tasks (Only tasks assigned to this examiner) ------------------
+@app.route("/api/examiner_tasks/<project_id>")
+def api_examiner_tasks(project_id):
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    examiner_uid = session.get("uid")
+
+    # 🔹 تأكيد أن الـ Examiner مقبول في هذا المشروع
+    inv = (
+        db.collection("invitations")
+        .where("project_id", "==", project_id)
+        .where("examiner_id", "==", examiner_uid)
+        .where("status", "==", "accepted")
+        .limit(1)
+        .get()
+    )
+    if not inv:
+        return jsonify({"error": "Forbidden"}), 403
+
+    # 🔹 نجلب جميع المهام في المشروع
+    tasks_ref = (
+        db.collection("tasks")
+        .where("project_ID", "==", project_id)
+        .stream()
+    )
+
+    tasks = []
+    for t in tasks_ref:
+        data = t.to_dict()
+
+        # هل هذه المهمة مخصصة لهذا ال examiner ؟
+        assigned = examiner_uid in data.get("examiner_ids", [])
+
+        # نجيب الإيميل الأساسي أول Examiner 
+        assignment_email = ""
+        if data.get("examiner_ids"):
+            main_ex = data["examiner_ids"][0]
+            ex_doc = db.collection("users").document(main_ex).get()
+            if ex_doc.exists:
+                assignment_email = ex_doc.to_dict().get("email", "")
+
+        # إذا غير مكلّف → يظهر Not assigned لكن ما نستبعدها من القائمة
+        tasks.append({
+            "task_id": data.get("task_ID"),
+            "task_name": data.get("task_name"),
+            "status": data.get("status", "pending"),
+            "conversation_type": data.get("conversation_type", None),
+            "number_of_turns": data.get("number_of_turns", 0),
+            "is_assigned_to_you": assigned,
+            "assignment_label": assignment_email
+        })
+    return jsonify({"tasks": tasks})
+@app.route("/api/tasks/<task_id>/delete", methods=["POST"])
+def api_delete_task(task_id):
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    uid = session.get("uid")
+
+    # نجيب المهمة
+    task_ref = db.collection("tasks").document(task_id)
+    task_doc = task_ref.get()
+
+    if not task_doc.exists:
+        return jsonify({"error": "Task not found"}), 404
+
+    task_data = task_doc.to_dict()
+    project_id = task_data.get("project_ID")
+
+    # نجيب المشروع للتأكد أن هذا الـ Owner هو صاحب المشروع
+    proj_doc = db.collection("projects").document(project_id).get()
+    if not proj_doc.exists:
+        return jsonify({"error": "Project not found"}), 404
+
+    if proj_doc.to_dict().get("owner_id") != uid:
+        return jsonify({"error": "Forbidden"}), 403
+
+    # حذف المهمة
+    task_ref.delete()
+
+    return jsonify({"success": True, "message": "Task deleted successfully"}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
+

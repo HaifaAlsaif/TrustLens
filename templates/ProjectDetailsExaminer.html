@@ -673,109 +673,7 @@
           </div>
         </div>
 
-        <div class="tasks-grid">
-          <article class="task-card" data-status="pending">
-            <h4 class="task-title">Customer Support Chat #1</h4>
-            <div class="task-meta">
-              <div class="task-meta-row">
-                <span class="task-meta-label">Type:</span>
-                <span class="tag tag-blue">Human ↔ AI</span>
-              </div>
-              <div class="task-meta-row">
-                <span class="task-meta-label">Turns:</span>
-                <span class="tag tag-purple">5 Messages</span>
-              </div>
-            </div>
-            <button class="task-button primary join">Join</button>
-          </article>
-
-          <article class="task-card" data-status="progress">
-            <h4 class="task-title">Tech Support Dialogue #2</h4>
-            <div class="task-meta">
-              <div class="task-meta-row">
-                <span class="task-meta-label">Type:</span>
-                <span class="tag tag-green-alt">Human ↔ Human</span>
-              </div>
-              <div class="task-meta-row">
-                <span class="task-meta-label">Turns:</span>
-                <span class="tag tag-purple">3 Messages</span>
-              </div>
-            </div>
-            <div class="assignment-box">
-              <div class="assignment-label">Assigned to:</div>
-              <div class="assignment-value">Lina@hotmail.com</div>
-            </div>
-            <button class="task-button primary continue">Continue</button>
-          </article>
-
-          <article class="task-card" data-status="completed">
-            <h4 class="task-title">Sales Chat #3</h4>
-            <div class="task-meta">
-              <div class="task-meta-row">
-                <span class="task-meta-label">Type:</span>
-                <span class="tag tag-blue">Human ↔ AI</span>
-              </div>
-              <div class="task-meta-row">
-                <span class="task-meta-label">Turns:</span>
-                <span class="tag tag-purple">7 Messages</span>
-              </div>
-            </div>
-            <div class="assignment-box">
-              <div class="assignment-label">Assigned to:</div>
-              <div class="assignment-value">Lina@hotmail.com</div>
-            </div>
-            <button class="task-button completed completed-btn">Completed</button>
-          </article>
-
-          <article class="task-card" data-status="pending">
-            <h4 class="task-title">Help Desk Chat #4</h4>
-            <div class="task-meta">
-              <div class="task-meta-row">
-                <span class="task-meta-label">Type:</span>
-                <span class="tag tag-blue">Human ↔ AI</span>
-              </div>
-              <div class="task-meta-row">
-                <span class="task-meta-label">Turns:</span>
-                <span class="tag tag-purple">4 Messages</span>
-              </div>
-            </div>
-            <button class="task-button primary join">Join</button>
-          </article>
-
-          <article class="task-card" data-status="pending">
-            <h4 class="task-title">Product Inquiry Chat #5</h4>
-            <div class="task-meta">
-              <div class="task-meta-row">
-                <span class="task-meta-label">Type:</span>
-                <span class="tag tag-green-alt">Human ↔ Human</span>
-              </div>
-              <div class="task-meta-row">
-                <span class="task-meta-label">Turns:</span>
-                <span class="tag tag-purple">6 Messages</span>
-              </div>
-            </div>
-            <button class="task-button primary join">Join</button>
-          </article>
-
-          <article class="task-card" data-status="progress">
-            <h4 class="task-title">Complaint Resolution #6</h4>
-            <div class="task-meta">
-              <div class="task-meta-row">
-                <span class="task-meta-label">Type:</span>
-                <span class="tag tag-blue">Human ↔ AI</span>
-              </div>
-              <div class="task-meta-row">
-                <span class="task-meta-label">Turns:</span>
-                <span class="tag tag-purple">2 Messages</span>
-              </div>
-            </div>
-            <div class="assignment-box">
-              <div class="assignment-label">Assigned to:</div>
-              <div class="assignment-value">Lina@hotmail.com</div>
-            </div>
-            <button class="task-button primary continue">Continue</button>
-          </article>
-        </div>
+        <div class="tasks-grid"> </div>
       </section>
     </div>
   </main>
@@ -825,7 +723,8 @@
       document.getElementById("projectDesc").textContent = data.description;
       document.getElementById("ownerName").textContent   = data.owner_name;
       document.getElementById("ownerEmail").textContent  = data.owner_email;
-    
+      window.projectCategory = data.category?.toLowerCase();
+
       // domain tags
       const domainContainer = document.getElementById("domainTags");
       domainContainer.innerHTML = "";
@@ -836,7 +735,10 @@
         domainContainer.appendChild(tag);
       });
     
+      
       // category tag
+      const categoryDiv = document.getElementById("categoryTag");
+categoryDiv.innerHTML = "";  
       const catSpan = document.createElement("span");
       catSpan.className = "tag tag-green";
       catSpan.textContent = data.category;
@@ -883,5 +785,88 @@ async function loadExaminers() {
 // استدعاءها بعد ما تتحمل الصفحة
 loadProjectDetails().then(() => loadExaminers());
   </script>
+  <script>
+    async function loadExaminerTasks() {
+      const pathParts = window.location.pathname.split('/');
+      const projectId = pathParts[pathParts.length - 1];
+    
+      const res = await fetch(`/api/examiner_tasks/${projectId}`);
+      if (!res.ok) { 
+        console.error("Failed to load tasks");
+        return;
+      }
+    
+      const data = await res.json();
+      const tasks = data.tasks || [];
+    
+      const grid = document.querySelector(".tasks-grid");
+      grid.innerHTML = "";
+    
+      tasks.forEach(task => {
+    
+        const card = document.createElement("article");
+        card.className = "task-card";
+        card.setAttribute("data-status", task.status);
+    
+        // 👇 ديناميكية الإخفاء إذا كان Article
+        let metaHTML = "";
+        if (window.projectCategory !== "article") {
+          const typeTag = task.conversation_type === "human-ai"
+            ? `<span class="tag tag-blue">Human ↔ AI</span>`
+            : `<span class="tag tag-green-alt">Human ↔ Human</span>`;
+    
+          metaHTML = `
+            <div class="task-meta">
+              <div class="task-meta-row">
+                <span class="task-meta-label">Type:</span>
+                ${typeTag}
+              </div>
+              <div class="task-meta-row">
+                <span class="task-meta-label">Turns:</span>
+                <span class="tag tag-purple">${task.number_of_turns} Messages</span>
+              </div>
+            </div>
+          `;
+        }
+    
+        // assignment box
+        const assignedToYou = task.is_assigned_to_you;
+    
+        let buttonHTML = "";
+        if (task.status === "completed") {
+          buttonHTML = `<button class="task-button completed completed-btn">Completed</button>`;
+        } else if (assignedToYou) {
+          buttonHTML = `
+            <button class="task-button primary ${task.status === 'progress' ? 'continue' : 'join'}">
+              ${task.status === "progress" ? "Continue" : "Join"}
+            </button>`;
+        } else {
+          buttonHTML = `<button class="task-button completed completed-btn">Not Assigned</button>`;
+        }
+    
+        // بناء الكارد كاملاً
+        card.innerHTML = `
+          <h4 class="task-title">${task.task_name}</h4>
+    
+          ${metaHTML}
+    
+          <div class="assignment-box">
+            <div class="assignment-label">Assigned to:</div>
+            <div class="assignment-value">${task.assignment_label}</div>
+          </div>
+    
+          ${buttonHTML}
+        `;
+    
+        grid.appendChild(card);
+      });
+    }
+    
+      
+    loadProjectDetails()
+      .then(() => loadExaminers())
+      .then(() => loadExaminerTasks());
+    </script>
+    
 </body>
 </html>
