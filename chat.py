@@ -53,20 +53,29 @@ conv_ref = rtdb_root.child("generate_Conversation_llm").push({
 
 messages_ref = conv_ref.child("messages")
 
+turn_counter = 1  # عدّاد الرسائل داخل نفس المحادثة
 
-# ---------------------------
-# حفظ رسالة في Firebase
-# ---------------------------
 def save_message(sender: str, text: str):
+    global turn_counter
+
+    turn_ref = messages_ref.push({})  # إنشاء ID أولًا
+    turn_id = turn_ref.key  
+
+    data = {
+        "turnID": turn_id,
+        "taskID": conv_ref.key,  # بما إن المحادثة = التاسك الآن
+        "turnNumber": turn_counter,
+        "senderType": "Ex" if sender == "user" else "AI",
+        "sender": sender,
+        "message": text,
+        "examinerID": "",  # مؤقتًا إلى أن تربطينها لاحقًا
+    }
+
     try:
-        messages_ref.push({
-            "sender": sender,
-            "text": text,
-            "time": datetime.now(timezone.utc).isoformat(),
-        })
+        turn_ref.set(data)
+        turn_counter += 1
     except Exception as e:
         print("[WARN] لم نستطع حفظ الرسالة في Firebase:", e)
-
 
 # ---------------------------
 # توليد رد من الموديل
@@ -109,5 +118,8 @@ while True:
 
     bot_reply = generate_reply(user)
     print("Bot:", bot_reply)
+
+
+
 
     save_message("bot", bot_reply)
