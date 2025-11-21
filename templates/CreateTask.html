@@ -69,7 +69,7 @@
     }
     .user-info h3{margin:0;font-size:14px;font-weight:400;color:var(--text)}
     .user-info p{margin:0;font-size:12px;color:var(--muted);text-transform:capitalize}
-    
+   
     .user-dropdown{
       position:absolute;top:calc(100% + 8px);right:0;
       width:200px;background:#fff;border:0.8px solid var(--line);
@@ -153,8 +153,9 @@
     .step-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
     .step-input[type=number]{-moz-appearance:textfield}
     .step-hint{font-size:12px;color:var(--muted);margin-top:4px}
- /* ---------- Conversation Pills ---------- */
- .conv-toggle{display:flex;gap:12px;flex-wrap:wrap}
+
+    /* ---------- Conversation Pills ---------- */
+    .conv-toggle{display:flex;gap:12px;flex-wrap:wrap}
     .conv-pill{
       flex:1 1 180px;min-height:56px;border-radius:9999px;
       border:1px solid rgba(148,163,184,.8);background:#fff;
@@ -200,15 +201,13 @@
       </div>
 
       <div style="display:flex;gap:12px;align-items:center">
-    
         <div class="user-profile" id="userProfile">
-          <div class="user-avatar">H</div>
+          <div class="user-avatar">{{ user_name[0]|upper }}</div>
           <div class="user-info">
-            <h3>Haifa</h3>
+            <h3>{{ user_name }}</h3>
             <p>owner</p>
           </div>
 
-        
           <div class="user-dropdown" id="userDropdown">
             <a href="HomePage.html" class="dropdown-item">
               <img src="../static/images/img_iconhome.svg" alt="Home" class="dropdown-icon"> Home
@@ -309,7 +308,7 @@
     </div>
   </div>
 
-  
+
   <!-- ================== JS ================== -->
   <script>
     const $=(s,e=document)=>e.querySelector(s);
@@ -336,79 +335,145 @@
     document.addEventListener("click",e=>{
       if(!e.target.closest("#userProfile")) userDropdown.classList.remove("show");
     });
-    function requiredCount(){return convTypeInput.value==="human-human"?2:1;}
 
-function updateRule(){
-  const req=requiredCount();
-  exRuleText.textContent=req===2?"Select exactly 2 examiners":"Select exactly 1 examiner";
-  updateSelectedCount();
-}
-function updateSelectedCount(){
-  const selected=exChecks.filter(cb=>cb.checked).length;
-  const req=requiredCount();
-  exCountSpan.textContent=`(${selected} selected)`;
-  if(selected===req){
-    exCountSpan.style.color="var(--success)";
-    exBox.style.borderColor="rgba(0,0,0,0.1)";
-    exBox.style.boxShadow="0 0 0 1px rgba(16,185,129,.25)";
-  }else{
-    exCountSpan.style.color="#f54900";
-    exBox.style.borderColor="rgba(180,35,24,0.4)";
-    exBox.style.boxShadow="none";
-  }
-}
+    function requiredCount(){
+      return convTypeInput.value==="human-human"?2:1;
+    }
 
-convToggle.addEventListener("click",e=>{
-  const btn=e.target.closest(".conv-pill");
-  if(!btn)return;
-  const value=btn.dataset.value;
-  convTypeInput.value=value;
-  $$(".conv-pill",convToggle).forEach(b=>b.classList.toggle("active",b===btn));
-  updateRule();
-});
-exChecks.forEach(cb=>cb.addEventListener("change",updateSelectedCount));
+    function updateRule(){
+      const req=requiredCount();
+      exRuleText.textContent=req===2?"Select exactly 2 examiners":"Select exactly 1 examiner";
+      updateSelectedCount();
+    }
 
-stepBtns.forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    const dir=parseInt(btn.dataset.dir,10);
-    let val=parseInt(turnInput.value||"2",10);
-    if(isNaN(val))val=2;
-    val+=dir;
-    if(val<2)val=2;
-    if(val>7)val=7;
-    turnInput.value=val;
-  });
-});
-submitBtn.addEventListener("click",()=>{
-  const titleOk=!!titleEl.value.trim();
-  titleErr.style.display=titleOk?"none":"block";
+    function updateSelectedCount(){
+      const selected=exChecks.filter(cb=>cb.checked).length;
+      const req=requiredCount();
+      exCountSpan.textContent=`(${selected} selected)`;
+      if(selected===req){
+        exCountSpan.style.color="var(--success)";
+        exBox.style.borderColor="rgba(0,0,0,0.1)";
+        exBox.style.boxShadow="0 0 0 1px rgba(16,185,129,.25)";
+      }else{
+        exCountSpan.style.color="#f54900";
+        exBox.style.borderColor="rgba(180,35,24,0.4)";
+        exBox.style.boxShadow="none";
+      }
+    }
 
-  const selected=exChecks.filter(cb=>cb.checked).length;
-  const req=requiredCount();
+    convToggle.addEventListener("click",e=>{
+      const btn=e.target.closest(".conv-pill");
+      if(!btn)return;
+      const value=btn.dataset.value;
+      convTypeInput.value=value;
+      $$(".conv-pill",convToggle).forEach(b=>b.classList.toggle("active",b===btn));
+      updateRule();
+    });
 
-  if(!titleOk){titleEl.focus();return;}
-  if(selected!==req){
-    const msg=req===2
-      ?"For Human to Human, you must select exactly 2 examiners."
-      :"For Human to AI, you must select exactly 1 examiner.";
-    alert(msg);
-    return;
-  }
-  alert("Task created successfully!");
-});
+    exChecks.forEach(cb=>cb.addEventListener("change",updateSelectedCount));
 
-cancelBtn.addEventListener("click",()=>{
-  titleEl.value="";
-  titleErr.style.display="none";
-  exChecks.forEach(cb=>cb.checked=false);
-  convTypeInput.value="human-ai";
-  $$(".conv-pill",convToggle).forEach(b=>b.classList.toggle("active",b.dataset.value==="human-ai"));
-  turnInput.value="2";
-  updateRule();
-});
+    stepBtns.forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const dir=parseInt(btn.dataset.dir,10);
+        let val=parseInt(turnInput.value||"2",10);
+        if(isNaN(val))val=2;
+        val+=dir;
+        if(val<2)val=2;
+        if(val>7)val=7;
+        turnInput.value=val;
+      });
+    });
 
-updateRule();
-    
+    submitBtn.addEventListener("click", async () => {
+      // 1) تحقق من العنوان
+      const title = titleEl.value.trim();
+      const titleOk = !!title;
+      titleErr.style.display = titleOk ? "none" : "block";
+
+      // 2) examiners المختارين
+      const selectedExaminers = exChecks
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+
+      const req = requiredCount();
+
+      if (!titleOk) {
+        titleEl.focus();
+        return;
+      }
+
+      if (selectedExaminers.length !== req) {
+        const msg = req === 2
+          ? "For Human to Human, you must select exactly 2 examiners."
+          : "For Human to AI, you must select exactly 1 examiner.";
+        alert(msg);
+        return;
+      }
+
+      // 3) قراءة باقي الحقول
+      const conversationType = convTypeInput.value;  // "human-ai" أو "human-human"
+      let turns = parseInt(turnInput.value || "2", 10);
+      if (isNaN(turns)) turns = 2;
+
+      const payload = {
+        title: title,
+        conversationType: conversationType,
+        turns: turns,
+        examiners: selectedExaminers
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Creating...";
+
+      try {
+        const res = await fetch("/api/tasks", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          console.error("Create task error:", data);
+          alert(data.error || "Failed to create task.");
+          return;
+        }
+
+        // نجاح 🎉
+        const taskId = data.taskId;
+        alert("Task created successfully!");
+
+        if (conversationType === "human-ai") {
+          // افتح صفحة المحادثة مع نفس الـ task
+          window.location.href = `/conversation-ai?taskId=${encodeURIComponent(taskId)}`;
+        } else {
+          // Human ↔ Human (حالياً نرجع لصفحة تفاصيل المشروع)
+          window.location.href = "/projectdetailsowner";
+        }
+
+      } catch (err) {
+        console.error("Network error:", err);
+        alert("Network error while creating the task. Please try again.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Create Task";
+      }
+    });
+
+    cancelBtn.addEventListener("click",()=>{
+      titleEl.value="";
+      titleErr.style.display="none";
+      exChecks.forEach(cb=>cb.checked=false);
+      convTypeInput.value="human-ai";
+      $$(".conv-pill",convToggle).forEach(b=>b.classList.toggle("active",b.dataset.value==="human-ai"));
+      turnInput.value="2";
+      updateRule();
+    });
+
+   updateRule();
   </script>
 </body>
 </html>
