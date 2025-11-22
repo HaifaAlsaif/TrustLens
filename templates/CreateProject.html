@@ -163,21 +163,25 @@
 
         <div class="content" id="form">
           <!-- Project Name -->
-          <div class="field">
+          <div class="field" id="fieldName">
+
             <div class="label"><span>Project Name</span></div>
             <input id="name" class="input" type="text" placeholder="Enter project name"/>
             <div class="note error" id="nameErr" hidden>Project name is required.</div>
           </div>
 
           <!-- Description -->
-          <div class="field">
+          <div class="field" id="fieldDesc">
+
+
             <div class="label"><span>Description</span></div>
             <textarea id="desc" class="textarea" rows="4" placeholder="Describe your project..."></textarea>
             <div class="note error" id="descErr" hidden>Description is required.</div>
           </div>
 
           <!-- Domain -->
-          <div class="field">
+          <div class="field" id="fieldDomains">
+
             <div class="label"><span>Domain</span></div>
             <div class="hint">Select one or more domains for your project</div>
 
@@ -204,7 +208,8 @@
           </div>
 
           <!-- Category -->
-          <div class="field">
+          <div class="field" id="fieldCategory">
+
             <div class="label"><span>Category</span></div>
             <div class="hint">Choose the type of content you want to evaluate</div>
             <div class="cats">
@@ -223,7 +228,8 @@
           </div>
 
           <!-- Dataset -->
-          <div class="field dataset">
+          <div class="field dataset" id="fieldDataset">
+
             <div class="label"><span>Dataset</span></div>
             <div class="drop" id="dropzone">
               <input id="file" class="file-input" type="file" accept=".csv">
@@ -240,7 +246,8 @@
           </div>
 
           <!-- Invite Examiners -->
-          <div class="field">
+          <div class="field" id="fieldInvite">
+
             <div class="label"><span>Invite Examiners</span></div>
             <div class="hint">Type username or email to add manually, or select from our volunteer community</div>
 
@@ -281,6 +288,58 @@
     </div>
   </div>
   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+const EDIT_ID = urlParams.get("id");
+const BASIC_MODE = urlParams.get("basic") === "1";
+if (BASIC_MODE) {
+  document.getElementById("fieldDomains").style.display = "none";
+  document.getElementById("fieldCategory").style.display = "none";
+  document.getElementById("fieldDataset").style.display = "none";
+  document.getElementById("fieldInvite").style.display = "none";
+
+  // عنوان وزر
+  document.querySelector(".title").textContent = "Edit Project Info";
+  document.getElementById("submit").textContent = "Save Changes";
+
+ 
+  document.getElementById("cat-news").checked = true;
+  window.SKIP_CATEGORY_CHECK = true;
+}
+
+    
+    async function loadProjectData() {
+      const res = await fetch(`/api/project_json_owner/${EDIT_ID}`);
+      const data = await res.json();
+    
+      if (data.error) {
+        alert("Failed to load project data");
+        return;
+      }
+    
+      // تعبئة الحقول
+      $("#name").value = data.project_name;
+      $("#desc").value = data.description;
+    
+      // domains
+      selectedDomains = new Set(data.domain);
+      updateDomainState();
+      renderDomainList();
+      renderDomainChips();
+    
+      // category
+      if (data.category.toLowerCase() === "article")
+      document.getElementById("cat-news").checked = true;
+  else
+      document.getElementById("cat-conv").checked = true;
+  
+    
+      syncGenVisibility();
+    
+      // تعديل العنوان والزر
+      $(".title").textContent = "Edit Project";
+      $("#submit").textContent = "Update Project";
+    }
+    
     const $ = (s, el=document) => el.querySelector(s);
     const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
 
@@ -599,99 +658,49 @@ const submitStatus = $("#submitStatus");
 let isSubmitting = false;
 
 submitBtn.addEventListener("click", async () => {
-  // لو فيه request شغّال، لا تسوين شيء
-  if (isSubmitting) return;
+  const isEdit = !!EDIT_ID;
 
-  // التحقق من الحقول الأساسية
   $("#nameErr").hidden = !!nameEl.value.trim();
   $("#descErr").hidden = !!descEl.value.trim();
 
+
   const hasCategory = catNews.checked || catConv.checked;
-  if (!hasCategory) {
-    alert("Please select a category.");
-    return;
+
+  // إذا كان BASIC_MODE → لا تتحقق من الكاتيجوري
+  if (!window.SKIP_CATEGORY_CHECK && !hasCategory) {
+    return alert("Please select a category.");
   }
-
-  const baseOK = !!nameEl.value.trim() && !!descEl.value.trim();
-  if (!baseOK) return;
-
-  // تجهيز البيانات
+  
   const formData = new FormData();
   formData.append("project_name", nameEl.value.trim());
   formData.append("description", descEl.value.trim());
   formData.append("category", catNews.checked ? "Article" : "Conversation");
-
   selectedDomains.forEach(d => formData.append("domain", d));
 
-  if (fileInput.files && fileInput.files[0]) {
-    formData.append("dataset", fileInput.files[0]);
+  let url = "/api/create_project";
+  let method = "POST";
+
+  if (isEdit) {
+    url = `/api/update_project/${EDIT_ID}`;
   }
 
-  // 🔵 تفعيل وضع التحميل
-  isSubmitting = true;
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Uploading dataset...";
-  submitStatus.hidden = false;
-  submitStatus.textContent = "Uploading dataset and creating project...";
+  const res = await fetch(url, { method, body: formData });
+  const data = await res.json();
 
-  try {
-    // إنشاء المشروع
-    const res = await fetch("/api/create_project", {
-      method: "POST",
-      body: formData
-    });
-
-    let data = {};
-    try {
-      data = await res.json();
-    } catch (e) {
-      // لو الرد مو JSON
-      data = {};
-    }
-
-    if (!res.ok || !data.project_ID) {
-      const msg = data.error || "Server error while creating project.";
-      throw new Error(msg);
-    }
-
-    // إرسال الدعوات (اختياري الآن)
-    for (const ex of selectedExaminers) {
-      try {
-        const inviteRes = await fetch("/api/send_invitation", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            examiner_email: ex.email,
-            project_id: data.project_ID
-          })
-        });
-
-        if (!inviteRes.ok) {
-          console.error("Failed to send invitation for", ex.email);
-        }
-      } catch (e) {
-        console.error("Invite error:", e);
-      }
-    }
-
-    alert("✅ Project created and invitations sent successfully!");
-    window.location.href = "/myprojectowner";
-
-  } catch (err) {
-    console.error(err);
-    submitStatus.hidden = false;
-    submitStatus.textContent = "Network error while uploading dataset or creating project.";
-    alert("❌ " + (err.message || "Network error. Please try again."));
-  } finally {
-    // 🔵 رجوع لحالة الزر الطبيعية (بس لو ما صار redirect)
-    isSubmitting = false;
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Create Project";
+  if (!res.ok) {
+    alert("Error: " + (data.error || "Unknown"));
+    return;
   }
+
+  alert(isEdit ? "Project updated!" : "Project created!");
+
+  window.location.href = "/myprojectowner";
 });
 
+if (EDIT_ID) {
+  loadProjectData();
+}
 
-      
   </script>
 </body>
 </html>

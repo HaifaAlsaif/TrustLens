@@ -12,10 +12,41 @@ import json
 import csv
 import io
 import requests
+from llm_service import generate_reply
+from flask import abort
 
 # إعداد Flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
-app.secret_key = "CHANGE_THIS_SECRET_IN_ENV_OR_CONFIG"  # غيّريه لقيمة آمنة
+app.secret_key = "CHANGE_THIS_SECRET_IN_ENV_OR_CONFIG"  
+def get_current_user_doc():
+    """
+    ترجع وثيقة المستخدم الحالي من Firestore
+    بناءً على uid الموجود في الـ session.
+    """
+    uid = session.get("uid")
+    if not uid:
+        return None
+
+    snap = db.collection("users").document(uid).get()
+    return snap if snap.exists else None
+
+
+def get_user_full_name(user_doc):
+    """
+    ترجع الاسم الكامل: firstName + lastName
+    لو ما فيه بيانات يرجع 'User'
+    """
+    if not user_doc:
+        return "User"
+
+    data = user_doc.to_dict()
+    prof = data.get("profile", {})
+    first = prof.get("firstName", "")
+    last = prof.get("lastName", "")
+
+    full = f"{first} {last}".strip()
+    return full or "User"
+
 
 # ------------------ صفحات واجهة (GET) ------------------
 
@@ -62,7 +93,9 @@ def profile_page():
 
 @app.route("/createproject")
 def create_project_page():
-    return render_template("CreateProject.html")
+    project_id = request.args.get("id")  # في حال تم فتح الصفحة للتعديل
+    return render_template("CreateProject.html", edit_project_id=project_id)
+
 
 @app.route("/myprojectowner")
 def my_project_owner_page():
@@ -80,6 +113,142 @@ def my_project_owner_page():
     full_name  = f"{first_name} {last_name}".strip() or "User"
 
     return render_template("myprojectowner.html", user_name=full_name)
+@app.route("/api/add_examiner_to_project", methods=["POST"])
+def api_add_examiner_to_project():
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    owner_uid = session.get("uid")
+    data = request.get_json() or {}
+
+    project_id = data.get("project_id")
+    examiner_email = data.get("examiner_email")
+
+    if not project_id or not examiner_email:
+        return jsonify({"error": "Missing project_id or examiner_email"}), 400
+
+    # نتحقق أن المشروع للمالك الحالي
+    proj_doc = db.collection("projects").document(project_id).get()
+    if not proj_doc.exists:
+        return jsonify({"error": "Project not found"}), 404
+
+    if proj_doc.to_dict().get("owner_id") != owner_uid:
+        return jsonify({"error": "Forbidden"}), 403
+
+    # نجيب بيانات الـ Examiner عن طريق الإيميل
+    ex_docs = list(
+        db.collection("users")
+        .where("email", "==", examiner_email)
+        .where("role", "==", "examiner")
+        .limit(1)
+        .stream()
+    )
+
+    if not ex_docs:
+        return jsonify({"error": "Examiner not found"}), 404
+
+    examiner_uid = ex_docs[0].id
+    ex_data = ex_docs[0].to_dict()
+
+    # استخراج اسم examiner
+    prof = ex_data.get("profile", {})
+    examiner_name = f"{prof.get('firstName','')} {prof.get('lastName','')}".strip()
+
+    # جلب اسم المالك
+    owner_doc = db.collection("users").document(owner_uid).get()
+    owner_prof = owner_doc.to_dict().get("profile", {})
+    owner_name = f"{owner_prof.get('firstName','')} {owner_prof.get('lastName','')}".strip()
+
+    # أوّل شيء نتأكد أنه مو مضاف مسبقًا
+    existing = list(
+        db.collection("invitations")
+        .where("project_id", "==", project_id)
+        .where("examiner_id", "==", examiner_uid)
+        .limit(1)
+        .stream()
+    )
+    if existing:
+        return jsonify({"error": "Examiner already invited"}), 409
+
+    # إنشاء دعوة جديدة
+    inv_ref = db.collection("invitations").document()
+    inv_ref.set({
+        "project_id": project_id,
+        "project_name": proj_doc.to_dict().get("project_name"),
+        "owner_id": owner_uid,
+        "owner_name": owner_name,
+        "examiner_id": examiner_uid,
+        "examiner_email": examiner_email,
+        "status": "pending",  # مباشرة نضيفه مقبول
+        "created_at": SERVER_TIMESTAMP
+    })
+
+    return jsonify({
+        "message": "Examiner added successfully",
+        "examiner_name": examiner_name,
+        "examiner_email": examiner_email,
+        "examiner_id": examiner_uid
+    }), 200
+    
+@app.route("/api/remove_examiner", methods=["POST"])
+def api_remove_examiner():
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    owner_uid = session.get("uid")
+    data = request.get_json() or {}
+
+    project_id = data.get("project_id")
+    examiner_id = data.get("examiner_id")
+
+    if not project_id or not examiner_id:
+        return jsonify({"error": "Missing fields"}), 400
+
+    # تأكيد أن المشروع ملك للـ owner
+    proj_doc = db.collection("projects").document(project_id).get()
+    if not proj_doc.exists:
+        return jsonify({"error": "Project not found"}), 404
+
+    if proj_doc.to_dict().get("owner_id") != owner_uid:
+        return jsonify({"error": "Forbidden"}), 403
+
+    # البحث عن الدعوة المقبولة
+    inv_query = (
+        db.collection("invitations")
+        .where("project_id", "==", project_id)
+        .where("examiner_id", "==", examiner_id)
+        .where("status", "==", "accepted")
+        .limit(1)
+        .stream()
+    )
+
+    inv_list = list(inv_query)
+    if not inv_list:
+        return jsonify({"error": "Examiner not assigned"}), 404
+
+    inv_id = inv_list[0].id
+
+    # حذف الدعوة
+    db.collection("invitations").document(inv_id).delete()
+
+    # حذف الـ examiner من المهام
+    tasks = db.collection("tasks").where("project_ID", "==", project_id).stream()
+    batch = db.batch()
+
+    for t in tasks:
+        t_data = t.to_dict()
+        examiners = t_data.get("examiner_ids", [])
+        if examiner_id in examiners:
+            new_list = [e for e in examiners if e != examiner_id]
+            batch.update(
+                db.collection("tasks").document(t.id),
+                {"examiner_ids": new_list}
+            )
+
+    batch.commit()
+
+    return jsonify({"success": True, "message": "Examiner removed"}), 200
+
 
 @app.route("/myprojectexaminer")
 def myprojectexaminer_page():
@@ -219,6 +388,7 @@ def api_project_json_owner(project_id):
         "owner_name": owner_name,
         "owner_email": owner_email
     })
+    
 # ------------- قائمة Examiners المقبولين (للـ Owner) -------------
 @app.route("/api/project_examiners_owner/<project_id>")
 def api_project_examiners_owner(project_id):
@@ -726,6 +896,41 @@ def api_create_project():
         "project_ID": project_id,
         "dataset_id": dataset_id,
     }), 201
+@app.route("/api/update_project/<project_id>", methods=["POST"])
+def api_update_project(project_id):
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    uid = session.get("uid")
+
+    proj_ref = db.collection("projects").document(project_id)
+    proj_doc = proj_ref.get()
+
+    if not proj_doc.exists:
+        return jsonify({"error": "Project not found"}), 404
+
+    if proj_doc.to_dict().get("owner_id") != uid:
+        return jsonify({"error": "Forbidden"}), 403
+
+    data = request.form
+
+    name = data.get("project_name", "").strip()
+    desc = data.get("description", "").strip()
+    category = data.get("category")
+    domains = data.getlist("domain")
+
+    update_data = {
+        "project_name": name,
+        "description": desc,
+        "category": category,
+        "domain": domains,
+        "updated_at": datetime.utcnow().isoformat() + "Z"
+    }
+
+    proj_ref.update(update_data)
+
+    return jsonify({"message": "Project updated successfully"}), 200
+
 # ------------------ حذف مشروع ------------------
 @app.route("/api/delete_project/<project_id>", methods=["DELETE"])
 def api_delete_project(project_id):
@@ -1338,6 +1543,7 @@ def api_examiner_tasks(project_id):
             "assignment_label": assignment_email
         })
     return jsonify({"tasks": tasks})
+
 @app.route("/api/tasks/<task_id>/delete", methods=["POST"])
 def api_delete_task(task_id):
     if not session.get("idToken"):
@@ -1363,10 +1569,187 @@ def api_delete_task(task_id):
     if proj_doc.to_dict().get("owner_id") != uid:
         return jsonify({"error": "Forbidden"}), 403
 
-    # حذف المهمة
+    # 🗑️ حذف المهمة
     task_ref.delete()
 
     return jsonify({"success": True, "message": "Task deleted successfully"}), 200
+
+
+
+
+@app.route("/api/update_task/<task_id>", methods=["PATCH"])
+def api_update_task(task_id):
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    owner_uid = session.get("uid")
+
+    # نجيب المهمة
+    task_ref = db.collection("tasks").document(task_id)
+    task_doc = task_ref.get()
+
+    if not task_doc.exists:
+        return jsonify({"error": "Task not found"}), 404
+
+    task_data = task_doc.to_dict()
+    project_id = task_data.get("project_ID")
+
+    # نتأكد أن ال Owner هو صاحب المشروع
+    proj_doc = db.collection("projects").document(project_id).get()
+    if not proj_doc.exists:
+        return jsonify({"error": "Project not found"}), 404
+
+    if proj_doc.to_dict().get("owner_id") != owner_uid:
+        return jsonify({"error": "Forbidden"}), 403
+
+    # نقرأ البيانات الجديدة
+    data = request.get_json() or {}
+
+    new_name = data.get("task_name", "").strip()
+    new_examiners = data.get("examiner_ids", [])
+
+    if not new_name:
+        return jsonify({"error": "Task name is required"}), 400
+
+    if not new_examiners:
+        return jsonify({"error": "At least one examiner is required"}), 400
+
+    # نحدّث فقط اللي تبينه
+    update_data = {
+        "task_name": new_name,
+        "examiner_ids": new_examiners,
+        "updated_at": datetime.utcnow().isoformat() + "Z"
+    }
+
+    task_ref.update(update_data)
+
+    return jsonify({"message": "Task updated successfully"}), 200
+
+    
+# ===================================================================
+# ------------- صفحة Human ↔ AI Conversation (Front) ---------------
+# ===================================================================
+ 
+@app.route("/conversation-ai")
+def conversation_ai_page():
+    if not session.get("idToken"):
+        return redirect(url_for("login_page"))
+ 
+    user_doc = get_current_user_doc()
+    user_name = get_user_full_name(user_doc) if user_doc else "User"
+ 
+    # نقرأ taskId من الرابط
+    task_id = request.args.get("taskId")
+
+    # 👇 نقرأ project_id من الرابط
+    project_id = request.args.get("projectId")
+ 
+    # قيم افتراضية
+    max_turns = 6
+    task_title = "Conversation task topic"
+ 
+    if task_id:
+        try:
+            task_snapshot = db.collection("tasks").document(task_id).get()
+            if task_snapshot.exists:
+                task_data = task_snapshot.to_dict()
+                max_turns = int(task_data.get("number_of_turns", 6))
+                task_title = task_data.get("task_name", task_title)
+        except Exception as e:
+            app.logger.exception("Error loading task in conversation_ai_page: %s", e)
+ 
+    return render_template(
+        "ConversationH-AI.html",
+        user_name=user_name,
+        max_turns=max_turns,
+        task_title=task_title,
+        task_id=task_id,
+        project_id=project_id  
+)
+
+
+# ===================================================================
+# ------------- صفحة Human ↔ Human Conversation (Front) ------------
+# ===================================================================
+ 
+@app.route("/conversation-hh")
+def conversation_hh_page():
+    """
+    صفحة المحادثة Human ↔ Human.
+ 
+    - تستقبل taskId من الـ query string (اختياري):
+        /conversation-hh?taskId=ABC123
+ 
+    - إذا وُجد taskId نحاول نقرأ التاسك من Firestore
+      ونستخدم عدد الـ turns والعنوان من هناك.
+ 
+    - هذه الصفحة لا تستدعي أي موديل AI ولا تخزن الرسائل حالياً.
+    """
+    # يجب أن يكون المستخدم مسجّل دخول
+    if not session.get("idToken"):
+        return redirect(url_for("login_page"))
+ 
+    # نجيب اسم المستخدم الحالي
+    user_doc = get_current_user_doc()
+    user_name = get_user_full_name(user_doc) if user_doc else "User"
+ 
+    # نقرأ taskId من الرابط (اختياري)
+    task_id = request.args.get("taskId")
+ 
+    # قيم افتراضية لو ما وجدنا تاسك
+    max_turns = 6
+    task_title = "Human ↔ Human conversation task"
+ 
+    if task_id:
+        try:
+            task_snapshot = db.collection("tasks").document(task_id).get()
+            if task_snapshot.exists:
+                task_data = task_snapshot.to_dict()
+                max_turns = int(task_data.get("number_of_turns", 6))
+                task_title = task_data.get("task_name", task_title)
+                conv_type = task_data.get("conversation_type")
+
+                if conv_type != "human-human":
+                    # نوجّه المستخدم لصفحة الـ AI لو التاسك من نوع human-ai
+                    return redirect(url_for("conversation_ai_page", taskId=task_id))
+        except Exception as e:
+            app.logger.exception(
+                "Error loading task in conversation_hh_page: %s", e
+            )
+ 
+    return render_template(
+        "ConversationH-H.html",
+        user_name=user_name,
+        max_turns=max_turns,
+        task_title=task_title,
+        task_id=task_id,
+    )
+
+    return jsonify({"success": True, "message": "Task deleted successfully"}), 200
+# ==========================
+#  AI Conversation Reply API
+# ==========================
+@app.route("/api/ai_reply", methods=["POST"])
+def api_ai_reply():
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json() or {}
+    user_message = data.get("message", "").strip()
+
+    if not user_message:
+        return jsonify({"error": "Message is required"}), 400
+
+    try:
+        ai_response = generate_reply(user_message)
+        return jsonify({
+            "reply": ai_response
+        }), 200
+    except Exception as e:
+        print("AI error:", e)
+        return jsonify({
+            "error": "AI server error"
+        }), 500
 
 if __name__ == "__main__":
     app.run(debug=True)

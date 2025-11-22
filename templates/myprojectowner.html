@@ -306,12 +306,12 @@ async function deleteProject(projectId) {
   }
 }
 
-/* ===== تعديل المشروع (جاهزة لاحقاً) ===== */
-function editProject(projectId) {
-  window.location.href = `editproject.html?pid=${projectId}`;
-}
+
 function goToOwner(projectId) {
   window.location.href = `/projectdetailsowner/${projectId}`;
+}
+function editProject(projectId) {
+  window.location.href = `/createproject?id=${projectId}&basic=1`;
 }
 
 </script>

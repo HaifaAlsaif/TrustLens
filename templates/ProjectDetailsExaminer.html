@@ -592,6 +592,10 @@
     .task-button:active {
       transform: scale(0.95);
     }
+    #examinersList {
+      visibility: hidden;
+   }
+   
   </style>
   
   </head>
@@ -783,7 +787,11 @@ async function loadExaminers() {
 }
 
 // استدعاءها بعد ما تتحمل الصفحة
-loadProjectDetails().then(() => loadExaminers());
+loadProjectDetails().then(() => {
+  loadExaminers();
+  loadExaminerTasks();
+});
+
   </script>
   <script>
     async function loadExaminerTasks() {
@@ -802,7 +810,7 @@ loadProjectDetails().then(() => loadExaminers());
       const grid = document.querySelector(".tasks-grid");
       grid.innerHTML = "";
     
-      tasks.forEach(task => {
+      tasks.forEach(task => { 
     
         const card = document.createElement("article");
         card.className = "task-card";
@@ -828,22 +836,25 @@ loadProjectDetails().then(() => loadExaminers());
             </div>
           `;
         }
-    
-        // assignment box
-        const assignedToYou = task.is_assigned_to_you;
-    
-        let buttonHTML = "";
-        if (task.status === "completed") {
-          buttonHTML = `<button class="task-button completed completed-btn">Completed</button>`;
-        } else if (assignedToYou) {
-          buttonHTML = `
-            <button class="task-button primary ${task.status === 'progress' ? 'continue' : 'join'}">
-              ${task.status === "progress" ? "Continue" : "Join"}
-            </button>`;
-        } else {
-          buttonHTML = `<button class="task-button completed completed-btn">Not Assigned</button>`;
-        }
-    
+// assignment variables
+const assignedToYou = task.is_assigned_to_you;
+let buttonHTML = "";
+
+// زرار المهمة
+if (task.status === "completed") {
+  buttonHTML = `<button class="task-button completed completed-btn">Completed</button>`;
+} 
+else if (assignedToYou) {
+  buttonHTML = `
+    <button class="task-button primary ${task.status === 'progress' ? 'continue' : 'join'}"
+            onclick="goToTask('${task.task_id}', '${task.conversation_type}')">
+      ${task.status === "progress" ? "Continue" : "Join"}
+    </button>`;
+} 
+else {
+  buttonHTML = `<button class="task-button completed completed-btn">Not Assigned</button>`;
+}
+
         // بناء الكارد كاملاً
         card.innerHTML = `
           <h4 class="task-title">${task.task_name}</h4>
@@ -861,11 +872,24 @@ loadProjectDetails().then(() => loadExaminers());
         grid.appendChild(card);
       });
     }
+    function goToTask(taskId, type) {
+      if (type === "human-ai") {
+          window.location.href = `/conversation-ai?taskId=${taskId}`;
+      }
+      else if (type === "human-human") {
+          window.location.href = `/conversation-hh?taskId=${taskId}`;
+      }
+      else {
+          alert("Invalid conversation type");
+      }
+    }
     
-      
-    loadProjectDetails()
-      .then(() => loadExaminers())
-      .then(() => loadExaminerTasks());
+
+
+    
+
+
+    
     </script>
     
 </body>
