@@ -81,6 +81,348 @@
     .btn-accept:hover{transform:translateY(-1px);box-shadow:0 4px 8px #00000019}
     .btn-decline{background:#fff;color:#e7000b;font-size:14px;padding:6px 12px;border-radius:8px;border:0 solid #fa2b3666;cursor:pointer;transition:background .2s}
     .btn-decline:hover{background:#fef2f2}
+
+
+
+    /* ===== HEADER موحّد لكل الصفحات ===== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 16px 32px;
+  margin-top: 8px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+}
+
+.brand-text {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 23px;
+  background: linear-gradient(90deg, #00b8da 0%, #155cfb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* زر اللغة */
+.language-selector {
+  padding: 4px 10px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  color: #0a0a0a;
+  background: #ffffff;
+}
+
+/* زر الثيم */
+.theme-toggle-wrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle-wrapper img {
+  width: 40px;
+  height: 40px;
+}
+
+.theme-toggle-btn,
+.theme-toggle-btn:focus,
+.theme-toggle-btn:active {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent;
+}
+
+/* البروفايل */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  position: relative;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+}
+
+.user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.user-info h3 {
+  font-size: 14px;
+  font-weight: 400;
+  color: #0a0a0a;
+}
+
+.user-info p {
+  font-size: 12px;
+  color: #717182;
+  text-transform: capitalize;
+}
+
+/* منيو البروفايل */
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 20px #0000001a;
+  padding: 6px 0;
+  width: 190px;
+  margin-top: 4px;
+  display: none;
+  z-index: 9999;
+}
+
+.user-dropdown.show {
+  display: block;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #0a0a0a;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background: #f3f4f6;
+}
+
+.dropdown-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #00000019;
+  margin: 4px 0;
+}
+
+/* ===== Dark Mode للهيدر والملف كامل ===== */
+body.dark {
+  background: #050608 !important;
+  color: #f9fafb !important;
+}
+
+body.dark .header {
+  background: #050608 !important;
+  border-bottom: 1px solid #111827 !important;
+}
+
+body.dark .language-selector {
+  border-color: #4b5563;
+  background: #111827;
+  color: #f9fafb;
+}
+
+body.dark .user-info h3 {
+  color: #ffffff !important;
+}
+
+body.dark .user-info p {
+  color: #9ca3af !important;
+}
+
+/* منيو البروفايل في الدارك مود */
+body.dark .user-dropdown {
+  background-color: #050608;
+  border: 1px solid #111827;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+}
+
+body.dark .dropdown-item {
+  color: #f9fafb;
+}
+
+body.dark .dropdown-item:hover {
+  background-color: #111827;
+}
+
+body.dark .dropdown-divider {
+  background: #111827;
+}
+
+body.dark .dropdown-item img.dropdown-icon {
+  filter: brightness(0) invert(1);
+}
+/* ===== Dark mode – Invitations page ===== */
+
+/* خلفية عامة */
+body.dark {
+  background: #050608 !important;
+  color: #f9fafb !important;
+}
+
+/* الهيدر فوق */
+body.dark .header {
+  background: #050608 !important;
+  border-bottom: 1px solid #111827 !important;
+}
+
+body.dark .language-selector {
+  border-color: #4b5563;
+  background: #111827;
+  color: #f9fafb;
+}
+
+/* نص البروفايل */
+body.dark .user-info h3 {
+  color: #ffffff !important;
+}
+body.dark .user-info p {
+  color: #9ca3af !important;
+}
+
+/* منيو البروفايل */
+body.dark .user-dropdown {
+  background-color: #050608;
+  border: 1px solid #111827;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+}
+body.dark .dropdown-item {
+  color: #f9fafb;
+}
+body.dark .dropdown-item:hover {
+  background-color: #111827;
+}
+body.dark .dropdown-divider {
+  background: #111827;
+}
+body.dark .dropdown-item img.dropdown-icon {
+  filter: brightness(0) invert(1);
+}
+
+/* السايدبار الأبيض */
+body.dark .sidebar {
+  background: #050608 !important;
+  border-right: 1px solid #111827 !important;
+}
+body.dark .menu-text {
+  color: #e5e7eb !important;
+}
+body.dark .menu-item.active {
+  background: #1b2333 !important;
+  border-left: 3px solid #4c84ff !important;
+  color: #ffffff !important;
+}
+body.dark .menu-item.active img.menu-icon {
+  filter: brightness(0) invert(1) drop-shadow(0 0 4px #4c84ff);
+}
+body.dark .menu-item:hover {
+  background: #2b2f3a !important;
+  color: #ffffff !important;
+}
+body.dark .sidebar img.menu-icon {
+  filter: brightness(0) invert(1) !important;
+}
+
+/* خلفية المحتوى */
+body.dark .main-content {
+  background: #050608 !important;
+}
+
+/* بلوك "Welcome back" */
+body.dark .welcome-section {
+  background: linear-gradient(90deg,#020617 0%,#020617 40%,#020617 100%) !important;
+  border: 1px solid #111827 !important;
+  box-shadow: none !important;
+}
+body.dark .welcome-title,
+body.dark .welcome-subtitle {
+  color: #f9fafb !important;
+}
+
+/* كرت Project Invitations */
+body.dark .invitations-card {
+  background: #050608 !important;
+  border: 1px solid #111827 !important;
+  box-shadow: none !important;
+}
+body.dark .invitations-title,
+body.dark .invitations-description {
+  color: #f9fafb !important;
+}
+
+/* البادج حق 0 Pending */
+body.dark .pending-badge {
+  background: #1f2933 !important;
+  border-color: #4b5563 !important;
+  color: #e5e7eb !important;
+}
+
+/* كروت الدعوات نفسها */
+body.dark .invitation-item {
+  background: #050815 !important;
+  border: 1px solid #111827 !important;
+}
+body.dark .invitation-project-title,
+body.dark .invitation-from {
+  color: #e5e7eb !important;
+}
+
+/* الأزرار */
+body.dark .btn-accept {
+  background: linear-gradient(90deg,#22c55e 0%,#16a34a 100%) !important;
+  color: #ffffff !important;
+}
+body.dark .btn-decline {
+  background: transparent !important;
+  color: #fecaca !important;
+  border: 1px solid #f97373 !important;
+}
+
   </style>
 </head>
 <body>
@@ -88,36 +430,70 @@
   <!-- ===== Header المطابق لـ Dashboard ===== -->
   <header class="header">
     <div class="header-left">
-      <img src="{{ url_for('static', filename='images/img_header.svg') }}" alt="TrustLens Logo" class="logo">
+      <img src="{{ url_for('static', filename='images/img_header.svg') }}" alt="TrustLens Logo" class="logo" />
       <div class="brand-text">TrustLens</div>
     </div>
+  
     <div class="header-right">
+      <!-- EN badge -->
       <div class="language-selector">EN</div>
-      <img src="{{ url_for('static', filename='images/img_buttonlight.png') }}" id="themeToggle" class="notification-btn" style="cursor:pointer;">
-      <div class="user-profile" onclick="toggleUserDropdown()">
-        <img src="{{ url_for('static', filename='images/user-profile.png') }}" alt="Avatar" class="user-avatar">
+  
+      <!-- Theme toggle -->
+      <div class="theme-toggle-wrapper">
+        <img
+          src="{{ url_for('static', filename='images/img_buttonDark.svg') }}"
+          alt="Toggle Theme"
+          id="themeToggle"
+          class="theme-toggle-btn"
+        />
+      </div>
+  
+      <!-- User profile -->
+      <div class="user-profile" onclick="toggleUserDropdown()" id="userProfile">
+        <div class="user-avatar">
+          <img src="{{ url_for('static', filename='images/user-profile.png') }}" alt="User avatar" class="user-avatar-img" />
+        </div>
+  
         <div class="user-info">
           <h3>{{ user_name }}</h3>
           <p>Examiner</p>
         </div>
+  
         <div class="user-dropdown" id="userDropdown">
-          <a href="/" class="dropdown-item"><img src="{{ url_for('static', filename='images/img_iconhome.svg') }}" class="dropdown-icon"> Home</a>
+          <a href="/" class="dropdown-item">
+            <img src="{{ url_for('static', filename='images/img_iconhome.svg') }}" class="dropdown-icon" alt="Home" />
+            Home
+          </a>
           <div class="dropdown-divider"></div>
-          <a href="/profile" class="dropdown-item"><img src="{{ url_for('static', filename='images/img_profile.svg') }}" class="dropdown-icon"> Profile</a>
-          <a href="Settings.html" class="dropdown-item"><img src="{{ url_for('static', filename='images/img_icon_Settings.svg') }}" class="dropdown-icon"> Settings</a>
+  
+          <a href="/profile" class="dropdown-item">
+            <img src="{{ url_for('static', filename='images/img_profile.svg') }}" class="dropdown-icon" alt="Profile" />
+            Profile
+          </a>
+  
+          <a href="/settings" class="dropdown-item">
+            <img src="{{ url_for('static', filename='images/img_icon_Settings.svg') }}" class="dropdown-icon" alt="Settings" />
+            Settings
+          </a>
+  
           <div class="dropdown-divider"></div>
-          <a href="/" class="dropdown-item"><img src="{{ url_for('static', filename='images/img_logout.png') }}" class="dropdown-icon"> Logout</a>
+  
+          <a href="/logout" class="dropdown-item">
+            <img src="{{ url_for('static', filename='images/img_logout.png') }}" class="dropdown-icon" alt="Logout" />
+            Logout
+          </a>
         </div>
       </div>
     </div>
   </header>
+  
 
   <div class="content-wrapper">
     <!-- ===== Sidebar ===== -->
     <aside class="sidebar">
       <nav class="sidebar-menu">
         <div class="menu-item" onclick="window.location.href='/'"><img src="{{ url_for('static', filename='images/img_iconhome.svg') }}" class="menu-icon"><span class="menu-text">Home</span></div>
-        <div class="menu-item" onclick="window.location.href='Examinerdashboard.html'"><img src="{{ url_for('static', filename='images/img_File.svg') }}" class="menu-icon"><span class="menu-text">Dashboard</span></div>
+        <div class="menu-item" onclick="window.location.href='/examinerdashboard'"><img src="{{ url_for('static', filename='images/img_File.svg') }}" class="menu-icon"><span class="menu-text">Dashboard</span></div>
         <div class="menu-item active" onclick="window.location.href='/invitation'"><img src="{{ url_for('static', filename='images/img_invitation.svg') }}" class="menu-icon"><span class="menu-text">Invitations</span></div>
         <div class="menu-item" onclick="window.location.href='/myprojectexaminer'"><img src="{{ url_for('static', filename='images/img_File.svg') }}" class="menu-icon"><span class="menu-text">My Projects</span></div>
         <div class="menu-item" onclick="window.location.href='/feedback'"><img src="{{ url_for('static', filename='images/img_Explainability2.png') }}" class="menu-icon"><span class="menu-text">Feedback</span></div>

@@ -39,23 +39,6 @@
  min-height: 100vh;
  }
  
- .header {
- display: flex;
- justify-content: space-between;
- align-items: center;
- width: 100%;
- padding: 16px;
- margin-top: 16px;
- margin-left: 140px;
- margin-right: 128px;
- }
- 
- .header-left {
- display: flex;
- gap: 8px;
- justify-content: center;
- align-items: center;
- }
  
  .logo {
  width: 32px;
@@ -72,53 +55,6 @@
  background-clip: text;
  }
  
- .header-right {
- display: flex;
- gap: 12px;
- align-items: center;
- }
- 
- .language-selector {
- padding: 6px;
- font-size: 14px;
- color: #0a0a0a;
- }
- 
- .notification-btn {
- width: 36px;
- height: 36px;
- }
- 
- .user-profile {
- display: flex;
- gap: 8px;
- align-items: center;
- }
- 
- .user-avatar {
- width: 40px;
- height: 40px;
- background: linear-gradient(135deg, #00b8da 0%, #155cfb 100%);
- border-radius: 20px;
- display: flex;
- align-items: center;
- justify-content: center;
- color: #ffffff;
- font-size: 16px;
- font-weight: 400;
- }
- 
- .user-info h3 {
- font-size: 14px;
- font-weight: 400;
- color: #0a0a0a;
- }
- 
- .user-info p {
- font-size: 12px;
- color: #717182;
- text-transform: capitalize;
- }
  
  .content-wrapper {
  display: flex;
@@ -920,35 +856,10 @@
  border-top: 1px solid rgba(255, 161, 162, 0.3);
  }
  
- .user-dropdown {
- position: absolute;
- top: 100%;
- right: 0;
- background-color: #ffffff;
- border: 0 solid #00000019;
- border-radius: 8px;
- box-shadow: 0px 2px 4px #00000019;
- padding: 4px 0;
- margin-top: 4px;
- margin-right: 98px;
- width: 190px;
- display: none;
- }
- 
  .user-dropdown.show {
  display: block;
  }
  
- .dropdown-item {
- display: flex;
- align-items: center;
- gap: 16px;
- padding: 4px 8px;
- font-size: 14px;
- color: #0a0a0a;
- text-decoration: none;
- transition: background-color 0.3s ease;
- }
  
  .dropdown-item:hover {
  background-color: #f3f4f6;
@@ -959,11 +870,6 @@
  height: 16px;
  }
  
- .dropdown-divider {
- height: 1px;
- background-color: #00000019;
- margin: 4px 0;
- }
  
  /* Typography */
  h1 {
@@ -1279,6 +1185,267 @@ body.dark {
  border-right: 3px solid #4c84ff; /* خط ملون على الحافة اليمنى */
  cursor: default; /* يشير أنه غير قابل للنقر مرة ثانية */
  }
+ /* ====== HEADER + PROFILE (Dashboard) ====== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 16px 32px;
+  margin-top: 8px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb; /* الخط الخفيف تحت الهيدر */
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+}
+
+.brand-text {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 23px;
+  background: linear-gradient(90deg, #00b8da 0%, #155cfb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: 8px;
+}
+
+/* اللغة */
+.language-selector {
+  padding: 4px 10px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  color: #0a0a0a;
+  background: #ffffff;
+}
+
+/* زر الثيم / الإشعار */
+.notification-btn {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+/* البروفايل */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  position: relative; /* عشان الدروب داون */
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  object-fit: cover;
+  display: block;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.user-info h3 {
+  font-size: 14px;
+  font-weight: 400;
+  color: #0a0a0a;
+}
+
+.user-info p {
+  font-size: 12px;
+  color: #717182;
+  text-transform: capitalize;
+}
+
+/* منيو البروفايل */
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 10px 20px #0000001a;
+  padding: 6px 0;
+  width: 190px;
+  margin-top: 4px;
+  display: none;
+  z-index: 9999;
+}
+
+.user-dropdown.show {
+  display: block;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #0a0a0a;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background: #f3f4f6;
+}
+
+.dropdown-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #00000019;
+  margin: 4px 0;
+}
+
+/* ====== Dark Mode للهيدر والبروفايل ====== */
+body.dark .header {
+  background: #050608 !important;
+  border-bottom: 1px solid #111827 !important;
+}
+
+body.dark .language-selector {
+  border-color: #4b5563;
+  background: #111827;
+  color: #f9fafb;
+}
+
+body.dark .user-info h3 {
+  color: #ffffff !important;
+}
+
+body.dark .user-info p {
+  color: #9ca3af !important;
+}
+
+/* منيو البروفايل في الدارك مود */
+body.dark .user-dropdown {
+  background-color: #050608 !important;
+  border: 1px solid #1f2937 !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.75) !important;
+}
+
+body.dark .dropdown-item {
+  color: #f9fafb !important;
+}
+
+body.dark .dropdown-item:hover {
+  background-color: #111827 !important;
+}
+
+body.dark .dropdown-divider {
+  background: #111827 !important;
+}
+
+body.dark .dropdown-item img.dropdown-icon {
+  filter: brightness(0) invert(1) !important;
+}
+/* ------- إصلاح الحواف البيضاء عن العناصر المحددة -------- */
+.sidebar-menu .menu-item {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* إزالة الفوكس الأبيض اللي يظهر حول الأيقونات */
+.menu-item:focus,
+.menu-item img:focus {
+    outline: none !important;
+    border: none !important;
+}
+
+/* ------- ستايل الزر المختار (Active Item) للدارك مود ------- */
+body.dark .sidebar-menu .menu-item.active {
+    background: #1f1f1f; /* خلفية غامقة ناعمة */
+    border-right: 3px solid #4c84ff; /* نفس اللي عندك */
+    border-radius: 10px; /* بدون حواف بيضاء */
+}
+
+/* ------- تعديل الـHover في الدارك مود ------- */
+body.dark .sidebar-menu .menu-item:hover {
+    background: #2d2d2d; /* لون خفيف بدال الأبيض */
+    border-radius: 10px;
+    transition: 0.2s ease;
+}
+
+/* ------- تخصيص زر الوضع الليلي لمنع ظهور حدود بيضاء ------- */
+#themeToggle {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+/* ---- تحسين الأيقونات في الوضع الداكن ---- */
+body.dark .menu-icon,
+body.dark .dropdown-icon,
+body.dark .action-icon {
+    filter: brightness(2.2);
+    opacity: 1;
+}
+
+/* زر الوضع الداكن بدون الحواف البيضا */
+.notification-btn {
+    border: none !important;
+    outline: none !important;
+    padding: 0;
+}
+
+.notification-btn:focus,
+.notification-btn:active {
+    border: none !important;
+    outline: none !important;
+}
+
+/* تحسين هوفر السايدبار للوضع الداكن */
+body.dark .menu-item:hover {
+    background: #1c1c1e !important;
+    transition: 0.3s ease;
+}
+
+/* إزالة الفورق البيضاء داخل الدارك مود خصوصًا حول الصور */
+body.dark img {
+    background: transparent !important;
+}
+
+/* هيدر زر الدارك مود يصير نظيف */
+#themeToggle {
+    border-radius: 10px;
+    background: none !important;
+}
+/* -------- Fix Menu Icons in Dark Mode -------- */
+body.dark .menu-icon,
+body.dark .dropdown-icon {
+    filter: brightness(0) invert(1) contrast(1.2); 
+}
  </style>
  
  
@@ -1295,8 +1462,8 @@ body.dark {
  <div class="language-selector">EN</div>
  
  <!-- زر تبديل الوضع المظلم/الفاتح -->
-<img src="../static/images/img_buttonlight.png" alt="Toggle Dark Mode" id="themeToggle" class="notification-btn" style="cursor:pointer;">
-<div class="user-profile" onclick="toggleUserDropdown()">
+ <img src="../static/images/img_buttonDark.svg" alt="Toggle Dark Mode" id="themeToggle" class="notification-btn" style="cursor:pointer;">
+ <div class="user-profile" onclick="toggleUserDropdown()">
  <img src="../static/images/user-profile.png" alt="Avatar" class="user-avatar">
  <div class="user-info">
  <h3>{{ user_name }}</h3>
@@ -1334,7 +1501,7 @@ body.dark {
  </div>
  
  
- <div class="menu-item active" onclick="window.location.href='ExaminerDashord.html'">
+ <div class="menu-item active" onclick="window.location.href='/examinerdashboard'">
  <img src="../static/images/img_File.svg" alt="Dashboard" class="menu-icon">
  <span class="menu-text">Dashboard</span>
  </div>
@@ -1583,28 +1750,31 @@ Feedback
  element.addEventListener('mouseup', function() {
  this.style.transform = 'translateY(-1px)';
  });
- });
- // ---------- Theme Toggle ----------
+ });// ---------- Theme Toggle ----------
 const themeToggle = document.getElementById('themeToggle');
-const darkSrc = '../assets/static/img_buttonlight.png';
-const lightSrc = '../assets/static/img_buttonDark.svg';
+// لما يكون الوضع "دارك" نعرض أيقونة الشمس
+const darkSrc  = '../static/images/img_buttonlight.png';
+// لما يكون الوضع "لايت" نعرض أيقونة القمر
+const lightSrc = '../static/images/img_buttonDark.svg';
 
 // استرجاع الوضع المحفوظ (إن وجد)
-if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
- document.body.classList.add('dark');
- themeToggle.src = darkSrc;
+if (
+  localStorage.theme === 'dark' ||
+  (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+) {
+  document.body.classList.add('dark');
+  themeToggle.src = darkSrc;
 } else {
- themeToggle.src = lightSrc;
+  document.body.classList.remove('dark');
+  themeToggle.src = lightSrc;
 }
 
 // تبديل الوضع عند النقر
 themeToggle.addEventListener('click', () => {
- const isDark = document.body.classList.toggle('dark');
- themeToggle.src = isDark ? darkSrc : lightSrc;
- localStorage.theme = isDark ? 'dark' : 'light';
+  const isDark = document.body.classList.toggle('dark');
+  themeToggle.src = isDark ? darkSrc : lightSrc;
+  localStorage.theme = isDark ? 'dark' : 'light';
 });
-
-
  </script>
 </body>
 </html>

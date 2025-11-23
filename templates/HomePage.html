@@ -1147,6 +1147,411 @@
 .team-top-row .team-card .team-member-avatar {
   margin: 0 auto 34px;
 }
+.footer-bg-circle-1,
+.footer-bg-circle-2 {
+  display: none !important;
+}
+.signup-btn {
+  text-decoration: none !important; 
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* لو فيه hover أو focus يسوي underline */
+.signup-btn:hover,
+.signup-btn:focus,
+.signup-btn:active {
+  text-decoration: none !important;
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* إزالة الحواف البيضاء من زر الثيم والـ signup لما يصير dark mode */
+button, a {
+  outline: none !important;
+  border: none !important;
+}
+a {
+  text-decoration: none;
+}
+
+
+.theme-toggle-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  overflow: hidden;           /* هنا السحر – يقطع الزوايا البيضا */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* ===== Dark mode – full page polish ===== */
+[data-theme="dark"] body {
+  background:#050608 !important;   /* خلفية سوداء كاملة */
+}
+
+/* نخلي الكونتينر ياخذ عرض الشاشة بالكامل بالدارك مود عشان تروح الحواف الرماديّة */
+[data-theme="dark"] .container {
+  max-width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+
+/* الهيدر فوق */
+[data-theme="dark"] .header {
+  background:#050608 !important;
+  border-bottom:1px solid #111827 !important;
+}
+
+[data-theme="dark"] .logo-text {
+  color:#e5e7eb;
+}
+
+[data-theme="dark"] .nav-item {
+  color:#9ca3af;
+}
+
+[data-theme="dark"] .nav-item.active,
+[data-theme="dark"] .nav-item:hover {
+  color:#ffffff;
+}
+
+/* الهيرو الكبير */
+[data-theme="dark"] .hero-section {
+  background:radial-gradient(circle at top left,#111827 0%,#020617 40%,#020617 100%) !important;
+}
+
+[data-theme="dark"] .hero-title {
+  color:#e5e7eb;
+}
+
+[data-theme="dark"] .hero-description {
+  color:#9ca3af;
+}
+
+[data-theme="dark"] .platform-badge {
+  background:#0b1220;
+  border-color:#1d4ed8;
+  color:#60a5fa;
+}
+
+/* الكروت (About / Features / Target Users / Team / Contact) */
+[data-theme="dark"] .about-section,
+[data-theme="dark"] .features-section,
+[data-theme="dark"] .target-users-section,
+[data-theme="dark"] .team-section,
+[data-theme="dark"] .contact-section {
+  background:#020617;
+}
+
+[data-theme="dark"] .about-card,
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .target-user-card,
+[data-theme="dark"] .team-card,
+[data-theme="dark"] .contact-form {
+  background:#050815 !important;
+  border:1px solid #111827 !important;
+  box-shadow:none !important;
+}
+
+[data-theme="dark"] .about-title,
+[data-theme="dark"] .features-title,
+[data-theme="dark"] .target-users-title,
+[data-theme="dark"] .team-title,
+[data-theme="dark"] .contact-title {
+  color:#e5e7eb;
+}
+
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .feature-title,
+[data-theme="dark"] .target-user-title,
+[data-theme="dark"] .team-member-name,
+[data-theme="dark"] .form-label {
+  color:#e5e7eb;
+}
+
+[data-theme="dark"] .card-description,
+[data-theme="dark"] .feature-description,
+[data-theme="dark"] .target-user-description,
+[data-theme="dark"] .team-member-role,
+[data-theme="dark"] .team-member-department,
+[data-theme="dark"] .contact-subtitle {
+  color:#9ca3af;
+}
+
+/* حقول الفورم */
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-textarea {
+  background:#020617;
+  color:#e5e7eb;
+}
+
+/* الفوتر */
+[data-theme="dark"] .footer {
+  background:#020617;
+  border-top:1px solid #111827;
+}
+
+[data-theme="dark"] .footer-logo,
+[data-theme="dark"] .footer-links-title,
+[data-theme="dark"] .footer-social-title {
+  color:#e5e7eb;
+}
+
+[data-theme="dark"] .footer-description,
+[data-theme="dark"] .footer-link,
+[data-theme="dark"] .footer-copyright {
+  color:#9ca3af;
+}
+
+[data-theme="dark"] .footer-link:hover {
+  color:#ffffff;
+}
+
+/* الأيقونات في الفوتر */
+[data-theme="dark"] .social-icon {
+  background:#020617;
+}
+
+/* زر الـ FAB تحت */
+[data-theme="dark"] .fab {
+  box-shadow:0 10px 30px rgba(15,23,42,0.9);
+}
+/* ===== Glowing icons & cards in DARK mode ===== */
+
+/* خلفية مشعة خفيفة للكروت نفسها */
+[data-theme="dark"] .about-card,
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .target-user-card,
+[data-theme="dark"] .team-card,
+[data-theme="dark"] .contact-form {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.9);
+}
+
+[data-theme="dark"] .about-card::before,
+[data-theme="dark"] .feature-card::before,
+[data-theme="dark"] .target-user-card::before,
+[data-theme="dark"] .team-card::before,
+[data-theme="dark"] .contact-form::before {
+  content: "";
+  position: absolute;
+  inset: -40px;
+  border-radius: inherit;
+  background: radial-gradient(circle at top left,
+              rgba(59,130,246,0.35),
+              transparent 60%);
+  filter: blur(26px);
+  opacity: 0.9;
+  z-index: -1;
+}
+
+/* Glow عام للأيقونات */
+[data-theme="dark"] .feature-icon,
+[data-theme="dark"] .target-user-icon,
+[data-theme="dark"] .team-member-avatar,
+[data-theme="dark"] .social-icon,
+[data-theme="dark"] .fab {
+  box-shadow: 0 0 26px rgba(59,130,246,0.65);
+}
+
+/* ألوان مختلفة لكل Feature card على حسب الأيقونة */
+[data-theme="dark"] .features-grid .feature-card:nth-child(1) .feature-icon {
+  box-shadow: 0 0 30px rgba(56,189,248,0.8);   /* أزرق سماوي */
+}
+
+[data-theme="dark"] .features-grid .feature-card:nth-child(2) .feature-icon {
+  box-shadow: 0 0 30px rgba(236,72,153,0.85);  /* وردي */
+}
+
+[data-theme="dark"] .features-grid .feature-card:nth-child(3) .feature-icon {
+  box-shadow: 0 0 30px rgba(74,222,128,0.85);  /* أخضر */
+}
+
+[data-theme="dark"] .features-grid .feature-card:nth-child(4) .feature-icon {
+  box-shadow: 0 0 30px rgba(249,115,22,0.9);   /* برتقالي */
+}
+
+/* Glow ملوّن حسب نوع الـ Target User */
+[data-theme="dark"] .researchers-icon {
+  box-shadow: 0 0 32px rgba(56,189,248,0.85);
+}
+
+[data-theme="dark"] .platform-owners-icon {
+  box-shadow: 0 0 32px rgba(236,72,153,0.9);
+}
+
+[data-theme="dark"] .examiners-icon {
+  box-shadow: 0 0 32px rgba(74,222,128,0.9);
+}
+
+/* الفريق و زر الصعود */
+[data-theme="dark"] .team-member-avatar {
+  box-shadow: 0 0 32px rgba(59,130,246,0.9);
+}
+
+[data-theme="dark"] .fab {
+  box-shadow: 0 18px 40px rgba(37,99,235,0.9),
+              0 0 60px rgba(56,189,248,0.8);
+}
+
+
+/* منطقة الايقونات - تعديل اللمعة + شكل الخلفية */
+.footer-social-icons .social-icon {
+  width: 55px;
+  height: 55px;
+  background: #000000; /* صارت سودة بدل بيضا */
+  border-radius: 50%;
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 0.25s ease-in-out;
+  filter: drop-shadow(0px 0px 8px rgba(0, 132, 255, 0.15)); /* خفيفة جدًا */
+}
+
+/* لما تحطين المؤشر عليها */
+.footer-social-icons .social-icon:hover {
+  transform: scale(1.07);
+  filter: drop-shadow(0px 0px 14px rgba(0, 132, 255, 0.25));
+}
+
+/* تعديل لون الآيقونات نفسها */
+.footer-social-icons .social-icon img {
+  filter: invert(80%) brightness(90%); /* يعطي رمادي ناعم زي GitHub */
+  opacity: 0.9;
+  transition: .2s;
+}
+
+/* لما يتم الـ Hover على الأيقونة */
+.footer-social-icons .social-icon:hover img {
+  opacity: 1;
+  filter: invert(100%) brightness(120%); /* يلمع شوي بشكل بسيط مره */
+}
+
+/* ====== Fix Social Icons Design ====== */
+
+[data-theme="dark"] .footer-social-icons .social-icon {
+  width: 64px;
+  height: 64px;
+  background: #000000; /* أسود بالكامل */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .25s ease;
+  filter: none !important; /* إزالة أي تأثيرات قديمة */
+  box-shadow: none !important; /* بدون لمعة */
+}
+
+/* شكل الأيقونات */
+[data-theme="dark"] .footer-social-icons .social-icon img {
+  width: 28px;
+  height: 28px;
+  opacity: .6; /* رمادي مو واضح مرة */
+  filter: invert(1); /* يصير أبيض */
+  transition: .25s ease;
+}
+
+/* عند الهوفر — تحسين بسيط بدون لمعة */
+[data-theme="dark"] .footer-social-icons .social-icon:hover {
+  background: #111; /* درجة أغمق بشكل خفي */
+  transform: scale(1.05);
+}
+
+/* الأيقونة عند الهوفر تصير واضحة */
+[data-theme="dark"] .footer-social-icons .social-icon:hover img {
+  opacity: 1;
+}
+
+
+/* ====== Connect With Us – same as design screenshot ====== */
+
+/* الحاوية نفسها */
+.footer-social-icons {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+
+/* شكل الدوائر */
+.footer-social-icons .social-icon {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: #e5e7eb;       /* دائرة فاتحة */
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;          /* بدون لمعة */
+  filter: none;
+  transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+/* الأيقونات داخل الدائرة */
+.footer-social-icons .social-icon img {
+  width: 32px;
+  height: 32px;
+  opacity: 0.7;              /* رمادي ناعم */
+  filter: none;              /* بدون invert ولا شيء */
+}
+
+/* hover بسيط */
+.footer-social-icons .social-icon:hover {
+  transform: translateY(-2px);
+  background: #f4f4f5;       /* درجة أفتح بسيطة */
+}
+
+.footer-social-icons .social-icon:hover img {
+  opacity: 1;
+}
+
+/* نفس الشكل في الدارك مود بالضبط */
+[data-theme="dark"] .footer-social-icons .social-icon {
+  background: #e5e7eb;
+}
+
+[data-theme="dark"] .footer-social-icons .social-icon img {
+  filter: none;
+}
+/* ====== Final Soft Gray Social Icons (Same Size) ====== */
+
+[data-theme="dark"] .footer-social-icons .social-icon {
+  width: 48px;   /* نفس الحجم القديم */
+  height: 48px;
+  background: #e5e5e5; /* رمادي فاتح بدل الأسود */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .25s ease;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* لون الأيقونات */
+[data-theme="dark"] .footer-social-icons .social-icon img {
+  width: 22px;
+  height: 22px;
+  opacity: .55; /* رمادي رايق مو غامق */
+  filter: invert(0); /* يخليه رمادي مو أبيض */
+  transition: .25s ease;
+}
+
+/* عند الـ hover — بسيط جداً */
+[data-theme="dark"] .footer-social-icons .social-icon:hover {
+  background: #dcdcdc; /* نفس اللون بس أغمق درجة واحدة */
+  transform: scale(1.05);
+}
+
+/* الأيقونة تبان أكثر بالهوفر */
+[data-theme="dark"] .footer-social-icons .social-icon:hover img {
+  opacity: .85;
+}
   </style>
   
   <!-- CSS Variables for Dark Mode (تم إضافته فقط هنا) -->
@@ -1184,7 +1589,15 @@
       
       <div class="header-actions">
         <span class="language-selector" title="Translate">EN</span>
-        <img src="../static/images/img_buttonDark.svg" alt="Settings" class="header-icon" title="Dark mode">
+      
+        <!-- غلاف للأيقونة عشان يخفي الزوايا البيضا -->
+        <div class="theme-toggle-wrapper">
+          <img src="../static/images/img_buttonDark.svg"
+               alt="Settings"
+               class="header-icon"
+               title="Dark mode">
+        </div>
+      
         <a href="/login" class="signup-btn">Sign Up / Log In</a>
       </div>
     </header>

@@ -453,25 +453,26 @@
         justify-content: space-between;
         margin-top: 2rem;
       }
-
       .btn-secondary {
-        background: white;
-        color: #64748b;
-        padding: 0.75rem 1.5rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 0.95rem;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
+  background: linear-gradient(90deg, #00b8db 0%, #155dfc 100%);
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 184, 219, 0.3);
+}
 
-      .btn-secondary:hover {
-        border-color: #cbd5e1;
-        background: #f8fafc;
-      }
+.btn-secondary:hover {
+  background: linear-gradient(90deg, #0096b8 0%, #1149d4 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 184, 219, 0.3);
+}
 
       .btn-primary {
         display: flex;
@@ -577,6 +578,108 @@
         color: #64748b;
         font-size: 0.9rem;
       }
+/* ==== Theme (Light / Dark) ==== */
+:root{
+  --bg:#ffffff;
+  --text:#0f172a;
+  --card-bg:#ffffff;
+  --border:#e2e8f0;
+  --muted:#64748b;
+  --header-bg:#ffffff;
+  --footer-bg:linear-gradient(180deg,#ffffff 0%,rgba(236,236,240,0.2) 100%);
+}
+
+/* Dark mode variables (نطبّقها إذا على html كلاس dark) */
+:root.dark{
+  --bg:#111111;
+  --text:#f9fafb;
+  --card-bg:#18181b;
+  --border:#27272f;
+  --muted:#9ca3af;
+  --header-bg:#111111;
+  --footer-bg:linear-gradient(180deg,#020617 0%,#000000 100%);
+}
+
+/* تطبيق المتغيّرات */
+body{
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* الهيدر */
+header,
+.header{
+  background:var(--header-bg);
+}
+
+/* الكرت الأبيض حق الـ Create Account */
+.signup-container{
+  background:var(--card-bg);
+  color:var(--text);
+  border:1px solid var(--border);
+}
+
+/* الفوتر */
+footer{
+  background:var(--footer-bg);
+  border-top:1px solid var(--border);
+}
+.footer-bottom{
+  border-top:1px solid var(--border);
+  color:var(--muted);
+}
+.footer-section p,
+.footer-links a{
+  color:var(--muted);
+}
+
+/* النصوص في الدارك */
+.dark .footer-links a:hover{
+  color:#38bdf8;
+}
+.dark label,
+.dark .section-title,
+.dark .step-label{
+  color:var(--text);
+}
+
+/* دوائر الخطوات في الدارك */
+.dark .step-circle{
+  background:#1f2937;
+  color:#e5e7eb;
+}
+
+/* الحقول في الدارك مود */
+.dark input,
+.dark select,
+.dark textarea{
+  background:#020617;
+  border-color:#374151;
+  color:var(--text);
+}
+.dark input::placeholder,
+.dark textarea::placeholder{
+  color:#6b7280;
+}
+
+/* لون النص الثانوي */
+.dark .password-hint{
+  color:#9ca3af;
+}
+
+/* EN في الدارك */
+.dark .language-selector{
+  color:#e5e7eb;
+}
+
+/* زر الثيم – بدون حواف أو ظل */
+#theme-toggle{
+  border:none;
+  outline:none;
+  background:transparent;
+  box-shadow:none;
+  display:block;
+}
     </style>
   </head>
   <body>
@@ -584,18 +687,22 @@
 <style>
   /* هيدر فقط */
   .header{
-    background:#fff;
-    padding:10px 16px;
-    box-shadow:0 2px 4px rgba(0,0,0,.05);
-  }
-  .header .header-content{
-    max-width:1200px;
-    margin:0 auto;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-  }
+  /* يستخدم ألوان الثيم بدل الأبيض الثابت */
+  background:var(--header-bg);
+  padding:10px 16px;
+  box-shadow:0 2px 4px rgba(0,0,0,.05);
+}
+.header .language-selector{
+  font-size:14px;
+  font-weight:600;
+  color:var(--muted);   /* لون هادي في اللايت */
+  user-select:none;
+}
 
+/* في الدارك نخليه أبيض/فاتح */
+.dark .header .language-selector{
+  color:#e5e7eb;
+}
   /* إخفاء الناف القديم داخل الهيدر فقط */
   .header nav{ display:none !important; }
 
@@ -638,6 +745,147 @@
     box-shadow:0 10px 22px rgba(0,184,219,.35);
   }
   .header .home-btn img{ width:18px; height:18px; display:block; filter:brightness(100%); }
+
+
+
+  /* زر الهلال نفس الفيدباك لكن بدون وظيفة *//* زر الهلال (ثيم) كزر عادي بدون إطار */
+.notification-btn {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;      /* عشان يبين أنه قابل للضغط */
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;     /* يشيل الحواف البيضا من الصورة */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* صورة الهلال/الشمس */
+#theme-toggle {
+  width: 40px;
+  height: 40px;
+  display: block;
+}
+/* زر تبديل الثيم (شكل الهلال مثل الفيدباك) */
+.theme-toggle-wrapper {
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* تصغير الصورة قليلاً بدون اطراف */
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  display: block;
+  transition: transform .25s ease;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+}/* ========== Dark mode polish ========== */
+
+/* الكونتينر الرئيسي في الدارك */
+.dark .signup-container{
+  background: radial-gradient(circle at top, #020617 0%, #020617 40%, #020617 100%);
+  border: 1px solid #1f2937;
+  box-shadow: 0 30px 80px rgba(15,23,42,0.95);
+}
+
+/* عناوين الخطوة */
+.dark .section-title{
+  color: #e5e7eb;
+}
+.dark .section-subtitle{
+  color: #9ca3af;
+}
+
+/* كروت Project Owner / Examiner في الدارك */
+.dark .role-card{
+  background: radial-gradient(circle at top, rgba(56,189,248,0.06) 0%, #020617 55%, #020617 100%);
+  border-color: #1f2937;
+  box-shadow: 0 18px 40px rgba(15,23,42,0.9);
+}
+.dark .role-card h3{
+  color: #e5e7eb;
+}
+.dark .role-card p{
+  color: #9ca3af;
+}
+.dark .role-card.selected{
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 1px rgba(56,189,248,0.7),
+              0 20px 45px rgba(56,189,248,0.18);
+  background: radial-gradient(circle at top,
+    rgba(56,189,248,0.18) 0%,
+    #020617 50%,
+    #020617 100%
+  );
+}
+
+/* كرت الـ Volunteer في الدارك */
+.dark .volunteer-section{
+  background: radial-gradient(circle at top left,
+    rgba(56,189,248,0.10) 0%,
+    rgba(59,130,246,0.08) 25%,
+    #020617 70%
+  );
+  border: 1px solid rgba(56,189,248,0.6);
+  box-shadow: 0 20px 45px rgba(15,23,42,1);
+}
+
+.dark .volunteer-section .checkbox-wrapper label,
+.dark .volunteer-section .form-group label{
+  color: #e5e7eb;
+}
+
+/* لون صحّة الـ checkbox */
+.dark .volunteer-section .checkbox-wrapper input[type="checkbox"]{
+  accent-color: #38bdf8;
+}
+
+/* السيلكت و التكست إريا داخل كرت الـ volunteer */
+.dark #specialization,
+.dark #selfDescription{
+  background: #020617;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+.dark #specialization:focus,
+.dark #selfDescription:focus{
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 1px rgba(56,189,248,0.5);
+}
+.dark #selfDescription::placeholder{
+  color: #6b7280;
+}
+
+/* الأزرار في الدارك – نعطيها غلو خفيف */
+.dark .btn-primary,
+.dark .btn-secondary{
+  box-shadow: 0 14px 35px rgba(37,99,235,0.55);
+}
+.dark .btn-primary:hover,
+.dark .btn-secondary:hover{
+  box-shadow: 0 18px 40px rgba(37,99,235,0.7);
+}
+
+/* نص "Select Your Role" و الوصف فوقه */
+.dark h3.section-title{
+  color:#e5e7eb;
+}
+.dark p.section-subtitle{
+  color:#9ca3af;
+}
 </style>
 
 <header class="header">
@@ -653,8 +901,19 @@
     <!-- يمين: EN + زر الدارك مود + زر الهوم -->
     <div class="header-actions">
       <span class="nav-item language-selector">EN</span>
-      <img id="theme-toggle" src="../static/images/img_buttonDark.svg" alt="theme" class="theme-toggle">
-      <a href="/" class="home-btn" aria-label="Home">
+      <button class="notification-btn" type="button">
+       <div class="theme-toggle-wrapper">
+        <img
+        id="theme-toggle"
+        src="{{ url_for('static', filename='images/img_buttonDark.svg') }}"
+        data-light="{{ url_for('static', filename='images/img_buttonDark.svg') }}"
+        data-dark="{{ url_for('static', filename='images/img_buttonLight.png') }}"
+        alt="Theme icon"
+        class="theme-toggle"
+      />
+</div>
+      </button>
+   <a href="/" class="home-btn" aria-label="Home">
         <img src="../static/images/home.png" alt="Home">
       </a>
     </div>
@@ -1776,8 +2035,49 @@ window.togglePassword = togglePassword;
 
   // شغّلي شريط التقدم بدايةً
   updateProgress();
+
+
+  
     </script>
+<script>
+  const rootEl = document.documentElement;
+  const themeToggleImg = document.getElementById("theme-toggle");
+
+  const LIGHT_ICON = themeToggleImg.dataset.light;
+  const DARK_ICON  = themeToggleImg.dataset.dark;
+
+  function applyTheme(theme) {
+    if (theme === "dark") {
+      rootEl.classList.add("dark");
+      themeToggleImg.src = DARK_ICON;   // في الدارك نعرض أيقونة الضوء
+    } else {
+      rootEl.classList.remove("dark");
+      themeToggleImg.src = LIGHT_ICON;  // في اللايت نعرض أيقونة الليل
+    }
+  }
+
+  let currentTheme =
+    localStorage.getItem("tl-theme") ||
+    (window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light");
+
+  applyTheme(currentTheme);
+
+  if (themeToggleImg) {
+    themeToggleImg.addEventListener("click", () => {
+      currentTheme = currentTheme === "dark" ? "light" : "dark";
+      localStorage.setItem("tl-theme", currentTheme);
+      applyTheme(currentTheme);
+    });
+  }
+</script>
+
+
   </body>
+
+
 
 
 

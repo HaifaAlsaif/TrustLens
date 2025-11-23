@@ -1279,49 +1279,196 @@ body.dark {
  border-right: 3px solid #4c84ff; /* خط ملون على الحافة اليمنى */
  cursor: default; /* يشير أنه غير قابل للنقر مرة ثانية */
  }
+ /* ====== HEADER (Dashboard Owner) ====== */
+
+.header {
+  background: #ffffff;
+  padding: 10px 24px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+body.dark .header {
+  background: #050816;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .7);
+}
+.header-content {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 12px 120px 12px 96px; /* قللنا الـ left padding عشان اللوقو يطلع أقرب لليسار */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}.header {
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+/* دارك مود */
+body.dark .header {
+  background: #050816;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .7);
+}
+
+/* الشعار يسار */
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+}
+
+.brand-text {
+  font-size: 20px;
+  font-weight: 500;
+  background: linear-gradient(90deg, #00b8da 0%, #155cfb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* يمين الهيدر */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.language-selector {
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+body.dark .language-selector {
+  color: #e5e7eb;
+}
+
+/* زر الثيم (نفس ستايل الصفحات الثانية) */
+.theme-toggle-wrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  display: block;
+  transition: transform .2s ease;
+}
+
+.theme-toggle-wrapper:hover .theme-toggle {
+  transform: scale(1.08);
+}
+
+/* نترك ستايل البروفايل كما هو تقريبًا */
+.user-profile {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+}
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;       /* دائرة ناعمة */
+  object-fit: cover;          /* يضبط الصورة جوّا الدائرة */
+  display: block;
+  box-shadow: 0 0 0 2px #ffffff;  /* إطار أبيض بسيط (اختياري، تقدرين تشيلينه) */
+}
+
+.user-info h3 {
+  font-size: 14px;
+  font-weight: 400;
+  color: #0a0a0a;
+}
+
+.user-info p {
+  font-size: 12px;
+  color: #717182;
+  text-transform: capitalize;
+}
+
+body.dark .user-info h3,
+body.dark .user-info p {
+  color: #e5e7eb;
+}
  </style>
  
  
  </head>
 <body>
  <div class="main-container">
- <!-- Header -->
- <header class="header">
- <div class="header-left">
- <img src="../static/images/img_header.svg" alt="TrustLens Logo" class="logo">
- <div class="brand-text">TrustLens</div>
- </div>
- <div class="header-right">
- <div class="language-selector">EN</div>
- 
- <!-- زر تبديل الوضع المظلم/الفاتح -->
-<img src="../static/images/img_buttonlight.png" alt="Toggle Dark Mode" id="themeToggle" class="notification-btn" style="cursor:pointer;">
-<div class="user-profile" onclick="toggleUserDropdown()">
- <img src="../static/images/user-profile.png" alt="Avatar" class="user-avatar">
- <div class="user-info">
- <h3>{{ user_name }}</h3>
- <p>Project Owner</p>
-</div>
- 
- <!-- القائمة داخل نفس الحاوية -->
- <div class="user-dropdown" id="userDropdown">
- <a href="/"class="dropdown-item">
- <img src="../static/images/img_iconhome.svg" alt="Home" class="dropdown-icon"> Home
- </a>
- <div class="dropdown-divider"></div>
- <a href="/profile"class="dropdown-item">
- <img src="../static/images/img_profile.svg" alt="Profile" class="dropdown-icon"> Profile
- </a>
- <a href="Settings.html" class="dropdown-item">
- <img src="../static/images/img_icon_Settings.svg" alt="Settings" class="dropdown-icon"> Settings
- </a>
- <div class="dropdown-divider"></div>
- <a href= "/" class="dropdown-item">
- <img src="../static/images/img_logout.png" alt="Logout" class="dropdown-icon"> Logout
- </a>
- </div>
- </div>
- </header>
+ <!-- Header --><header class="header">
+  <div class="header-content">
+
+    <!-- يسار: لوقو TrustLens -->
+    <div class="logo-section">
+      <a href="/" aria-label="TrustLens Home" style="display:flex;align-items:center;gap:8px;text-decoration:none;">
+        <img src="../static/images/img_header.svg" alt="TrustLens Logo" class="logo">
+        <span class="brand-text">TrustLens</span>
+      </a>
+    </div>
+
+    <!-- يمين: EN + زر الثيم + البروفايل -->
+    <div class="header-actions">
+      <span class="language-selector">EN</span>
+
+      <div class="theme-toggle-wrapper">
+        <img
+          id="themeToggle"
+          src="../static/images/img_buttonDark.svg"
+          alt="Toggle Dark Mode"
+          class="theme-toggle"
+        >
+      </div>
+
+      <div class="user-profile" onclick="toggleUserDropdown()">
+        <img src="../static/images/user-profile.png" alt="Avatar" class="user-avatar">
+        <div class="user-info">
+          <h3>{{ user_name }}</h3>
+          <p>Project Owner</p>
+        </div>
+
+        <!-- نفس الدروب داون اللي كان عندك، ما غيّرته -->
+        <div class="user-dropdown" id="userDropdown">
+          <a href="/" class="dropdown-item">
+            <img src="../static/images/img_iconhome.svg" alt="Home" class="dropdown-icon"> Home
+          </a>
+          <div class="dropdown-divider"></div>
+          <a href="/profile" class="dropdown-item">
+            <img src="../static/images/img_profile.svg" alt="Profile" class="dropdown-icon"> Profile
+          </a>
+          <a href="Settings.html" class="dropdown-item">
+            <img src="../static/images/img_icon_Settings.svg" alt="Settings" class="dropdown-icon"> Settings
+          </a>
+          <div class="dropdown-divider"></div>
+          <a href="/" class="dropdown-item">
+            <img src="../static/images/img_logout.png" alt="Logout" class="dropdown-icon"> Logout
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</header>
 
  <div class="content-wrapper">
  <!-- Sidebar -->
@@ -1794,11 +1941,9 @@ body.dark {
  this.style.transform = 'translateY(-1px)';
  });
  });
- // ---------- Theme Toggle ----------
-const themeToggle = document.getElementById('themeToggle');
-const darkSrc = '../assets/static/img_buttonlight.png';
-const lightSrc = '../assets/static/img_buttonDark.svg';
-
+ // ---------- Theme Toggle ----------const themeToggle = document.getElementById('themeToggle');
+const darkSrc  = '../static/images/img_buttonLight.png'; // يظهر في وضع الدارك
+const lightSrc = '../static/images/img_buttonDark.svg';  // يظهر في وضع اللايت
 // استرجاع الوضع المحفوظ (إن وجد)
 if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
  document.body.classList.add('dark');

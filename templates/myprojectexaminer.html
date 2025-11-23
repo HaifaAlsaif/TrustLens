@@ -650,6 +650,635 @@
       cursor: pointer;
       transition: all 0.2s ease;
     }
+/* ===== HEADER نفس حق صفحة Feedback ===== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 16px 32px;
+  margin-top: 8px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;  /* الخط الفاصل الخفيف */
+}
+
+body.dark .header {
+  background: #111827;
+  border-bottom: 1px solid #333;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+}
+
+/* اللوقو يوضح في الدارك مود */
+body.dark .logo {
+  filter: brightness(0) invert(1);
+}
+
+.brand-text {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 23px;
+  background: linear-gradient(90deg, #00b8da 0%, #155cfb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: 8px;
+}
+
+.language-selector {
+  padding: 4px 10px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  color: #0a0a0a;
+  background: #ffffff;
+}
+
+body.dark .language-selector {
+  border-color: #4b5563;
+  background: #111827;
+  color: #f9fafb;
+}
+
+/* زر الثيم – مع قص الحواف البيضا */
+.theme-toggle-wrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle-wrapper img {
+  width: 40px;
+  height: 40px;
+}
+
+body.dark .theme-toggle-wrapper {
+  background: #111827;
+}
+
+.notification-btn,
+.notification-btn:focus,
+.notification-btn:focus-visible {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent;
+}
+
+/* البروفايل */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  position: relative;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+}
+
+.user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.user-info h3 {
+  font-size: 14px;
+  font-weight: 400;
+  color: #0a0a0a;
+}
+
+.user-info p {
+  font-size: 12px;
+  color: #717182;
+  text-transform: capitalize;
+}
+
+body.dark .user-info h3 {
+  color: #ffffff !important;
+}
+
+body.dark .user-info p {
+  color: #9ca3af !important;
+}
+
+/* منيو البروفايل + حجم أيقونة Logout */
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 20px #0000001a;
+  padding: 6px 0;
+  width: 190px;
+  margin-top: 4px;
+  display: none;
+  z-index: 9999;
+}
+
+.user-dropdown.show {
+  display: block;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #0a0a0a;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background: #f3f4f6;
+}
+
+/* 👇 هنا نصغّر كل الأيقونات بما فيها logout */
+.dropdown-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #00000019;
+  margin: 4px 0;
+}
+
+/* خلفية عامة للدارك مود */
+body.dark {
+  background: #0b0b0f;
+  color: #ffffff;
+  transition: all 0.25s ease-in-out;
+}
+
+/* السايدبار في الدارك مود */
+body.dark .sidebar {
+  background: #0d0d0d !important;
+  border-right: 1px solid #333 !important;
+}
+
+body.dark .menu-text {
+  color: #e5e7eb;
+}
+
+/* الكرت حق My Projects + الجدول في الدارك مود */
+body.dark .projects-section {
+  background: #1d1d1f !important;
+  border: 1px solid #6f32ff29;
+  box-shadow: 0 0 12px rgba(0, 255, 120, 0.08);
+}
+
+body.dark .table-header {
+  background: #111827;
+  border-bottom: 1px solid #333;
+}
+
+body.dark .table-header th,
+body.dark .table-cell,
+body.dark .project-name,
+body.dark .owner-name {
+  color: #f9fafb;
+}
+
+body.dark .view-button {
+  background: #111827;
+  color: #ffffff;
+  border: 1px solid #333;
+}
+
+body.dark .view-button:hover {
+  background: #1f2933;
+}
+
+/* البادجات */
+body.dark .category-conversation,
+body.dark .category-news {
+  background: #062b19;
+  border-color: #00ff90;
+  color: #9dffd0;
+}
+/* ==== Dark mode of My Projects نفس الفيدباك ==== */
+
+/* الخلفية العامة */
+body.dark {
+  background: #050608 !important;
+  color: #f9fafb !important;
+}
+
+/* الهيدر */
+body.dark .header {
+  background: #050608 !important;
+  border-bottom: 1px solid #111827 !important;
+}
+
+/* نخلي اللوقو نفس الفيدباك (بدون invert) */
+body.dark .logo {
+  filter: none !important;
+}
+
+/* زر اللغة نفس الفيدباك */
+body.dark .language-selector {
+  border-color: #4b5563;
+  background: #111827;
+  color: #f9fafb;
+}
+
+/* السايدبار */
+body.dark .sidebar {
+  background: #050608 !important;
+  border-right: 1px solid #111827 !important;
+}
+
+/* الخلفية وراء المحتوى */
+body.dark .main-content {
+  background: #050608 !important;
+}
+
+/* الكرت الكبير حق My Projects */
+body.dark .projects-section {
+  background: #050608 !important;
+  border: 1px solid #111827 !important;
+  box-shadow: 0 0 0 transparent !important;
+}
+
+/* الهيدر داخل الكرت */
+body.dark .projects-header {
+  border-bottom: 1px solid #111827 !important;
+}
+
+body.dark .projects-details h2,
+body.dark .projects-details p,
+body.dark .projects-count {
+  color: #f9fafb !important;
+}
+
+/* الهيدر حق الجدول */
+body.dark .table-header {
+  background: #050608 !important;
+  border-bottom: 1px solid #111827 !important;
+}
+
+body.dark .table-header th {
+  color: #9ca3af !important;
+}
+
+/* صفوف الجدول */
+body.dark .table-row {
+  border-bottom: 1px solid #111827 !important;
+}
+
+body.dark .table-row:hover {
+  background: #0b1120 !important;
+}
+
+/* النصوص داخل الجدول */
+body.dark .project-name,
+body.dark .owner-name {
+  color: #f9fafb !important;
+}
+
+/* التاقات (Domain) */
+body.dark .domain-tag {
+  background: transparent !important;
+  border-color: #4c1d95 !important;
+  color: #c4b5fd !important;
+}
+
+body.dark .domain-tag.more {
+  background: #111827 !important;
+  border-color: #374151 !important;
+  color: #e5e7eb !important;
+}
+
+/* Category badge */
+body.dark .category-badge.category-conversation {
+  background: #052e16 !important;
+  border-color: #16a34a !important;
+  color: #bbf7d0 !important;
+}
+
+body.dark .category-badge.category-news {
+  background: #0b1120 !important;
+  border-color: #38bdf8 !important;
+  color: #e0f2fe !important;
+}
+
+/* زر الـ Status (In Progress / Pending / Completed) */
+body.dark .status-select {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 1px #1d4ed8 !important;
+}
+
+body.dark .status-select.pending {
+  background: #f97316 !important;
+}
+
+body.dark .status-select.completed {
+  background: #16a34a !important;
+}
+
+/* زر View يكون مثل View Feedback (أخضر نيون) */
+body.dark .view-button {
+  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 3px 10px rgba(34, 197, 94, 0.4) !important;
+}
+
+body.dark .view-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(34, 197, 94, 0.6) !important;
+}
+
+/* نصوص البروفايل في الهيدر */
+body.dark .user-info h3 {
+  color: #ffffff !important;
+}
+body.dark .user-info p {
+  color: #9ca3af !important;
+}
+
+/* أيقونات المينيو في السايدبار توضح */
+body.dark .sidebar img.menu-icon {
+  filter: brightness(0) invert(1) !important;
+}
+
+/* حجم أيقونة الـ Logout داخل المنيو */
+.user-dropdown .dropdown-item img {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+/* Dark Mode Global Theme Matching Feedback */
+body.dark-mode {
+  background-color: #0e1116 !important;
+  color: #fff !important;
+}
+
+body.dark-mode .header {
+  background-color: #12151a !important;
+  border-bottom: 1px solid #1e2228 !important;
+}
+
+body.dark-mode .sidebar {
+  background-color: #12151a !important;
+  border-right: 1px solid #1e2228 !important;
+}
+
+/* نص داخل الصفحة */
+body.dark-mode .menu-text,
+body.dark-mode .user-name,
+body.dark-mode .owner-name,
+body.dark-mode .project-name,
+body.dark-mode th,
+body.dark-mode td {
+  color: #ffffff !important;
+}
+
+/* Active Menu (My Projects) */
+body.dark-mode .menu-item.active {
+  background-color: rgba(68, 253, 136, 0.18) !important;
+  border: 1px solid rgba(0,255,136,0.5) !important;
+}
+
+/* Hover */
+body.dark-mode .menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Table */
+body.dark-mode .projects-section {
+  background-color: #14181f !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+body.dark-mode .table-header {
+  background-color: #1b1f27 !important;
+  border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+/* زر View */
+body.dark-mode .view-button {
+  background-color: #0f1218 !important;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+}
+
+body.dark-mode .view-button:hover {
+  background-color: #1a1e25 !important;
+}
+
+/* Status Badge */
+body.dark-mode .status-select {
+  background-color: #1b2330 !important;
+  color: white !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+}
+body.dark-mode .logo {
+  filter: brightness(1.3) contrast(1.2);
+}
+/* ===== Make welcome text visible like Feedback ===== */
+body.dark .welcome-text h1,
+body.dark .page-titles h1 {
+  color: #ffffff !important;
+}
+
+body.dark .welcome-text p {
+  color: #cfcfcf !important;
+}
+
+/* ===== Sidebar styling match to Feedback ===== */
+body.dark .sidebar .menu-item {
+  color: #cfcfcf;
+}
+
+/* Active state same as Feedback */
+body.dark .sidebar .menu-item.active {
+  background: #1e1e1e !important;
+  border-left: 3px solid #4c84ff !important;
+  color: #ffffff !important;
+}
+
+/* Icons inside active element become highlighted */
+body.dark .sidebar .menu-item.active img.menu-icon {
+  filter: brightness(0) invert(1) drop-shadow(0px 0px 4px #4c84ff);
+}
+
+/* Hover state (not white, but smooth like Feedback) */
+body.dark .sidebar .menu-item:hover {
+  background: #2b2b2b !important;
+  color: #ffffff !important;
+}
+
+/* Fix table text readability */
+body.dark table,
+body.dark td,
+body.dark th {
+  color: #ffffff !important;
+}
+
+/* Fix button View (Glow same style as Feedback) */
+body.dark .view-button {
+  background: #111 !important;
+  border: 1px solid #3cff7b88;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(0,255,120,0.2);
+}
+
+body.dark .view-button:hover {
+  background: #1f1f1f !important;
+  box-shadow: 0 0 14px rgba(0,255,120,0.35);
+}
+/* أيقونة العين داخل زر View */
+.view-icon-eye {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+}
+
+/* خلي الـSVG يمشي مع لون النص (أسود في اللايت، أبيض في الدارك) */
+.view-icon-eye svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+/* ===== Profile dropdown نفس باقي الصفحات ===== */
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 20px #0000001a;
+  padding: 6px 0;
+  width: 190px;
+  margin-top: 4px;
+  display: none;
+  z-index: 9999;
+}
+
+.user-dropdown.show {
+  display: block;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #0a0a0a;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background: #f3f4f6;
+}
+
+.dropdown-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #00000019;
+  margin: 4px 0;
+}
+
+/* ===== Dark mode للمنيو ===== */
+body.dark .user-dropdown {
+  background-color: #050608;
+  border: 1px solid #111827;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+}
+
+body.dark .dropdown-item {
+  color: #f9fafb;
+}
+
+body.dark .dropdown-item:hover {
+  background-color: #111827;
+}
+
+body.dark .dropdown-divider {
+  background: #111827;
+}
+
+body.dark .dropdown-item img.dropdown-icon {
+  filter: brightness(0) invert(1);
+}
+/* ===== FIX Profile Dropdown in Dark Mode ===== */
+body.dark .user-dropdown {
+  background: #12151a !important;
+  border: 1px solid #2a2f36 !important;
+  box-shadow: 0 4px 15px rgba(0,255,136,0.1) !important;
+}
+
+/* النصوص بالدارك */
+body.dark .user-dropdown .dropdown-item {
+  color: #ffffff !important;
+}
+
+/* hover يكون خفيف مو أزرق */
+body.dark .user-dropdown .dropdown-item:hover {
+  background: rgba(255,255,255,0.08) !important;
+}
+
+/* الآيقونات تكون واضحة */
+body.dark .dropdown-item img {
+  filter: invert(1) brightness(1.8) !important;
+}
+
+/* الفاصل لا يكون أبيض قوي */
+body.dark .dropdown-divider {
+  background: rgba(255,255,255,0.12) !important;
+}
 
   </style>
   
@@ -657,42 +1286,59 @@
   
   <div class="main-container">
     <header class="header">
-      <div style="display:flex; align.items:center; gap:16px;">
-        <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
-        <img src="../static/images/img_header_logo.png" alt="TrustLens Logo" class="logo">
+      <div class="header-left">
+        <img src="../static/images/img_header.svg" alt="TrustLens Logo" class="logo" />
+        <div class="brand-text">TrustLens</div>
       </div>
-
+    
       <div class="header-right">
-        <span class="language-selector">EN</span>
-        <img src="../static/images/img_button.svg" alt="Theme toggle" class="theme-toggle">
-
+        <div class="language-selector">EN</div>
+    
+        <!-- Theme toggle -->
+        <div class="theme-toggle-wrapper">
+          <img
+            src="../static/images/img_buttonDark.svg"
+            alt="Toggle Theme"
+            id="themeToggle"
+            class="notification-btn theme-toggle-btn"
+          />
+        </div>
+    
+        <!-- User profile -->
         <div class="user-profile" onclick="toggleUserDropdown()" id="userProfile">
-          <img src="../static/images/user-profile.png" alt="Avatar" class="user-avatar">
-          <div class="user-info">
-            <h3 class="user-name">{{ user_name }}</h3>
-            <p class="user-role">Examiner</p>
+          <div class="user-avatar">
+            <img src="../static/images/user-profile.png" alt="User avatar" class="user-avatar-img" />
           </div>
-
-          <div class="user-dropdown" id="userDropdown" aria-hidden="true">
+    
+          <div class="user-info">
+            <h3>{{ user_name }}</h3>
+            <p>Examiner</p>
+          </div>
+    
+          <div class="user-dropdown" id="userDropdown">
             <a href="/" class="dropdown-item">
-              <img src="../static/images/img_iconhome.svg" width="16" height="16" alt=""> Home
+              <img src="../static/images/img_iconhome.svg" class="dropdown-icon" alt="Home" />
+              Home
             </a>
             <div class="dropdown-divider"></div>
             <a href="/profile" class="dropdown-item">
-              <img src="../static/images/img_profile.svg" width="16" height="16" alt=""> Profile
+              <img src="../static/images/img_profile.svg" class="dropdown-icon" alt="Profile" />
+              Profile
             </a>
             <a href="/settings" class="dropdown-item">
-              <img src="../static/images/img_icon_Settings.svg" width="16" height="16" alt=""> Settings
+              <img src="../static/images/img_icon_Settings.svg" class="dropdown-icon" alt="Settings" />
+              Settings
             </a>
             <div class="dropdown-divider"></div>
             <a href="/logout" class="dropdown-item">
-              <img src="../static/images/img_logout.png" width="16" height="16" alt=""> Logout
+              <img src="../static/images/img_logout.png" class="dropdown-icon" alt="Logout" />
+              Logout
             </a>
           </div>
         </div>
       </div>
     </header>
-
+    
     <div class="content-wrapper">
       <nav class="sidebar" id="sidebar">
         <div class="menu-item" id="menu-home">
@@ -781,12 +1427,6 @@
 
         sidebar.classList.remove('open');
       }
-    });
-
-    document.querySelectorAll('.status-select').forEach(select => {
-      select.addEventListener('change', function() {
-        this.className = 'status-select ' + this.value.replace('-', '');
-      });
     });
 
     document.querySelectorAll('.table-row').forEach(row => {
@@ -898,18 +1538,24 @@
           </td>
           <td class="table-cell">
             <select class="${selectClass}"
-                    onchange="handleStatusChange('${p.project_id}', this.value)">
+        onchange="handleStatusChange('${p.project_id}', this.value, this)">
               <option value="in-progress" ${currentStatus === "in-progress" ? "selected" : ""}>In Progress</option>
               <option value="pending" ${currentStatus === "pending" ? "selected" : ""}>Pending</option>
               <option value="completed" ${currentStatus === "completed" ? "selected" : ""}>Completed</option>
             </select>
           </td>
           <td class="table-cell" style="text-align:right;">
-            <button class="view-button" onclick="goToDetails('${p.project_id}')">
-              <img src="../static/images/img_icon_4.svg" alt="" class="view-icon">
-              View
-            </button>
-          </td>
+  <button class="view-button" onclick="goToDetails('${p.project_id}')">
+    <span class="view-icon-eye" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+    </span>
+    View
+  </button>
+</td>
+
         `;
         tbody.appendChild(tr);
       });
@@ -928,18 +1574,60 @@
   </script>
 
   <script>
-    function handleStatusChange(projectId, newStatus) {
-      let overrides = {};
-      try {
-        overrides = JSON.parse(localStorage.getItem("tl_examiner_status") || "{}");
-      } catch (e) {
-        overrides = {};
-      }
+   function handleStatusChange(projectId, newStatus, selectEl) {
+  // 1) نحفظ الحالة في localStorage مثل قبل
+  let overrides = {};
+  try {
+    overrides = JSON.parse(localStorage.getItem("tl_examiner_status") || "{}");
+  } catch (e) {
+    overrides = {};
+  }
 
-      overrides[projectId] = newStatus;
-      localStorage.setItem("tl_examiner_status", JSON.stringify(overrides));
-    }
+  overrides[projectId] = newStatus;
+  localStorage.setItem("tl_examiner_status", JSON.stringify(overrides));
+
+  // 2) نحدّث الكلاس حق الزر مباشرة عشان اللون يتغيّر بدون ريفريش
+  let baseClass = "status-select";
+  if (newStatus === "pending") {
+    selectEl.className = baseClass + " pending";
+  } else if (newStatus === "completed") {
+    selectEl.className = baseClass + " completed";
+  } else {
+    // in-progress أو أي شيء ثاني
+    selectEl.className = baseClass;
+  }
+}
+
   </script>
+
+
+
+    <script>
+
+const themeToggle = document.getElementById("themeToggle");
+const darkSrc = "../static/images/img_buttonlight.png";
+const lightSrc = "../static/images/img_buttonDark.svg";
+
+function applyThemeFromStorage() {
+  if (localStorage.theme === "dark") {
+    document.body.classList.add("dark");
+    themeToggle.src = darkSrc;
+  } else {
+    document.body.classList.remove("dark");
+    themeToggle.src = lightSrc;
+  }
+}
+
+applyThemeFromStorage();
+
+themeToggle.addEventListener("click", () => {
+  const isDark = document.body.classList.toggle("dark");
+  themeToggle.src = isDark ? darkSrc : lightSrc;
+  localStorage.theme = isDark ? "dark" : "light";
+});
+
+
+</script>
 
 </body>
 </html>

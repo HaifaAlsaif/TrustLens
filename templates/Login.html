@@ -610,6 +610,114 @@ body{background:var(--bg);color:var(--text);}
 #password.form-input {
   padding-right: 40px;
 }
+/* Remove footer background circles */
+.bg-decoration-1,
+.bg-decoration-2 {
+  display: none !important;
+}
+/* Fix dark mode icon edges */
+#theme-toggle {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+/* Improve input text visibility in dark mode */
+.dark .form-input {
+  background: #1b1c1f !important;
+  color: #ffffff !important;
+  border: 1px solid #3d3f45 !important;
+}
+
+/* Placeholder becomes lighter */
+.dark .form-input::placeholder {
+  color: #b4b4b4 !important;
+  opacity: 1;
+}
+
+/* Label text color */
+.dark .form-label {
+  color: #e6e6e6 !important;
+}
+.dark .login-btn {
+  color: white !important;
+  border: none !important;
+  box-shadow: 0 0 10px rgba(0, 132, 255, 0.25);
+}
+/* إزالة الحواف البيضاء من زر الثيم والأزرار في الدارك مود */
+#theme-toggle,
+.home-btn img,
+.theme-toggle,
+.header-icon {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* تصحيح مشكلة البكسل الأبيض حول الصورة داخل الغلاف */
+.theme-toggle-wrapper,
+.home-btn {
+    overflow: hidden !important;
+    border-radius: 8px !important; /* نفس شكل الأزرار عندك */
+}
+
+/* في الوضع الليلي نتأكد من إزالة أي إطار */
+.dark #theme-toggle,
+.dark .home-btn img {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+#theme-toggle,
+.home-btn img {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+}
+/* غلاف زر الثيم – نفس ستايل الصفحات الثانية */
+.theme-toggle-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  overflow: hidden;              /* يقطع أي حواف بيضا من الصورة */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+/* نفس حجم الأيقونة داخل الغلاف */
+.theme-toggle {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* نتأكد ما يطلع أي إطار بالدارك مود */
+.dark .theme-toggle,
+.dark .theme-toggle-wrapper {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+
+
+/* Dark Mode Header Fix */
+.dark .header {
+    background: #0f0f11 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+/* Dark background behind the whole top section if needed */
+.dark body, 
+.dark .main-container {
+    background: #0d0d0f !important; 
+}
 
   </style>
   
@@ -631,8 +739,12 @@ body{background:var(--bg);color:var(--text);}
         <div class="header-actions">
           <span class="nav-item language-selector">EN</span>
 <!-- زر التبديل -->
-<img id="theme-toggle" src="../static/images/img_buttonDark.svg" alt="theme" class="theme-toggle">
-<a href="/" class="home-btn">
+<div class="theme-toggle-wrapper">
+  <img id="theme-toggle"
+       src="../static/images/img_buttonDark.svg"
+       alt="theme"
+       class="theme-toggle">
+</div><a href="/" class="home-btn">
   <img src="../static/images/home.png" alt="Home" width="24" height="24">
 </a>
         </div>
