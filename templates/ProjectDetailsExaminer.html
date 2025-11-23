@@ -38,11 +38,13 @@
     }
 
     .header {
-  background: rgba(255, 255, 255, 0.05) !important;
-  backdrop-filter: blur(20px) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.15) !important;
-}
-
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 1252px;
+      padding: 0 16px;
+    }
 
     .header-left {
       display: flex;
@@ -590,436 +592,10 @@
     .task-button:active {
       transform: scale(0.95);
     }
-    /* ===== HEADER مشترك مع Feedback / My Projects ===== */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  max-width: 1252px;
-  padding: 0 32px;
-  margin: 0 auto 8px auto;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.logo {
-  width: 32px;
-  height: 32px;
-}
-
-.brand-text {
-  font-size: 20px;
-  font-weight: 400;
-  line-height: 23px;
-  background: linear-gradient(90deg, #00b8da 0%, #155cfb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.language-selector {
-  padding: 4px 10px;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  color: #0a0a0a;
-  background: #ffffff;
-}
-
-/* زر الثيم */
-.theme-toggle-wrapper {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.theme-toggle-wrapper img {
-  width: 40px;
-  height: 40px;
-}
-
-.notification-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-
-/* البروفايل */
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  position: relative;
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-}
-
-.user-avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-
-.user-info h3 {
-  font-size: 14px;
-  font-weight: 400;
-  color: #0a0a0a;
-  margin: 0;
-}
-
-.user-info p {
-  font-size: 12px;
-  color: #717182;
-  text-transform: capitalize;
-  margin: 0;
-}
-
-/* منيو البروفايل */
-.user-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 10px 20px #0000001a;
-  padding: 6px 0;
-  width: 190px;
-  margin-top: 4px;
-  display: none;
-  z-index: 9999;
-}
-
-.user-dropdown.show {
-  display: block;
-}
-
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  font-size: 14px;
-  color: #0a0a0a;
-  text-decoration: none;
-  transition: background 0.2s ease;
-}
-
-.dropdown-item:hover {
-  background: #f3f4f6;
-}
-
-.dropdown-icon {
-  width: 16px;
-  height: 16px;
-}
-
-.dropdown-divider {
-  height: 1px;
-  background: #00000019;
-  margin: 4px 0;
-}
-/* ===== Dark Mode نفس الفيدباك / البروجكت ===== */
-body.dark {
-  background: #050608 !important;
-  color: #f9fafb !important;
-}
-
-/* الهيدر */
-body.dark .header {
-  background: #050608 !important;
-  border-bottom: 1px solid #111827 !important;
-}
-
-body.dark .language-selector {
-  border-color: #4b5563;
-  background: #111827;
-  color: #f9fafb;
-}
-
-/* النص في البروفايل */
-body.dark .user-info h3 {
-  color: #ffffff !important;
-}
-body.dark .user-info p {
-  color: #9ca3af !important;
-}
-
-/* الخلفية العامة للمحتوى */
-body.dark .page-title,
-body.dark .back-link {
-  color: #f9fafb !important;
-}
-
-body.dark .back-link img.back-icon {
-  filter: brightness(0) invert(1);
-}
-
-/* الكرت حق المشروع + الفريق + التاسكات */
-body.dark .project-card,
-body.dark .team-section,
-body.dark .tasks-section {
-  background: #050608 !important;
-  border: 1px solid #111827 !important;
-  box-shadow: none !important;
-}
-
-body.dark .project-title,
-body.dark .project-description,
-body.dark .meta-label,
-body.dark .meta-value,
-body.dark .team-info h3,
-body.dark .team-info p,
-body.dark .member-info h4,
-body.dark .tasks-info h3,
-body.dark .tasks-info p {
-  color: #e5e7eb !important;
-}
-
-/* التاقات */
-body.dark .tag-purple {
-  background: transparent !important;
-  border-color: #4c1d95 !important;
-  color: #c4b5fd !important;
-}
-
-body.dark .tag-green,
-body.dark .tag-green-alt {
-  background: #052e16 !important;
-  border-color: #16a34a !important;
-  color: #bbf7d0 !important;
-}
-
-/* صندوق Assignment */
-body.dark .assignment-box {
-  background: #0b1120 !important;
-  border-color: #1d4ed8 !important;
-}
-
-body.dark .assignment-label {
-  color: #9ca3af !important;
-}
-body.dark .assignment-value {
-  color: #f9fafb !important;
-}
-
-/* الفلاتر */
-body.dark .filter-btn:not(.active) {
-  background: #111827 !important;
-  color: #e5e7eb !important;
-  border: 1px solid #374151 !important;
-}
-
-body.dark .filter-btn.active {
-  background: #030213 !important;
-  color: #ffffff !important;
-}
-
-/* الكروت حق التاسكات */
-body.dark .task-card {
-  background: #050608 !important;
-  border-color: #155cfb !important;
-  box-shadow: 0 0 0 transparent !important;
-}
-
-body.dark .task-title,
-body.dark .task-meta-label {
-  color: #e5e7eb !important;
-}
-
-/* الأزرار */
-body.dark .task-button.primary {
-  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%) !important;
-  color: #ffffff !important;
-}
-
-body.dark .task-button.completed {
-  background: #111827 !important;
-  color: #9ca3af !important;
-}
-
-/* لوقو الهيدر */
-body.dark .logo {
-  filter: none !important;  /* نفس الفيدباك */
-}
-/* تحسين الهيدر ليصير Full width مثل باقي الصفحات */
-.header {
-  width: 100%;
-  padding: 16px 50px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #ffffff;
-  border-bottom: 1px solid rgba(0,0,0,0.12);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-/* دااارك مود */
-body.dark .header {
-  background: #101418;
-  border-bottom: 1px solid #222;
-}
-
-/* تحسين شكل يمين الهيدر */
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-/* البروفايل */
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-}
-
-/* الصورة تبقى واضحة بالدارك مود */
-.user-avatar-img {
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-}
-
-/* نص البروفايل */
-body.dark .user-info h3 { color: white; }
-body.dark .user-info p { color: #9ca3af; }
-.header {
-  background: transparent !important;
-  border-bottom: none !important;
-  box-shadow: none !important;
-}
-body.dark .header {
-  background: rgba(0,0,0,0.2) !important;
-  backdrop-filter: blur(20px) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.1) !important;
-}
-/* ================= Dropdown Dark Mode ================= */
-body.dark .user-dropdown {
-  background: #0f1216;
-  border: 1px solid #1f2937;
-}
-
-body.dark .dropdown-item {
-  color: #ffffff;
-}
-
-body.dark .dropdown-item:hover {
-  background: #1e2530;
-}
-
-/* =========== Sidebar Active State Like Feedback =========== */
-.nav-item.active {
-  background: #1c2433 !important;
-  border-left: 4px solid #3b82f6 !important;
-  color: #ffffff !important;
-}
-
-body.dark .nav-item.active {
-  background: #1c2433 !important;
-  color: white !important;
-}
-
-/* ================= Improve Meta Icons ================= */
-.meta-row img {
-  width: 18px;
-  height: 18px;
-}
-
-body.dark .meta-row img {
-  filter: invert(1);
-}
-
-/* ================= Fix Dark Gray Section ================= */
-body.dark .team-member {
-  background-color: #111827 !important;
-  border: 1px solid #1f2937 !important;
-}
-
-/* ================= View Button Fix ================= */
-.view-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 18px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-/* Light mode */
-.view-btn {
-  background: #ffffff;
-  border-color: #d1d5db;
-  color: #111;
-}
-
-/* Dark mode */
-body.dark .view-btn {
-  background: #0f1216;
-  border-color: #374151;
-  color: #fff;
-}
-
-/* Eye icon handling */
-.view-btn img {
-  width: 18px;
-  height: 18px;
-}
-
-body.dark .view-btn img {
-  filter: invert(1);
-}
-.dropdown-icon {
-  width: 18px;
-  height: 18px;
-  filter: invert(0);
-  transition: 0.2s;
-}
-
-body.dark .dropdown-icon {
-  filter: brightness(0) invert(1);
-}
-
+    #examinersList {
+      visibility: hidden;
+   }
+   
   </style>
   
   </head>
@@ -1030,57 +606,12 @@ body.dark .dropdown-icon {
         <img src="../static/images/img_header.svg" alt="TrustLens logo" class="logo">
         <div class="brand-text">TrustLens</div>
       </div>
-    
       <div class="header-right">
-        
         <div class="language-selector">EN</div>
-    
-        <!-- Theme toggle -->
-        <div class="theme-toggle-wrapper">
-          <img src="../static/images/img_buttonDark.svg" id="themeToggle" class="theme-toggle-btn"/>
-        </div>
-    
-        <div class="user-profile" onclick="toggleUserDropdown()" id="userProfile">
-          <div class="user-avatar">
-            <img src="../static/images/user-profile.png" class="user-avatar-img"/>
-          </div>
-    
-          <div class="user-info">
-            <h3>{{ user_name }}</h3>
-            <p>Examiner</p>
-          </div>
-    
-          <div class="user-dropdown" id="userDropdown">
-            <a href="/" class="dropdown-item">
-              <img src="../static/images/img_iconhome.svg" class="dropdown-icon" alt="Home" />
-              Home
-            </a>
-          
-            <div class="dropdown-divider"></div>
-          
-            <a href="/profile" class="dropdown-item">
-              <img src="../static/images/img_profile.svg" class="dropdown-icon" alt="Profile" />
-              Profile
-            </a>
-          
-            <a href="/settings" class="dropdown-item">
-              <img src="../static/images/img_icon_Settings.svg" class="dropdown-icon" alt="Settings" />
-              Settings
-            </a>
-          
-            <div class="dropdown-divider"></div>
-          
-            <a href="/logout" class="dropdown-item">
-              <img src="../static/images/img_logout.png" class="dropdown-icon" alt="Logout" />
-              Logout
-            </a>
-          </div>
-          
-          
-        </div>
+        <img src="../static/images/img_button.svg" alt="Settings" class="settings-icon">
+      
       </div>
     </header>
-    
 
     <div class="content-wrapper">
       <section class="page-header">
@@ -1256,7 +787,11 @@ async function loadExaminers() {
 }
 
 // استدعاءها بعد ما تتحمل الصفحة
-loadProjectDetails().then(() => loadExaminers());
+loadProjectDetails().then(() => {
+  loadExaminers();
+  loadExaminerTasks();
+});
+
   </script>
   <script>
     async function loadExaminerTasks() {
@@ -1275,7 +810,7 @@ loadProjectDetails().then(() => loadExaminers());
       const grid = document.querySelector(".tasks-grid");
       grid.innerHTML = "";
     
-      tasks.forEach(task => {
+      tasks.forEach(task => { 
     
         const card = document.createElement("article");
         card.className = "task-card";
@@ -1301,22 +836,25 @@ loadProjectDetails().then(() => loadExaminers());
             </div>
           `;
         }
-    
-        // assignment box
-        const assignedToYou = task.is_assigned_to_you;
-    
-        let buttonHTML = "";
-        if (task.status === "completed") {
-          buttonHTML = `<button class="task-button completed completed-btn">Completed</button>`;
-        } else if (assignedToYou) {
-          buttonHTML = `
-            <button class="task-button primary ${task.status === 'progress' ? 'continue' : 'join'}">
-              ${task.status === "progress" ? "Continue" : "Join"}
-            </button>`;
-        } else {
-          buttonHTML = `<button class="task-button completed completed-btn">Not Assigned</button>`;
-        }
-    
+// assignment variables
+const assignedToYou = task.is_assigned_to_you;
+let buttonHTML = "";
+
+// زرار المهمة
+if (task.status === "completed") {
+  buttonHTML = `<button class="task-button completed completed-btn">Completed</button>`;
+} 
+else if (assignedToYou) {
+  buttonHTML = `
+    <button class="task-button primary ${task.status === 'progress' ? 'continue' : 'join'}"
+            onclick="goToTask('${task.task_id}', '${task.conversation_type}')">
+      ${task.status === "progress" ? "Continue" : "Join"}
+    </button>`;
+} 
+else {
+  buttonHTML = `<button class="task-button completed completed-btn">Not Assigned</button>`;
+}
+
         // بناء الكارد كاملاً
         card.innerHTML = `
           <h4 class="task-title">${task.task_name}</h4>
@@ -1334,55 +872,24 @@ loadProjectDetails().then(() => loadExaminers());
         grid.appendChild(card);
       });
     }
-    
-      
-    loadProjectDetails()
-      .then(() => loadExaminers())
-      .then(() => loadExaminerTasks());
-    </script>
-    <script>
-      // منيو البروفايل
-      function toggleUserDropdown(){
-        const dd = document.getElementById('userDropdown');
-        dd.classList.toggle('show');
-        dd.setAttribute('aria-hidden', dd.classList.contains('show') ? 'false' : 'true');
+    function goToTask(taskId, type) {
+      if (type === "human-ai") {
+          window.location.href = `/conversation-ai?taskId=${taskId}`;
       }
-    
-      document.addEventListener('click', function(e){
-        const profile = document.getElementById('userProfile');
-        const dd = document.getElementById('userDropdown');
-        if (!profile.contains(e.target)) dd.classList.remove('show');
-      });
-    
-      document.getElementById('userProfile')?.addEventListener('click', function(e){
-        if (e.target.closest('.dropdown-item')) return;
-        e.stopPropagation();
-      });
-    </script>
-    
-    <script>
-      // الثيم + LocalStorage
-      const themeToggle = document.getElementById("themeToggle");
-      const darkSrc = "../static/images/img_buttonlight.png";
-      const lightSrc = "../static/images/img_buttonDark.svg";
-    
-      function applyThemeFromStorage() {
-        if (localStorage.theme === "dark") {
-          document.body.classList.add("dark");
-          themeToggle.src = darkSrc;
-        } else {
-          document.body.classList.remove("dark");
-          themeToggle.src = lightSrc;
-        }
+      else if (type === "human-human") {
+          window.location.href = `/conversation-hh?taskId=${taskId}`;
       }
+      else {
+          alert("Invalid conversation type");
+      }
+    }
     
-      applyThemeFromStorage();
+
+
     
-      themeToggle.addEventListener("click", () => {
-        const isDark = document.body.classList.toggle("dark");
-        themeToggle.src = isDark ? darkSrc : lightSrc;
-        localStorage.theme = isDark ? "dark" : "light";
-      });
+
+
+    
     </script>
     
 </body>

@@ -187,6 +187,7 @@
       flex:1;background:#fff;border:0.8px solid var(--line);color:#0a0a0a;
     }
     .btn-ghost:hover{background:#f9fafb}
+    
   </style>
 </head>
 
@@ -290,7 +291,7 @@
 
 
           <!-- Number of turns -->
-          <div class="field">
+          <div class="field" id="turnsField">
             <div class="label">Number of Turns</div>
             <div class="stepper">
               <button type="button" class="step-btn" data-dir="-1">−</button>
@@ -301,7 +302,7 @@
           </div>
 
           <!-- Conversation type -->
-          <div class="field">
+          <div class="field" id="convField">
             <div class="label">Conversation Type</div>
             <div class="conv-toggle" id="convToggle">
               <button type="button" class="conv-pill active" data-value="human-ai">
@@ -329,11 +330,46 @@
   
   <!-- ================== JS ================== -->
   <script>
-    const projectId = "{{ project_id }}";
-const projectCategory = "{{ category }}";
+    const taskId = new URLSearchParams(window.location.search).get("task_id");
+
+    if (taskId) {
+      
+      document.querySelector(".title").textContent = "Edit Task";
+      document.querySelector(".subtitle").textContent = "Update existing evaluation task";
+      document.getElementById("submitTask").textContent = "Update Task";
+    
+    }
+    async function loadTaskForEdit() {
+      if (!taskId) return;
+    
+      const res = await fetch(`/api/tasks/${taskId}`);
+      const data = await res.json();
+    
+      if (data.error) {
+        alert("Task not found");
+        return;
+      }
+    
+      // تعبئة عنوان المهمة
+      document.getElementById("taskTitle").value = data.task_name;
+    
+      // تحديد الممتحنين المختارين
+      const selectedIds = data.examiner_ids.map(String); // تحويل للسترنق
+    
+      document.querySelectorAll("input[name='examiner']").forEach(cb => {
+        if (selectedIds.includes(cb.value)) {
+          cb.checked = true;
+        }
+      });
+    
+      updateSelectedCount();
+    }
+    
+  
+    const projectId = "{{ project_id }}".trim();
+    const projectCategory = "{{ category|safe }}".trim().toLowerCase();
 if (projectCategory === "article") {
-  document.querySelector(".stepper").closest(".field").style.display = "none";
-  document.getElementById("convToggle").closest(".field").style.display = "none";
+  
 }
     const $=(s,e=document)=>e.querySelector(s);
     const $$=(s,e=document)=>Array.from(e.querySelectorAll(s));
@@ -350,15 +386,20 @@ if (projectCategory === "article") {
     const convToggle=$("#convToggle");
     const turnInput=$("#turns");
     const stepBtns=$$(".step-btn");
-
-    const userProfile=$("#userProfile");
-    const userDropdown=$("#userDropdown");
-    userProfile.addEventListener("click",()=>{
-      userDropdown.classList.toggle("show");
-    });
-    document.addEventListener("click",e=>{
-      if(!e.target.closest("#userProfile")) userDropdown.classList.remove("show");
-    });
+    const userProfile = $("#userProfile");
+    const userDropdown = $("#userDropdown");
+    
+    if (userProfile && userDropdown) {
+      userProfile.addEventListener("click", () => {
+        userDropdown.classList.toggle("show");
+      });
+    
+      document.addEventListener("click", e => {
+        if (!e.target.closest("#userProfile")) userDropdown.classList.remove("show");
+      });
+    }
+    
+  
     function requiredCount() {
       if (projectCategory === "article") return 1; 
       return convTypeInput.value === "human-human" ? 2 : 1;
@@ -414,7 +455,7 @@ submitBtn.addEventListener("click", async () => {
 
   const selectedExaminers = exChecks
     .filter(cb => cb.checked)
-    .map(cb => cb.value); // UID now
+    .map(cb => cb.value);
 
   const required = requiredCount();
 
@@ -425,16 +466,15 @@ submitBtn.addEventListener("click", async () => {
 
   if (selectedExaminers.length !== required) {
     if (projectCategory === "article") {
-        alert("Please assign exactly 1 examiner to evaluate the article.");
+      alert("Please assign exactly 1 examiner to evaluate the article.");
     } else {
-        alert(required === 2 
-            ? "Please select exactly 2 examiners for Human ↔ Human conversation."
-            : "Please select exactly 1 examiner for Human ↔ AI conversation."
-        );
+      alert(required === 2
+        ? "Please select exactly 2 examiners for Human ↔ Human conversation."
+        : "Please select exactly 1 examiner for Human ↔ AI conversation."
+      );
     }
     return;
-}
-
+  }
 
   // Create payload
   let payload = {
@@ -443,16 +483,27 @@ submitBtn.addEventListener("click", async () => {
     examiner_ids: selectedExaminers
   };
   
-  if (projectCategory !== "article") {
-      payload.conversation_type = convType;
-      payload.number_of_turns = turns;
+
+  if (!taskId && projectCategory !== "article") {
+    // فقط عند إنشاء تاسك جديد وليس التعديل
+    payload.conversation_type = convType;
+    payload.number_of_turns = turns;
   }
   
 
+  // ⭐ تحديد URL و METHOD حسب الحالة (إنشاء / تعديل)
+  let url = "/api/create_task";
+  let method = "POST";
+
+  if (taskId) {
+    url = `/api/update_task/${taskId}`;
+    method = "PATCH";
+  }
+
   try {
-    const res = await fetch("/api/create_task", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
+    const res = await fetch(url, {
+      method: method,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
 
@@ -463,28 +514,15 @@ submitBtn.addEventListener("click", async () => {
       return;
     }
 
-    alert("Task created!");
+    alert(taskId ? "Task updated!" : "Task created!");
     window.location.href = `/projectdetailsowner/${projectId}`;
-
 
   } catch (err) {
     console.error(err);
-    alert("Failed to create task.");
+    alert("Failed to save task.");
   }
 });
 
- 
-
-
-cancelBtn.addEventListener("click",()=>{
-  titleEl.value="";
-  titleErr.style.display="none";
-  exChecks.forEach(cb=>cb.checked=false);
-  convTypeInput.value="human-ai";
-  $$(".conv-pill",convToggle).forEach(b=>b.classList.toggle("active",b.dataset.value==="human-ai"));
-  turnInput.value="2";
-  updateRule();
-});
 
 updateRule();
 
@@ -522,17 +560,36 @@ updateRule();
       console.error("Failed to load examiners:", err);
     }
   }
-  document.addEventListener("DOMContentLoaded", () => {
-    loadProjectExaminers().then(() => {
-      exChecks = Array.from(document.querySelectorAll("input[name='examiner']"));
-      exChecks.forEach(cb => cb.addEventListener("change", updateSelectedCount));
-      updateSelectedCount();
-    });
-  });
-  
-  
-
  
+  document.addEventListener("DOMContentLoaded", async () => {
+    await loadProjectExaminers();
+  
+    // لازم بعد تحميل الـ checkboxes
+    exChecks = Array.from(document.querySelectorAll("input[name='examiner']"));
+  
+    // الآن نقدر نعبّي البيانات
+    await loadTaskForEdit();
+  
+    // إعادة حساب العداد
+    updateSelectedCount(); 
+  
+    // وبعدها نربط الأحداث
+   
+    exChecks.forEach(cb => cb.addEventListener("change", updateSelectedCount));
+    document.getElementById("userProfile").style.display = "none";
+  });
+  if (taskId) {
+    document.getElementById("convField").style.display = "none";
+  }
+  if (taskId) {
+    document.getElementById("turnsField").style.display = "none";
+  }
+  
+  if (!taskId && projectCategory !== "article") {
+    payload.conversation_type = convType;
+    payload.number_of_turns = turns;
+}
+
   </script>
 </body>
 </html> 

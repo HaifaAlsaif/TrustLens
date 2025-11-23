@@ -1021,15 +1021,18 @@
 
   <!-- ⭐ أزرار Edit و Delete تمت إضافتها هنا ⭐ -->
   <div class="project-actions">
-    <button class="icon-btn">
+    <button class="icon-btn" onclick="goToEditProject()">
       <img src="../static/images/img_button_black_900.svg" class="icon-img" alt="edit icon">
       Edit
     </button>
+    
+    
 
-    <button class="icon-btn delete-btn">
+    <button class="icon-btn delete-btn" onclick="deleteProject()">
       <img src="../static/images/img_button_black_900_32x36.svg" class="icon-img" alt="delete icon">
       Delete
     </button>
+    
   </div>
   <!-- ⭐ نهاية الأزرار ⭐ -->
 
@@ -1176,14 +1179,45 @@
       }
     });
   }
-
-  // دالة حذف الممتحن (تبقى زي ما هي)
-  function removeExaminer(btn) {
-    const row = btn.closest('.team-member');
-    if (row) {
-      row.remove();
+  async function removeExaminer(btn) {
+    const row = btn.closest(".team-member");
+    const email = row.querySelector(".team-member-email").textContent.trim();
+  
+    if (!confirm("Are you sure you want to remove this examiner?")) return;
+  
+    // نجيب uid الخاص بالـ examiner من API
+    const resEx = await fetch(`/api/project_examiners_owner/${projectId}`);
+    const dataEx = await resEx.json();
+  
+    const found = dataEx.examiners.find(e => e.email === email);
+    if (!found) {
+      alert("Examiner not found.");
+      return;
+    }
+  
+    const payload = {
+      project_id: projectId,
+      examiner_id: found.id
+    };
+  
+    const res = await fetch("/api/remove_examiner", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(payload)
+    });
+  
+    const data = await res.json();
+  
+    if (data.success) {
+      row.remove();     // حذف الواجهة
+      alert("Examiner removed successfully.");
+    } else {
+      alert(data.error || "Something went wrong.");
     }
   }
+  
+  
+ 
 </script>
 <script>
   // ============= Modal controls =============
@@ -1394,30 +1428,38 @@
     return { text: "Pending", cls: "status-pending" };
   }
 
+  function getStatusConfig(status) {
+    status = (status || "pending").toLowerCase();
+    if (status === "completed") return { text: "Completed", cls: "status-completed" };
+    if (status === "progress" || status === "in_progress")
+      return { text: "In Progress", cls: "status-progress" };
+    return { text: "Pending", cls: "status-pending" };
+  }
+  
   async function loadTasks() {
     const grid = document.getElementById("tasksGrid");
     const noMsg = document.getElementById("noTasksMsg");
-
+  
     grid.innerHTML = "";
     noMsg.style.display = "none";
-
+  
     try {
       const res = await fetch(`/api/project_tasks/${projectId}`);
       const data = await res.json();
-
+  
       if (!data.tasks || !data.tasks.length) {
         noMsg.style.display = "block";
         return;
       }
-
+  
       data.tasks.forEach(t => {
         const cfg = getStatusConfig(t.status);
-
+  
         const card = document.createElement("article");
         card.className = "article-card";
         card.dataset.status = t.status || "pending";
         card.dataset.taskId = t.id;
-
+  
         let convText = "";
         if (t.category !== "article" && t.conversationType) {
           convText =
@@ -1425,14 +1467,14 @@
               ? `Human ↔ Human • ${t.turns || 2} turns`
               : `Human ↔ AI • ${t.turns || 2} turns`;
         }
-        
+  
         const examinerCount = t.examinerCount ?? 0;
-
+  
         card.innerHTML = `
           <div class="article-card-header">
             <h4 class="article-title">${t.title}</h4>
             <div class="article-actions">
-              <button class="article-icon-btn" disabled>
+              <button class="article-icon-btn js-edit-task">
                 <img src="../static/images/img_button_black_900.svg">
               </button>
               <button class="article-icon-btn js-delete-task">
@@ -1440,31 +1482,36 @@
               </button>
             </div>
           </div>
-
+  
           <p class="article-description">${convText}</p>
           <span class="status-pill ${cfg.cls}">${cfg.text}</span>
-
+  
           <div class="article-assigned-box">
             <div class="article-assigned-label">Assigned to:</div>
             <div class="article-assigned-email">
               ${t.primaryExaminerEmail || "-"}
             </div>
           </div>
-
+  
           <div class="article-footer">
             <span class="article-footer-text">${examinerCount} examiners</span>
           </div>
         `;
-
+  
         grid.appendChild(card);
       });
-
+  
+      // ⭐ مهم: نناديه بعد إضافة الكروت ⭐
+      attachEditHandlers();
+  
       attachDeleteHandlers();
+  
     } catch (err) {
       console.error("Failed to load tasks:", err);
       noMsg.style.display = "block";
     }
   }
+  
 
   function attachDeleteHandlers() {
     document.querySelectorAll(".js-delete-task").forEach(btn => {
@@ -1487,6 +1534,47 @@
   function goToCreateTask() {
     window.location.href = `/projects/${projectId}/tasks/create`;
   }
+  function goToEditProject() {
+    window.location.href = `/createproject?id=${projectId}&basic=1`;
+  }
+  
+
+  
+  </script>
+  <script>
+    async function deleteProject() {
+      if (!confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+        return;
+      }
+  
+      try {
+        const res = await fetch(`/api/delete_project/${projectId}`, {
+          method: "DELETE"
+        });
+  
+        const data = await res.json();
+  
+        if (data.message === "Project deleted successfully") {
+          alert("Project deleted successfully.");
+          window.location.href = "/ownerdashboard";
+        } else {
+          alert(data.error || "Something went wrong.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to delete project.");
+      }
+    }
+    function attachEditHandlers() {
+      document.querySelectorAll(".js-edit-task").forEach(btn => {
+        btn.onclick = () => {
+          const card = btn.closest(".article-card");
+          const tid = card.dataset.taskId;
+          window.location.href = `/projects/${projectId}/tasks/create?task_id=${tid}`;
+        };
+      });
+    }
+    
   </script>
   
 </body>
