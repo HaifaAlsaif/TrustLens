@@ -5,3 +5,4 @@ package-lock.json
 service-account.json
 __pycache__
 .venv
+.env
