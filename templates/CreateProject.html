@@ -683,6 +683,7 @@ submitBtn.addEventListener("click", async () => {
   if (isEdit) {
     url = `/api/update_project/${EDIT_ID}`;
   }
+  formData.append("invited_examiners", JSON.stringify(selectedExaminers));
 
   const res = await fetch(url, { method, body: formData });
   const data = await res.json();

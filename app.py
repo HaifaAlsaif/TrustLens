@@ -217,7 +217,7 @@ def api_remove_examiner():
         db.collection("invitations")
         .where("project_id", "==", project_id)
         .where("examiner_id", "==", examiner_id)
-        .where("status", "==", "accepted")
+        .where("project_id", "==", project_id)
         .limit(1)
         .stream()
     )

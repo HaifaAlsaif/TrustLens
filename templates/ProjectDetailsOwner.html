@@ -1089,34 +1089,7 @@
 
   <!-- 🧑‍💻 هنا كل الإيميلات -->
   <div class="team-members-row">
-    <!-- Examiner 1 -->
-    <div class="team-member">
-      <div class="team-member-left">
-        <div class="member-avatar">L</div>
-        <div class="member-info">
-          <h4 class="team-member-email">Lina@hotmail.com</h4>
-          <span class="member-status">You</span>
-        </div>
-      </div>
-
-      <button class="examiner-delete-btn" onclick="removeExaminer(this)">
-        <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete examiner">
-      </button>
-    </div>
-
-    <!-- Examiner 2 -->
-    <div class="team-member">
-      <div class="team-member-left">
-        <div class="member-avatar">E</div>
-        <div class="member-info">
-          <h4 class="team-member-email">examiner2@example.com</h4>
-        </div>
-      </div>
-
-      <button class="examiner-delete-btn" onclick="removeExaminer(this)">
-        <img src="../static/images/img_button_black_900_32x36.svg" alt="Delete examiner">
-      </button>
-    </div>
+ 
   </div>
 </div>
 
@@ -1428,90 +1401,90 @@
     return { text: "Pending", cls: "status-pending" };
   }
 
-  function getStatusConfig(status) {
-    status = (status || "pending").toLowerCase();
-    if (status === "completed") return { text: "Completed", cls: "status-completed" };
-    if (status === "progress" || status === "in_progress")
-      return { text: "In Progress", cls: "status-progress" };
-    return { text: "Pending", cls: "status-pending" };
-  }
-  
-  async function loadTasks() {
-    const grid = document.getElementById("tasksGrid");
-    const noMsg = document.getElementById("noTasksMsg");
-  
-    grid.innerHTML = "";
-    noMsg.style.display = "none";
-  
-    try {
-      const res = await fetch(`/api/project_tasks/${projectId}`);
-      const data = await res.json();
-  
-      if (!data.tasks || !data.tasks.length) {
-        noMsg.style.display = "block";
-        return;
-      }
-  
-      data.tasks.forEach(t => {
-        const cfg = getStatusConfig(t.status);
-  
-        const card = document.createElement("article");
-        card.className = "article-card";
-        card.dataset.status = t.status || "pending";
-        card.dataset.taskId = t.id;
-  
-        let convText = "";
-        if (t.category !== "article" && t.conversationType) {
-          convText =
-            t.conversationType === "human-human"
-              ? `Human ↔ Human • ${t.turns || 2} turns`
-              : `Human ↔ AI • ${t.turns || 2} turns`;
-        }
-  
-        const examinerCount = t.examinerCount ?? 0;
-  
-        card.innerHTML = `
-          <div class="article-card-header">
-            <h4 class="article-title">${t.title}</h4>
-            <div class="article-actions">
-              <button class="article-icon-btn js-edit-task">
-                <img src="../static/images/img_button_black_900.svg">
-              </button>
-              <button class="article-icon-btn js-delete-task">
-                <img src="../static/images/img_button_black_900_32x36.svg">
-              </button>
-            </div>
-          </div>
-  
-          <p class="article-description">${convText}</p>
-          <span class="status-pill ${cfg.cls}">${cfg.text}</span>
-  
-          <div class="article-assigned-box">
-            <div class="article-assigned-label">Assigned to:</div>
-            <div class="article-assigned-email">
-              ${t.primaryExaminerEmail || "-"}
-            </div>
-          </div>
-  
-          <div class="article-footer">
-            <span class="article-footer-text">${examinerCount} examiners</span>
-          </div>
-        `;
-  
-        grid.appendChild(card);
-      });
-  
-      // ⭐ مهم: نناديه بعد إضافة الكروت ⭐
-      attachEditHandlers();
-  
-      attachDeleteHandlers();
-  
-    } catch (err) {
-      console.error("Failed to load tasks:", err);
+ function getStatusConfig(status) {
+  status = (status || "pending").toLowerCase();
+  if (status === "completed") return { text: "Completed", cls: "status-completed" };
+  if (status === "progress" || status === "in_progress")
+    return { text: "In Progress", cls: "status-progress" };
+  return { text: "Pending", cls: "status-pending" };
+}
+
+async function loadTasks() {
+  const grid = document.getElementById("tasksGrid");
+  const noMsg = document.getElementById("noTasksMsg");
+
+  grid.innerHTML = "";
+  noMsg.style.display = "none";
+
+  try {
+    const res = await fetch(`/api/project_tasks/${projectId}`);
+    const data = await res.json();
+
+    if (!data.tasks || !data.tasks.length) {
       noMsg.style.display = "block";
+      return;
     }
+
+    data.tasks.forEach(t => {
+      const cfg = getStatusConfig(t.status);
+
+      const card = document.createElement("article");
+      card.className = "article-card";
+      card.dataset.status = t.status || "pending";
+      card.dataset.taskId = t.id;
+
+      let convText = "";
+      if (t.category !== "article" && t.conversationType) {
+        convText =
+          t.conversationType === "human-human"
+            ? `Human ↔ Human • ${t.turns || 2} turns`
+            : `Human ↔ AI • ${t.turns || 2} turns`;
+      }
+
+      const examinerCount = t.examinerCount ?? 0;
+
+      card.innerHTML = `
+        <div class="article-card-header">
+          <h4 class="article-title">${t.title}</h4>
+          <div class="article-actions">
+            <button class="article-icon-btn js-edit-task">
+              <img src="../static/images/img_button_black_900.svg">
+            </button>
+            <button class="article-icon-btn js-delete-task">
+              <img src="../static/images/img_button_black_900_32x36.svg">
+            </button>
+          </div>
+        </div>
+
+        <p class="article-description">${convText}</p>
+        <span class="status-pill ${cfg.cls}">${cfg.text}</span>
+
+        <div class="article-assigned-box">
+          <div class="article-assigned-label">Assigned to:</div>
+          <div class="article-assigned-email">
+            ${t.primaryExaminerEmail || "-"}
+          </div>
+        </div>
+
+        <div class="article-footer">
+          <span class="article-footer-text">${examinerCount} examiners</span>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+
+    // ⭐ مهم: نناديه بعد إضافة الكروت ⭐
+    attachEditHandlers();
+
+    attachDeleteHandlers();
+
+  } catch (err) {
+    console.error("Failed to load tasks:", err);
+    noMsg.style.display = "block";
   }
-  
+}
+
 
   function attachDeleteHandlers() {
     document.querySelectorAll(".js-delete-task").forEach(btn => {

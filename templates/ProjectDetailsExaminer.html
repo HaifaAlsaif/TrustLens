@@ -592,10 +592,7 @@
     .task-button:active {
       transform: scale(0.95);
     }
-    #examinersList {
-      visibility: hidden;
-   }
-   
+  
   </style>
   
   </head>
@@ -772,7 +769,7 @@ async function loadExaminers() {
     div.className = "team-member";
 
     // أول حرف الاسم للأفاتار
-    const initial = ex.name.charAt(0).toUpperCase();
+    const initial = ex.email.charAt(0).toUpperCase();
     const isYou   = ex.is_you ? '<span class="member-status">You</span>' : "";
 
     div.innerHTML = `
