@@ -680,6 +680,9 @@
   </main>
 
   <script>
+    
+  // 🟦 نجيب projectId من آخر جزء في الـ URL
+  const PROJECT_ID = window.location.pathname.split('/').pop();
     function filterTasks(status) {
       const buttons = document.querySelectorAll('.filter-btn');
       const cards = document.querySelectorAll('.task-card');
@@ -710,6 +713,7 @@
     
   </script>
   <script>
+    
     async function loadProjectDetails() {
       // استخراج project_id من الـ URL
       const pathParts = window.location.pathname.split('/');
@@ -869,19 +873,35 @@ else {
         grid.appendChild(card);
       });
     }
-    function goToTask(taskId, type) {
-      if (type === "human-ai") {
-          window.location.href = `/conversation-ai?taskId=${taskId}`;
-      }
-      else if (type === "human-human") {
-          window.location.href = `/conversation-hh?taskId=${taskId}`;
-      }
-      else {
-          alert("Invalid conversation type");
-      }
-    }
-    
+   // 🟦 هذه الدالة تفتح صفحة المحادثة المناسبة (هيومن–AI أو هيومن–هيومن)
+//    وتضيف معها taskId + projectId في الرابط
+function goToTask(taskId, type) {
+  // لو ما عرفنا نوع المحادثة نطلع تنبيه
+  if (!type) {
+    alert("Invalid conversation type");
+    return;
+  }
 
+  // نحدد أي صفحة نروح لها حسب النوع
+  let basePath = null;
+
+  if (type === "human-ai") {
+    // 🔹 تاسك Human ↔ AI
+    basePath = "/conversation-ai";
+  } else if (type === "human-human") {
+    // 🔹 تاسك Human ↔ Human
+    basePath = "/conversation-hh";
+  } else {
+    alert("Invalid conversation type");
+    return;
+  }
+
+  // 🟦 نضيف taskId و projectId في الـ URL مع ترميزهم عشان ما يخربون الرابط
+  const url = `${basePath}?taskId=${encodeURIComponent(taskId)}&projectId=${encodeURIComponent(PROJECT_ID)}`;
+
+  // ننتقل للصفحة
+  window.location.href = url;
+}
 
     
 

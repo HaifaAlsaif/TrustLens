@@ -1725,7 +1725,6 @@ def conversation_hh_page():
         task_id=task_id,
     )
 
-    return jsonify({"success": True, "message": "Task deleted successfully"}), 200
 # ==========================
 #  AI Conversation Reply API
 # ==========================
@@ -1736,20 +1735,185 @@ def api_ai_reply():
 
     data = request.get_json() or {}
     user_message = data.get("message", "").strip()
+    task_id = data.get("taskId")
 
-    if not user_message:
-        return jsonify({"error": "Message is required"}), 400
+    if not user_message or not task_id:
+        return jsonify({"error": "Missing message or taskId"}), 400
 
+    sender_id = session.get("uid")
+
+    # اسم المستخدم
+    sender_doc = db.collection("users").document(sender_id).get()
+    sender_name = "User"
+    if sender_doc.exists:
+        prof = sender_doc.to_dict().get("profile", {})
+        sender_name = f"{prof.get('firstName','')} {prof.get('lastName','')}".strip() or "User"
+
+    # ref للـ LLM conversation الجديدة
+    ref = rtdb.reference(f"llm_conversations/{task_id}/messages")
+
+    existing = ref.get() or {}
+    count_user = sum(1 for x in existing.values() if x.get("sender_type") == "Ex") + 1
+
+    turn_id = str(uuid.uuid4())
+
+    # 🧍‍♀️ 1) نحفظ رسالة المستخدم
+    ref.push({
+        "turn_id": turn_id,
+        "task_id": task_id,
+        "turn_number": count_user,
+        "sender_type": "Ex",
+        "examiner_id": sender_id,
+        "sender_name": sender_name,
+        "message": user_message,
+    })
+
+    # 🤖 2) نجيب رد AI
     try:
         ai_response = generate_reply(user_message)
+    except Exception:
+        ai_response = "Sorry, I couldn’t generate a reply."
+
+    # 🧠 3) نحفظ رسالة الـ AI بنفس turn_number
+    ref.push({
+        "turn_id": turn_id,
+        "task_id": task_id,
+        "turn_number": count_user,
+        "sender_type": "LLM",
+        "sender_name": "AI",
+        "message": ai_response,
+    })
+
+    return jsonify({"reply": ai_response}), 200
+# ==================================================
+# 🔹 Human ↔ Human Conversation APIs (Realtime DB)
+# ==================================================
+
+# 1) جلب كل رسائل التاسك من الـ Realtime DB
+@app.route("/api/hh/messages", methods=["GET"])
+def api_hh_get_messages():
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    task_id = request.args.get("taskId")
+    if not task_id:
+        return jsonify({"error": "Missing taskId"}), 400
+
+    uid = session.get("uid")
+
+    try:
+        ref = rtdb.reference(f"hh_conversations/{task_id}/messages")
+        raw = ref.get() or {}
+
+        # نضبط الـ rows حسب نوع الـ data
+        if isinstance(raw, dict):
+            rows = list(raw.values())
+        elif isinstance(raw, list):
+            rows = raw
+        else:
+            rows = []
+
+        # نرتّب حسب turn_number لو موجود
+        rows.sort(key=lambda m: m.get("turn_number", 0))
+
+        messages = []
+
+        # 🧮 كل (رسالتين) = 1 turn
+        total_msgs = len(rows)
+        current_turn = total_msgs // 2
+
+        for m in rows:
+            if not isinstance(m, dict):
+                continue
+
+            sender_id = (
+                m.get("sender_id")
+                or m.get("examiner_id")
+            )
+
+            sender_name = (m.get("sender_name") or "User").strip() or "User"
+            text = m.get("message", "")
+
+            side = "you" if sender_id == uid else "peer"
+
+            # أول حرف من الاسم (عشان دائرة الـ A)
+            initial = (sender_name[0].upper() if sender_name else "U")
+
+            messages.append({
+                "text": text,
+                "side": side,
+                "authorInitial": initial,
+            })
+
         return jsonify({
-            "reply": ai_response
+            "messages": messages,
+            "currentTurn": current_turn
         }), 200
+
     except Exception as e:
-        print("AI error:", e)
-        return jsonify({
-            "error": "AI server error"
-        }), 500
+        print("🔥 HH get error:", e)
+        return jsonify({"error": "Server error"}), 500
+
+# 2) حفظ رسالة جديدة في الـ Realtime DB
+# 2) حفظ رسالة جديدة في الـ Realtime DB
+@app.route("/api/hh/send", methods=["POST"])
+def api_hh_send():
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json() or {}
+
+    # ندعم الشكلين: task_id / taskId و message / text
+    task_id = data.get("task_id") or data.get("taskId")
+    message = (data.get("message") or data.get("text") or "").strip()
+
+    if not task_id or not message:
+        return jsonify({"error": "Missing taskId or message"}), 400
+
+    sender_id = session.get("uid")
+    if not sender_id:
+        return jsonify({"error": "Missing uid in session"}), 401
+
+    sender_doc = db.collection("users").document(sender_id).get()
+    sender_name = "User"
+    if sender_doc.exists:
+        prof = sender_doc.to_dict().get("profile", {})
+        sender_name = f"{prof.get('firstName', '')} {prof.get('lastName', '')}".strip() or "User"
+
+    # 🧮 نحسب turn_number لهذا الـ examiner في هذا الـ task
+    ref = rtdb.reference(f"hh_conversations/{task_id}/messages")
+
+    # نجيب كل الرسائل ونعد اللي examiner_id حقتها = sender_id
+    existing = ref.get() or {}
+    count_for_this_ex = 0
+    for _, row in existing.items():
+        if isinstance(row, dict) and row.get("examiner_id") == sender_id:
+            count_for_this_ex += 1
+
+    next_turn_number = count_for_this_ex + 1
+
+    # نولّد turn_ID عشوائي (زي الـ PK)
+    turn_id = str(uuid.uuid4())
+
+    try:
+        ref.push({
+            # الأتربيوت اللي في الـ ERD
+            "turn_id": turn_id,
+            "task_id": task_id,
+            "turn_number": next_turn_number,
+            "sender_type": "Ex",
+            "examiner_id": sender_id,
+            "message": message,
+
+            # للواجهة
+            "sender_name": sender_name,
+        })
+
+        return jsonify({"success": True, "message": "Message saved"}), 200
+
+    except Exception as e:
+        print("🔥 HH send error:", e)
+        return jsonify({"error": "Server error"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
