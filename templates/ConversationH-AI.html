@@ -304,7 +304,7 @@
       <section class="card">
         <!-- ========== Top Bar ========== -->
         <div class="top-bar">
-          <a class="back-btn" href="ProjectDetailsOwner.html">
+          <a class="back-btn" href="{{ url_for('project_details_examiner', project_id=project_id) }}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
@@ -440,7 +440,37 @@
 
     //(اختياري بعدين) taskId   استخدم
     const TASK_ID = "{{ task_id or '' }}";
+    async function loadHistory() {
+      if (!TASK_ID) return;
 
+      try {
+        const res = await fetch(`/api/ai/messages?taskId=${encodeURIComponent(TASK_ID)}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        // لو فيه رسائل محفوظة نمسح رسالة الـ Welcome ونحطها
+        if (Array.isArray(data.messages) && data.messages.length > 0) {
+          messages.innerHTML = '';
+          data.messages.forEach(m => {
+            const side = m.side === 'you' ? 'you' : 'ai';
+            appendMessageStatic(m.text, side);
+          });
+        }
+
+        // نحدّث رقم التيرن من السيرفر
+        currentTurn = data.currentTurn || 0;
+        turnNo.textContent = currentTurn;
+
+        // لو التاسك مكتمل أو وصلنا الحد الأقصى → نقفل الإدخال
+        if (data.taskStatus === 'completed' || currentTurn >= MAX_TURNS) {
+          lockInput();
+        }
+
+      } catch (err) {
+        console.error('Error loading AI history:', err);
+      }
+    }
     // تحديث عداد الأحرف وحالة زر الإرسال
     function updateCounter() {
       const len = userInput.value.length;
@@ -467,32 +497,45 @@
      * @param {'you' | 'ai'} side - جهة الرسالة (المستخدم أو الـ AI)
      * @returns {HTMLElement} bubbleEl - عنصر الفقاعة النصية
      */
-    function appendMessage(text, side) {
+        // عرض رسالة بدون ما نغيّر رقم الـ turn (مفيد لتحميل الهستوري)
+        function appendMessageStatic(text, side) {
       const msg = document.createElement('div');
       msg.className = `msg ${side}`;
-
       msg.innerHTML = `
         <div class="avatar">${side === 'you' ? CURRENT_USER_INITIAL : ''}</div>
         <div class="bubble"></div>
       `;
-
       const bubbleEl = msg.querySelector('.bubble');
       bubbleEl.textContent = text;
-
       messages.appendChild(msg);
       messages.scrollTop = messages.scrollHeight;
-
-      // تحديث رقم  turn عند إرسال المستخدم
-      if (side === 'you') {
-        currentTurn++;
-        turnNo.textContent = currentTurn;
-        if (currentTurn >= MAX_TURNS) {
-          lockInput();
-        }
-      }
-
-      return bubbleEl;
     }
+     function appendMessage(text, side, incrementTurn = true) {
+  const msg = document.createElement('div');
+  msg.className = `msg ${side}`;
+
+  msg.innerHTML = `
+    <div class="avatar">${side === 'you' ? CURRENT_USER_INITIAL : ''}</div>
+    <div class="bubble"></div>
+  `;
+
+  const bubbleEl = msg.querySelector('.bubble');
+  bubbleEl.textContent = text;
+
+  messages.appendChild(msg);
+  messages.scrollTop = messages.scrollHeight;
+
+  // تحديث رقم turn لما يكون إرسال جديد من اليوزر
+  if (side === 'you' && incrementTurn) {
+    currentTurn++;
+    turnNo.textContent = currentTurn;
+    if (currentTurn >= MAX_TURNS) {
+      lockInput();
+    }
+  }
+
+  return bubbleEl;
+}
 
     /**
      * إرسال رسالة المستخدم إلى خادم Flask واستقبال رد الـ LLM
@@ -548,6 +591,8 @@
         sendMsg();
       }
     });
+        // تحميل المحادثة المحفوظة عند فتح الصفحة
+        loadHistory();
   </script>
 </body>
 </html>

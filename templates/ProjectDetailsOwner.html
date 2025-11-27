@@ -1441,36 +1441,47 @@ async function loadTasks() {
             : `Human ↔ AI • ${t.turns || 2} turns`;
       }
 
-      const examinerCount = t.examinerCount ?? 0;
+      const emails = t.examinerEmails || [];
+const examinerCount = emails.length || (t.examinerCount ?? 0);
 
-      card.innerHTML = `
-        <div class="article-card-header">
-          <h4 class="article-title">${t.title}</h4>
-          <div class="article-actions">
-            <button class="article-icon-btn js-edit-task">
-              <img src="../static/images/img_button_black_900.svg">
-            </button>
-            <button class="article-icon-btn js-delete-task">
-              <img src="../static/images/img_button_black_900_32x36.svg">
-            </button>
-          </div>
-        </div>
+let assignedHtml = "-";
 
-        <p class="article-description">${convText}</p>
-        <span class="status-pill ${cfg.cls}">${cfg.text}</span>
+if (emails.length === 1) {
+  assignedHtml = emails[0];
+} else if (emails.length === 2) {
+  // كل إيميل بسطر
+  assignedHtml = `${emails[0]}<br>${emails[1]}`;
+} else if (emails.length > 2) {
+  assignedHtml = emails.join("<br>");
+}
 
-        <div class="article-assigned-box">
-          <div class="article-assigned-label">Assigned to:</div>
-          <div class="article-assigned-email">
-            ${t.primaryExaminerEmail || "-"}
-          </div>
-        </div>
+card.innerHTML = `
+  <div class="article-card-header">
+    <h4 class="article-title">${t.title}</h4>
+    <div class="article-actions">
+      <button class="article-icon-btn js-edit-task">
+        <img src="../static/images/img_button_black_900.svg">
+      </button>
+      <button class="article-icon-btn js-delete-task">
+        <img src="../static/images/img_button_black_900_32x36.svg">
+      </button>
+    </div>
+  </div>
 
-        <div class="article-footer">
-          <span class="article-footer-text">${examinerCount} examiners</span>
-        </div>
-      `;
+  <p class="article-description">${convText}</p>
+  <span class="status-pill ${cfg.cls}">${cfg.text}</span>
 
+  <div class="article-assigned-box">
+    <div class="article-assigned-label">Assigned to:</div>
+    <div class="article-assigned-email">
+      ${assignedHtml}
+    </div>
+  </div>
+
+  <div class="article-footer">
+    <span class="article-footer-text">${examinerCount} examiner${examinerCount === 1 ? "" : "s"}</span>
+  </div>
+`;
       grid.appendChild(card);
     });
 

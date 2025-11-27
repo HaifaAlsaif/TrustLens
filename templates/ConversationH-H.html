@@ -514,7 +514,7 @@ function renderSingleMessage(msg) {
 /**
  * إعادة رسم جميع الرسائل القادمة من السيرفر
  */
-function renderMessages(list, serverTurn) {
+ function renderMessages(list, serverTurn, taskStatus) {
   messagesEl.innerHTML = '';
   (list || []).forEach(m => renderSingleMessage(m));
 
@@ -528,7 +528,8 @@ function renderMessages(list, serverTurn) {
 
   turnNo.textContent = currentTurn;
 
-  if (currentTurn >= MAX_TURNS) {
+  // لو التاسك مكتمل في Firestore أو وصلنا للحد الأقصى → نقفل الإدخال
+  if (taskStatus === 'completed' || currentTurn >= MAX_TURNS) {
     lockInput();
   }
 }
@@ -552,12 +553,13 @@ async function loadMessages() {
     }
 
     const data = await res.json();
-    const msgs = data.messages || [];
-    const serverTurn = typeof data.currentTurn === 'number'
+const msgs = data.messages || [];
+const serverTurn = typeof data.currentTurn === 'number'
       ? data.currentTurn
       : undefined;
+const status = data.taskStatus || 'pending';
 
-    renderMessages(msgs, serverTurn);
+renderMessages(msgs, serverTurn, status);
   } catch (err) {
     console.error('Network error while loading HH messages:', err);
   }

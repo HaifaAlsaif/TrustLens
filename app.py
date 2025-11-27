@@ -1471,12 +1471,16 @@ def api_project_tasks(project_id):
     for t in tasks_ref:
         data = t.to_dict()
 
-        primary_email = None
-        if data.get("examiner_ids"):
-            ex_id = data["examiner_ids"][0]
+        examiner_ids = data.get("examiner_ids", []) or []
+
+        # 🟢 نجمع كل الإيميلات
+        examiner_emails = []
+        for ex_id in examiner_ids:
             ex_doc = db.collection("users").document(ex_id).get()
             if ex_doc.exists:
-                primary_email = ex_doc.to_dict().get("email", "")
+                email = ex_doc.to_dict().get("email", "")
+                if email:
+                    examiner_emails.append(email)
 
         tasks.append({
             "id": data.get("task_ID"),
@@ -1484,8 +1488,9 @@ def api_project_tasks(project_id):
             "status": data.get("status", "pending"),
             "conversationType": data.get("conversation_type"),
             "turns": data.get("number_of_turns"),
-            "examinerCount": len(data.get("examiner_ids", [])),
-            "primaryExaminerEmail": primary_email,
+            "examinerCount": len(examiner_emails),
+            "primaryExaminerEmail": examiner_emails[0] if examiner_emails else "",
+            "examinerEmails": examiner_emails,  # 👈 الجديد المهم
         })
 
     return jsonify({"tasks": tasks})
@@ -1498,7 +1503,7 @@ def api_examiner_tasks(project_id):
 
     examiner_uid = session.get("uid")
 
-    # 🔹 تأكيد أن الـ Examiner مقبول في هذا المشروع
+    # تأكيد أن الـ Examiner مقبول في المشروع
     inv = (
         db.collection("invitations")
         .where("project_id", "==", project_id)
@@ -1510,7 +1515,6 @@ def api_examiner_tasks(project_id):
     if not inv:
         return jsonify({"error": "Forbidden"}), 403
 
-    # 🔹 نجلب جميع المهام في المشروع
     tasks_ref = (
         db.collection("tasks")
         .where("project_ID", "==", project_id)
@@ -1521,28 +1525,123 @@ def api_examiner_tasks(project_id):
     for t in tasks_ref:
         data = t.to_dict()
 
-        # هل هذه المهمة مخصصة لهذا ال examiner ؟
-        assigned = examiner_uid in data.get("examiner_ids", [])
+        task_id          = data.get("task_ID")
+        conversation_type = data.get("conversation_type", None)
+        max_turns         = int(data.get("number_of_turns", 0) or 0)
 
-        # نجيب الإيميل الأساسي أول Examiner 
-        assignment_email = ""
-        if data.get("examiner_ids"):
-            main_ex = data["examiner_ids"][0]
-            ex_doc = db.collection("users").document(main_ex).get()
+        examiner_ids = data.get("examiner_ids", []) or []
+        assigned = examiner_uid in examiner_ids
+
+        # ✅ نجمع كل إيميلات الممتحنين في الكرت
+        examiner_emails = []
+        for ex_id in examiner_ids:
+            ex_doc = db.collection("users").document(ex_id).get()
             if ex_doc.exists:
-                assignment_email = ex_doc.to_dict().get("email", "")
+                em = ex_doc.to_dict().get("email", "")
+                if em:
+                    examiner_emails.append(em)
 
-        # إذا غير مكلّف → يظهر Not assigned لكن ما نستبعدها من القائمة
+               # -----------------------------
+        # 🔵 حساب وضعك أنت على هذا التسك
+        # -----------------------------
+        personal_status = "pending"
+        your_turn = 0
+
+        if assigned and conversation_type in ("human-ai", "human-human") and max_turns > 0:
+            try:
+                # نجيب كل رسائل هذا التاسك من RTDB
+                if conversation_type == "human-ai":
+                    conv_ref = rtdb.reference(f"llm_conversations/{task_id}/messages")
+                else:
+                    conv_ref = rtdb.reference(f"hh_conversations/{task_id}/messages")
+
+                raw = conv_ref.get() or {}
+
+                if isinstance(raw, dict):
+                    msgs = list(raw.values())
+                elif isinstance(raw, list):
+                    msgs = raw
+                else:
+                    msgs = []
+
+                # -------------------------
+                # 👇 حساب عدد التيرنز لك
+                # -------------------------
+                if conversation_type == "human-ai":
+                    # نفس المنطق القديم: كل رسالة من الـ Examiner = 1 turn
+                    count_for_me = 0
+                    for m in msgs:
+                        if not isinstance(m, dict):
+                            continue
+
+                        ex_id = m.get("examiner_id") or m.get("sender_id")
+                        if ex_id != examiner_uid:
+                            continue
+
+                        if m.get("sender_type") != "Ex":
+                            continue
+
+                        count_for_me += 1
+
+                    your_turn = count_for_me
+
+                else:
+                    # 👈 Human-Human: نستخدم نفس منطق الـ runs
+                    # نتأكد من قائمة الـ examiners
+                    ex_ids = examiner_ids or list({
+                        m.get("examiner_id") or m.get("sender_id")
+                        for m in msgs
+                        if isinstance(m, dict) and (m.get("examiner_id") or m.get("sender_id"))
+                    })
+
+                    # نرتب الرسائل زمنيًا
+                    msgs.sort(key=lambda m: m.get("created_at", ""))
+
+                    # نستخدم الفنكشن اللي فوق
+                    your_turn = _compute_hh_turns_for_examiner(msgs, examiner_uid, ex_ids)
+
+                # ما نتعدى الحد الأقصى
+                if max_turns > 0:
+                    your_turn = min(your_turn, max_turns)
+
+            except Exception as e:
+                app.logger.exception(
+                    "Failed to compute turns for task %s: %s", task_id, e
+                )
+                your_turn = 0
+
+            if your_turn >= max_turns:
+                personal_status = "completed"
+            elif your_turn > 0:
+                personal_status = "progress"
+            else:
+                personal_status = "pending"
+        else:
+            # لو ما هي مهمة محادثة أو مو مسندة لك، نرجع الحالة العامة
+            personal_status = data.get("status", "pending")
+
         tasks.append({
-            "task_id": data.get("task_ID"),
+            "task_id": task_id,
             "task_name": data.get("task_name"),
-            "status": data.get("status", "pending"),
-            "conversation_type": data.get("conversation_type", None),
-            "number_of_turns": data.get("number_of_turns", 0),
+
+            # ✅ هذه التي تستخدمها الكروت والفلاتر
+            "status": personal_status,
+
+            # الحالة العامة لو احتجتيها
+            "global_status": data.get("status", "pending"),
+
+            "conversation_type": conversation_type,
+            "number_of_turns": max_turns,
+            "current_turn_for_you": your_turn,
+
             "is_assigned_to_you": assigned,
-            "assignment_label": assignment_email
+            "assignment_label": examiner_emails[0] if examiner_emails else "",
+            "examiner_emails": examiner_emails,
+            "examiner_count": len(examiner_emails),
         })
+
     return jsonify({"tasks": tasks})
+
 
 @app.route("/api/tasks/<task_id>/delete", methods=["POST"])
 def api_delete_task(task_id):
@@ -1624,8 +1723,7 @@ def api_update_task(task_id):
     task_ref.update(update_data)
 
     return jsonify({"message": "Task updated successfully"}), 200
-
-    
+ 
 # ===================================================================
 # ------------- صفحة Human ↔ AI Conversation (Front) ---------------
 # ===================================================================
@@ -1674,57 +1772,47 @@ def conversation_ai_page():
  
 @app.route("/conversation-hh")
 def conversation_hh_page():
-    """
-    صفحة المحادثة Human ↔ Human.
- 
-    - تستقبل taskId من الـ query string (اختياري):
-        /conversation-hh?taskId=ABC123
- 
-    - إذا وُجد taskId نحاول نقرأ التاسك من Firestore
-      ونستخدم عدد الـ turns والعنوان من هناك.
- 
-    - هذه الصفحة لا تستدعي أي موديل AI ولا تخزن الرسائل حالياً.
-    """
-    # يجب أن يكون المستخدم مسجّل دخول
+    # لازم يكون مسجل دخول
     if not session.get("idToken"):
         return redirect(url_for("login_page"))
- 
-    # نجيب اسم المستخدم الحالي
+
+    # نجيب اسم المستخدم
     user_doc = get_current_user_doc()
     user_name = get_user_full_name(user_doc) if user_doc else "User"
- 
-    # نقرأ taskId من الرابط (اختياري)
+
+    # 🔹 هنا كنا نقرأ بس taskId
     task_id = request.args.get("taskId")
- 
-    # قيم افتراضية لو ما وجدنا تاسك
+    project_id = request.args.get("projectId")  # <-- ✅ (1) أضفنا قراءة projectId من الكويري
+
+    # قيم افتراضية
     max_turns = 6
     task_title = "Human ↔ Human conversation task"
- 
+
     if task_id:
         try:
             task_snapshot = db.collection("tasks").document(task_id).get()
             if task_snapshot.exists:
-                task_data = task_snapshot.to_dict()
-                max_turns = int(task_data.get("number_of_turns", 6))
+                task_data  = task_snapshot.to_dict()
+                max_turns  = int(task_data.get("number_of_turns", 6))
                 task_title = task_data.get("task_name", task_title)
-                conv_type = task_data.get("conversation_type")
+                conv_type  = task_data.get("conversation_type")
 
+                # لو طلع النوع مو Human-Human نحوله لصفحة AI زي ما كان
                 if conv_type != "human-human":
-                    # نوجّه المستخدم لصفحة الـ AI لو التاسك من نوع human-ai
-                    return redirect(url_for("conversation_ai_page", taskId=task_id))
+                    return redirect(
+                        url_for("conversation_ai_page", taskId=task_id, projectId=project_id)
+                    )
         except Exception as e:
-            app.logger.exception(
-                "Error loading task in conversation_hh_page: %s", e
-            )
- 
+            app.logger.exception("Error loading task in conversation_hh_page: %s", e)
+
     return render_template(
         "ConversationH-H.html",
         user_name=user_name,
         max_turns=max_turns,
         task_title=task_title,
         task_id=task_id,
+        project_id=project_id,  # <-- ✅ (2) نمرر project_id للتمبليت
     )
-
 # ==========================
 #  AI Conversation Reply API
 # ==========================
@@ -1749,13 +1837,13 @@ def api_ai_reply():
         prof = sender_doc.to_dict().get("profile", {})
         sender_name = f"{prof.get('firstName','')} {prof.get('lastName','')}".strip() or "User"
 
-    # ref للـ LLM conversation الجديدة
     ref = rtdb.reference(f"llm_conversations/{task_id}/messages")
 
     existing = ref.get() or {}
     count_user = sum(1 for x in existing.values() if x.get("sender_type") == "Ex") + 1
 
     turn_id = str(uuid.uuid4())
+    now_iso = datetime.utcnow().isoformat() + "Z"
 
     # 🧍‍♀️ 1) نحفظ رسالة المستخدم
     ref.push({
@@ -1766,6 +1854,7 @@ def api_ai_reply():
         "examiner_id": sender_id,
         "sender_name": sender_name,
         "message": user_message,
+        "created_at": now_iso,
     })
 
     # 🤖 2) نجيب رد AI
@@ -1774,7 +1863,7 @@ def api_ai_reply():
     except Exception:
         ai_response = "Sorry, I couldn’t generate a reply."
 
-    # 🧠 3) نحفظ رسالة الـ AI بنفس turn_number
+    # 🧠 3) نحفظ رسالة الـ AI بنفس turn_id
     ref.push({
         "turn_id": turn_id,
         "task_id": task_id,
@@ -1782,9 +1871,283 @@ def api_ai_reply():
         "sender_type": "LLM",
         "sender_name": "AI",
         "message": ai_response,
+        "created_at": datetime.utcnow().isoformat() + "Z",
     })
 
+    # ✅ 4) نحدّث حالة التاسك لو اكتملت
+    _update_ai_task_status_if_completed(task_id)
+
     return jsonify({"reply": ai_response}), 200
+
+# ==========================
+#  AI Conversation message API
+# ==========================
+@app.route("/api/ai/messages", methods=["GET"])
+def api_ai_get_messages():
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    task_id = request.args.get("taskId")
+    if not task_id:
+        return jsonify({"error": "Missing taskId"}), 400
+
+    uid = session.get("uid")
+
+    try:
+        ref = rtdb.reference(f"llm_conversations/{task_id}/messages")
+        raw = ref.get() or {}
+
+        if isinstance(raw, dict):
+            rows = list(raw.values())
+        elif isinstance(raw, list):
+            rows = raw
+        else:
+            rows = []
+
+        # نرتب بالوقت
+        rows.sort(key=lambda m: m.get("created_at", ""))
+
+               # نخلي كل Examiner يشوف محادثته هو فقط
+        my_turn_ids = {
+            m.get("turn_id")
+            for m in rows
+            if isinstance(m, dict)
+            and (m.get("examiner_id") == uid or m.get("sender_id") == uid)
+        }
+
+        messages = []
+        your_turn = 0
+
+        for m in rows:
+            if not isinstance(m, dict):
+                continue
+            if m.get("turn_id") not in my_turn_ids:
+                continue
+
+            sender_type = m.get("sender_type")
+            text = m.get("message", "")
+
+            if sender_type == "LLM":
+                side = "ai"
+            else:
+                side = "you"
+                your_turn = max(your_turn, int(m.get("turn_number", 0) or 0))
+
+            messages.append({
+                "text": text,
+                "side": side,
+            })
+
+             # حالة التاسك من Firestore + عدد التيرنز
+        task_status = "pending"
+        max_turns = 0
+        try:
+            task_doc = db.collection("tasks").document(task_id).get()
+            if task_doc.exists:
+                tdata = task_doc.to_dict()
+                task_status = tdata.get("status", "pending")
+                max_turns = int(tdata.get("number_of_turns", 0) or 0)
+
+                # ✅ لو مكتوبة completed لكن إنتِ ما خلصتي دوراتك
+                if task_status == "completed" and max_turns > 0 and your_turn < max_turns:
+                    task_status = "progress"
+        except Exception as e:
+            app.logger.exception("AI get: failed to load task status: %s", e)
+
+        return jsonify({
+            "messages": messages,
+            "currentTurn": your_turn,
+            "taskStatus": task_status
+        }), 200
+        
+    except Exception as e:
+        print("🔥 AI get error:", e)
+        return jsonify({"error": "Server error"}), 500
+
+
+# ==================================================
+# Task Update H-H
+# ==================================================
+def _compute_hh_turns_for_examiner(msgs, examiner_id, examiner_ids):
+    """
+    يحسب عدد الـ turns لممتحِن واحد في محادثة Human-Human.
+
+    turn واحد = (block من self) + (block من peer) أو العكس.
+    البلوك = مجموعة رسائل متتالية من نفس الطرف.
+    """
+    speaker_seq = []
+
+    for m in msgs:
+        if not isinstance(m, dict):
+            continue
+
+        sender = m.get("examiner_id") or m.get("sender_id")
+        if sender not in examiner_ids:
+            continue
+
+        if sender == examiner_id:
+            speaker_seq.append("self")
+        else:
+            speaker_seq.append("peer")
+
+    if not speaker_seq:
+        return 0
+
+    # ندمج البلوكات المتتالية المتشابهة
+    runs = []
+    last = None
+    for s in speaker_seq:
+        if s != last:
+            runs.append(s)
+            last = s
+
+    # كل بلوكين متتاليين (self+peer أو peer+self) = 1 turn مكتمل
+    turns = len(runs) // 2
+    return turns
+
+def _update_hh_task_status_if_completed(task_id):
+    """
+    يشيّك إذا كل الـ examiners في محادثة Human-Human
+    خلصوا عدد الـ turns المطلوب بناءً على تعريفك للـ turn:
+
+    turn واحد = (block من رسائل self) + (block من رسائل peer) أو العكس،
+    بغض النظر عن عدد الرسائل داخل كل block.
+    """
+    try:
+        task_ref = db.collection("tasks").document(task_id)
+        task_doc = task_ref.get()
+        if not task_doc.exists:
+            return
+
+        task_data = task_doc.to_dict()
+
+        # نتأكد أنها مهمة Human-Human
+        if task_data.get("conversation_type") != "human-human":
+            return
+
+        max_turns = int(task_data.get("number_of_turns", 0) or 0)
+        if max_turns <= 0:
+            return
+
+        examiner_ids = task_data.get("examiner_ids") or []
+
+        # لو ما فيه examiner_ids (حالات قديمة) نجمعهم من الرسائل
+        conv_ref = rtdb.reference(f"hh_conversations/{task_id}/messages")
+        raw = conv_ref.get() or {}
+        if isinstance(raw, dict):
+            msgs = list(raw.values())
+        elif isinstance(raw, list):
+            msgs = raw
+        else:
+            msgs = []
+
+        if not examiner_ids:
+            examiner_ids = list({
+                m.get("examiner_id")
+                for m in msgs
+                if isinstance(m, dict) and m.get("examiner_id")
+            })
+
+        if not examiner_ids or not msgs:
+            return
+
+        # نرتب الرسائل زمنيًا
+        msgs.sort(key=lambda m: m.get("created_at", ""))
+
+        # نحسب عدد الـ turns لكل ممتحِن
+        turns_per_examiner = {}
+        for ex_id in examiner_ids:
+            t = _compute_hh_turns_for_examiner(msgs, ex_id, examiner_ids)
+            if max_turns > 0:
+                t = min(t, max_turns)
+            turns_per_examiner[ex_id] = t
+
+        # نكمّل التاسك فقط لو كلهم وصلوا max_turns
+        completed = all(turns_per_examiner.get(e, 0) >= max_turns for e in examiner_ids)
+
+        if completed and task_data.get("status") != "completed":
+            task_ref.update({"status": "completed"})
+
+    except Exception as e:
+        app.logger.exception("Failed to update HH task status: %s", e)
+# ==================================================
+# Task Update Ai
+# ==================================================
+
+def _update_ai_task_status_if_completed(task_id):
+    """
+    يشيّك إذا كل الـ examiners وصلوا لعدد الـ turns المطلوب
+    (محادثة Human-AI) ولو نعم يحدّث حالة التاسك إلى completed.
+    """
+    try:
+        task_ref = db.collection("tasks").document(task_id)
+        task_doc = task_ref.get()
+        if not task_doc.exists:
+            return
+
+        task_data = task_doc.to_dict()
+
+        # نتأكد أنه Human-AI
+        if task_data.get("conversation_type") != "human-ai":
+            return
+
+        max_turns = int(task_data.get("number_of_turns", 0) or 0)
+        if max_turns <= 0:
+            return
+
+        examiner_ids = task_data.get("examiner_ids") or []
+        if not examiner_ids:
+            # لو ما فيه examiner_ids لأي سبب، نجمعهم من الرسائل
+            conv_ref = rtdb.reference(f"llm_conversations/{task_id}/messages")
+            raw = conv_ref.get() or {}
+            if isinstance(raw, dict):
+                msgs = raw.values()
+            elif isinstance(raw, list):
+                msgs = raw
+            else:
+                msgs = []
+
+            examiner_ids = list({
+                m.get("examiner_id")
+                for m in msgs
+                if isinstance(m, dict) and m.get("examiner_id")
+            })
+
+        if not examiner_ids:
+            return
+
+        # نقرأ كل رسائل هذه المحادثة
+        conv_ref = rtdb.reference(f"llm_conversations/{task_id}/messages")
+        raw = conv_ref.get() or {}
+        if isinstance(raw, dict):
+            msgs = raw.values()
+        elif isinstance(raw, list):
+            msgs = raw
+        else:
+            msgs = []
+
+        # نحسب كم رسالة كتب كل examiner (sender_type == "Ex")
+        counts = {ex_id: 0 for ex_id in examiner_ids}
+        for m in msgs:
+            if not isinstance(m, dict):
+                continue
+            if m.get("sender_type") != "Ex":
+                continue
+            ex_id = m.get("examiner_id")
+            if ex_id in counts:
+                counts[ex_id] += 1
+
+        # لو كل واحد وصل على الأقل max_turns → نكمّل التاسك
+        completed = all(counts.get(e, 0) >= max_turns for e in examiner_ids)
+
+        if completed and task_data.get("status") != "completed":
+            task_ref.update({"status": "completed"})
+
+    except Exception as e:
+        app.logger.exception("Failed to update AI task status: %s", e)
+
+
+
 # ==================================================
 # 🔹 Human ↔ Human Conversation APIs (Realtime DB)
 # ==================================================
@@ -1805,7 +2168,7 @@ def api_hh_get_messages():
         ref = rtdb.reference(f"hh_conversations/{task_id}/messages")
         raw = ref.get() or {}
 
-        # نضبط الـ rows حسب نوع الـ data
+        # نحولها لقائمة
         if isinstance(raw, dict):
             rows = list(raw.values())
         elif isinstance(raw, list):
@@ -1813,30 +2176,30 @@ def api_hh_get_messages():
         else:
             rows = []
 
-        # نرتّب حسب turn_number لو موجود
-        rows.sort(key=lambda m: m.get("turn_number", 0))
+        # نرتب الرسائل بالوقت
+        rows.sort(key=lambda m: m.get("created_at", ""))
 
         messages = []
-
-        # 🧮 كل (رسالتين) = 1 turn
-        total_msgs = len(rows)
-        current_turn = total_msgs // 2
+        speaker_sequence = []   # "you" أو "peer" بالترتيب الزمني
 
         for m in rows:
             if not isinstance(m, dict):
                 continue
 
-            sender_id = (
-                m.get("sender_id")
-                or m.get("examiner_id")
-            )
-
+            sender_id = m.get("examiner_id") or m.get("sender_id")
             sender_name = (m.get("sender_name") or "User").strip() or "User"
             text = m.get("message", "")
 
-            side = "you" if sender_id == uid else "peer"
+            if not sender_id:
+                continue
 
-            # أول حرف من الاسم (عشان دائرة الـ A)
+            if sender_id == uid:
+                side = "you"
+                speaker_sequence.append("you")
+            else:
+                side = "peer"
+                speaker_sequence.append("peer")
+
             initial = (sender_name[0].upper() if sender_name else "U")
 
             messages.append({
@@ -1845,9 +2208,41 @@ def api_hh_get_messages():
                 "authorInitial": initial,
             })
 
+        # ======== حساب عدد الـ turns من وجهة نظرك ========
+        # نحول sequence إلى blocks متتالية مختلفة
+        runs = []
+        last = None
+        for s in speaker_sequence:
+            if s != last:
+                runs.append(s)
+                last = s
+
+        # كل (you + peer) أو (peer + you) = turn واحد
+        your_turn = len(runs) // 2
+
+        task_status = "pending"
+        max_turns = 0
+
+        try:
+            task_doc = db.collection("tasks").document(task_id).get()
+            if task_doc.exists:
+                tdata = task_doc.to_dict()
+                task_status = tdata.get("status", "pending")
+                max_turns = int(tdata.get("number_of_turns", 0) or 0)
+
+                if max_turns > 0:
+                    your_turn = min(your_turn, max_turns)
+
+                # لو التاسك مكتوب completed بس لسه ما خلصتي كل التيرنز → نخليها progress
+                if task_status == "completed" and max_turns > 0 and your_turn < max_turns:
+                    task_status = "progress"
+        except Exception as e:
+            app.logger.exception("HH get: failed to load task status: %s", e)
+
         return jsonify({
             "messages": messages,
-            "currentTurn": current_turn
+            "currentTurn": your_turn,
+            "taskStatus": task_status
         }), 200
 
     except Exception as e:
@@ -1880,41 +2275,44 @@ def api_hh_send():
         prof = sender_doc.to_dict().get("profile", {})
         sender_name = f"{prof.get('firstName', '')} {prof.get('lastName', '')}".strip() or "User"
 
-    # 🧮 نحسب turn_number لهذا الـ examiner في هذا الـ task
     ref = rtdb.reference(f"hh_conversations/{task_id}/messages")
 
-    # نجيب كل الرسائل ونعد اللي examiner_id حقتها = sender_id
+    # نحسب turn_number الخاص بهذا الـ examiner فقط
     existing = ref.get() or {}
+    rows = []
+    if isinstance(existing, dict):
+        rows = list(existing.values())
+    elif isinstance(existing, list):
+        rows = existing
+
     count_for_this_ex = 0
-    for _, row in existing.items():
+    for row in rows:
         if isinstance(row, dict) and row.get("examiner_id") == sender_id:
             count_for_this_ex += 1
 
     next_turn_number = count_for_this_ex + 1
-
-    # نولّد turn_ID عشوائي (زي الـ PK)
     turn_id = str(uuid.uuid4())
 
     try:
         ref.push({
-            # الأتربيوت اللي في الـ ERD
             "turn_id": turn_id,
             "task_id": task_id,
             "turn_number": next_turn_number,
             "sender_type": "Ex",
             "examiner_id": sender_id,
             "message": message,
-
-            # للواجهة
-            "sender_name": sender_name,
+            "sender_name": sender_name,  # للواجهة فقط
+            "created_at": datetime.utcnow().isoformat() + "Z",
         })
+
+        # بعد ما نحفظ الرسالة نشيّك إذا التاسك صار completed
+        _update_hh_task_status_if_completed(task_id)
 
         return jsonify({"success": True, "message": "Message saved"}), 200
 
     except Exception as e:
         print("🔥 HH send error:", e)
         return jsonify({"error": "Server error"}), 500
-
 if __name__ == "__main__":
     app.run(debug=True)
 

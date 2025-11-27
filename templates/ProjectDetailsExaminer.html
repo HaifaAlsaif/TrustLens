@@ -421,7 +421,18 @@
       font-size: 14px;
       color: #717182;
     }
+    .status-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
 
+.status-pill.completed {
+  background-color: #D1FADF;  /* أخضر فاتح مثل اللي بالصورة */
+  color: #027A48;
+}
     .tag-blue {
       color: #1347e5;
       background-color: #2b7fff19;
@@ -787,127 +798,146 @@ async function loadExaminers() {
   });
 }
 
-// استدعاءها بعد ما تتحمل الصفحة
+
+  </script>
+ <script>
+ async function loadExaminerTasks() {
+  const pathParts = window.location.pathname.split('/');
+  const projectId = pathParts[pathParts.length - 1];
+
+  const res = await fetch(`/api/examiner_tasks/${projectId}`);
+  if (!res.ok) { 
+    console.error("Failed to load tasks");
+    return;
+  }
+
+  const data = await res.json();
+  const tasks = data.tasks || [];
+
+  const grid = document.querySelector(".tasks-grid");
+  grid.innerHTML = "";
+
+  tasks.forEach(task => {
+    const card = document.createElement("article");
+    card.className = "task-card";
+    card.setAttribute("data-status", task.status);
+
+    // 🔹 السطر الرمادي: Human ↔ Human • 2 turns
+    let metaHTML = "";
+    if (window.projectCategory !== "article") {
+      const typeLabel =
+        task.conversation_type === "human-ai" ? "Human ↔ AI" : "Human ↔ Human";
+      const turnsLabel = `${task.number_of_turns} turns`;
+
+      metaHTML = `
+        <div class="task-meta">
+          <div class="task-meta-row">
+            <span class="task-meta-label">${typeLabel} • ${turnsLabel}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // 🔹 الزر / حالة المهمة
+    const assignedToYou = task.is_assigned_to_you;
+    let statusPillHTML = "";
+    let buttonHTML = "";
+
+    if (task.status === "completed") {
+      // حبة "Completed" فوق
+      statusPillHTML = `
+        <span class="status-pill completed">Completed</span>
+      `;
+
+      // لو هي مهمتك وفيها نوع محادثة، خليه يفتح المحادثة
+      if (assignedToYou && task.conversation_type) {
+        buttonHTML = `
+          <button 
+            class="task-button completed completed-btn"
+            onclick="goToTask('${task.task_id}', '${task.conversation_type}')">
+            Completed
+          </button>
+        `;
+      } else {
+        buttonHTML = `
+          <button class="task-button completed completed-btn">
+            Completed
+          </button>
+        `;
+      }
+    } else if (assignedToYou) {
+      buttonHTML = `
+        <button 
+          class="task-button primary ${task.status === 'progress' ? 'continue' : 'join'}"
+          onclick="goToTask('${task.task_id}', '${task.conversation_type}')">
+          ${task.status === "progress" ? "Continue" : "Join"}
+        </button>
+      `;
+    } else {
+      buttonHTML = `
+        <button class="task-button completed completed-btn">
+          Not Assigned
+        </button>
+      `;
+    }
+
+    // 🔹 نص "Assigned to:" و "2 examiners"
+    const emails = task.examiner_emails || [];
+    let assignedText = "Not assigned";
+
+    if (emails.length === 1) {
+      assignedText = emails[0];
+    } else if (emails.length > 1) {
+      assignedText = `${emails[0]} and ${emails.length - 1} more`;
+    }
+
+    card.innerHTML = `
+      <h4 class="task-title">${task.task_name}</h4>
+
+      ${metaHTML}
+
+      ${statusPillHTML}
+
+      <div class="assignment-box">
+        <div class="assignment-label">Assigned to:</div>
+        <div class="assignment-value">${assignedText}</div>
+        <div class="assignment-label" style="margin-top:4px;">
+          ${emails.length} examiner${emails.length === 1 ? "" : "s"}
+        </div>
+      </div>
+
+      ${buttonHTML}
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
 loadProjectDetails().then(() => {
   loadExaminers();
   loadExaminerTasks();
 });
-
-  </script>
-  <script>
-    async function loadExaminerTasks() {
-      const pathParts = window.location.pathname.split('/');
-      const projectId = pathParts[pathParts.length - 1];
-    
-      const res = await fetch(`/api/examiner_tasks/${projectId}`);
-      if (!res.ok) { 
-        console.error("Failed to load tasks");
-        return;
-      }
-    
-      const data = await res.json();
-      const tasks = data.tasks || [];
-    
-      const grid = document.querySelector(".tasks-grid");
-      grid.innerHTML = "";
-    
-      tasks.forEach(task => { 
-    
-        const card = document.createElement("article");
-        card.className = "task-card";
-        card.setAttribute("data-status", task.status);
-    
-        // 👇 ديناميكية الإخفاء إذا كان Article
-        let metaHTML = "";
-        if (window.projectCategory !== "article") {
-          const typeTag = task.conversation_type === "human-ai"
-            ? `<span class="tag tag-blue">Human ↔ AI</span>`
-            : `<span class="tag tag-green-alt">Human ↔ Human</span>`;
-    
-          metaHTML = `
-            <div class="task-meta">
-              <div class="task-meta-row">
-                <span class="task-meta-label">Type:</span>
-                ${typeTag}
-              </div>
-              <div class="task-meta-row">
-                <span class="task-meta-label">Turns:</span>
-                <span class="tag tag-purple">${task.number_of_turns} Messages</span>
-              </div>
-            </div>
-          `;
-        }
-// assignment variables
-const assignedToYou = task.is_assigned_to_you;
-let buttonHTML = "";
-
-// زرار المهمة
-if (task.status === "completed") {
-  buttonHTML = `<button class="task-button completed completed-btn">Completed</button>`;
-} 
-else if (assignedToYou) {
-  buttonHTML = `
-    <button class="task-button primary ${task.status === 'progress' ? 'continue' : 'join'}"
-            onclick="goToTask('${task.task_id}', '${task.conversation_type}')">
-      ${task.status === "progress" ? "Continue" : "Join"}
-    </button>`;
-} 
-else {
-  buttonHTML = `<button class="task-button completed completed-btn">Not Assigned</button>`;
-}
-
-        // بناء الكارد كاملاً
-        card.innerHTML = `
-          <h4 class="task-title">${task.task_name}</h4>
-    
-          ${metaHTML}
-    
-          <div class="assignment-box">
-            <div class="assignment-label">Assigned to:</div>
-            <div class="assignment-value">${task.assignment_label}</div>
-          </div>
-    
-          ${buttonHTML}
-        `;
-    
-        grid.appendChild(card);
-      });
+  // نفس ما هو عندك
+  function goToTask(taskId, type) {
+    if (!type) {
+      alert("Invalid conversation type");
+      return;
     }
-   // 🟦 هذه الدالة تفتح صفحة المحادثة المناسبة (هيومن–AI أو هيومن–هيومن)
-//    وتضيف معها taskId + projectId في الرابط
-function goToTask(taskId, type) {
-  // لو ما عرفنا نوع المحادثة نطلع تنبيه
-  if (!type) {
-    alert("Invalid conversation type");
-    return;
+
+    let basePath = null;
+
+    if (type === "human-ai") {
+      basePath = "/conversation-ai";
+    } else if (type === "human-human") {
+      basePath = "/conversation-hh";
+    } else {
+      alert("Invalid conversation type");
+      return;
+    }
+
+    const url = `${basePath}?taskId=${encodeURIComponent(taskId)}&projectId=${encodeURIComponent(PROJECT_ID)}`;
+    window.location.href = url;
   }
-
-  // نحدد أي صفحة نروح لها حسب النوع
-  let basePath = null;
-
-  if (type === "human-ai") {
-    // 🔹 تاسك Human ↔ AI
-    basePath = "/conversation-ai";
-  } else if (type === "human-human") {
-    // 🔹 تاسك Human ↔ Human
-    basePath = "/conversation-hh";
-  } else {
-    alert("Invalid conversation type");
-    return;
-  }
-
-  // 🟦 نضيف taskId و projectId في الـ URL مع ترميزهم عشان ما يخربون الرابط
-  const url = `${basePath}?taskId=${encodeURIComponent(taskId)}&projectId=${encodeURIComponent(PROJECT_ID)}`;
-
-  // ننتقل للصفحة
-  window.location.href = url;
-}
-
-    
-
-
-    
-    </script>
-    
+</script>
 </body>
 </html>
