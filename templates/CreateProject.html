@@ -651,56 +651,105 @@ loadVolunteers().then(() => {
 
     cancelBtn.addEventListener("click", resetAll);
 
-    /* ===== Submit validation + redirect ===== */
-   
-    const submitBtn = $("#submit");
+    /* ===== Submit validation + redirect (Create + Edit مع رفع ملف ودعوات) ===== */
+const submitBtn = $("#submit");
 const submitStatus = $("#submitStatus");
 let isSubmitting = false;
 
 submitBtn.addEventListener("click", async () => {
+  // منع الضغط المتكرر
+  if (isSubmitting) return;
+
   const isEdit = !!EDIT_ID;
 
-  $("#nameErr").hidden = !!nameEl.value.trim();
-  $("#descErr").hidden = !!descEl.value.trim();
+  // التحقق من الاسم والوصف
+  const hasName = !!nameEl.value.trim();
+  const hasDesc = !!descEl.value.trim();
 
+  $("#nameErr").hidden = hasName;
+  $("#descErr").hidden = hasDesc;
 
+  if (!hasName || !hasDesc) {
+    return; // لا تكمل لو فاضية
+  }
+
+  // التحقق من الكاتيجوري (إلا لو BASIC_MODE)
   const hasCategory = catNews.checked || catConv.checked;
-
-  // إذا كان BASIC_MODE → لا تتحقق من الكاتيجوري
   if (!window.SKIP_CATEGORY_CHECK && !hasCategory) {
-    return alert("Please select a category.");
-  }
-  
-  const formData = new FormData();
-  formData.append("project_name", nameEl.value.trim());
-  formData.append("description", descEl.value.trim());
-  formData.append("category", catNews.checked ? "Article" : "Conversation");
-  selectedDomains.forEach(d => formData.append("domain", d));
-
-  let url = "/api/create_project";
-  let method = "POST";
-
-  if (isEdit) {
-    url = `/api/update_project/${EDIT_ID}`;
-  }
-  formData.append("invited_examiners", JSON.stringify(selectedExaminers));
-
-  const res = await fetch(url, { method, body: formData });
-  const data = await res.json();
-
-  if (!res.ok) {
-    alert("Error: " + (data.error || "Unknown"));
+    alert("Please select a category.");
     return;
   }
 
-  alert(isEdit ? "Project updated!" : "Project created!");
+  // تجهيز FormData
+  const formData = new FormData();
+  formData.append("project_name", nameEl.value.trim());
+  formData.append("description", descEl.value.trim());
 
-  window.location.href = "/myprojectowner";
+  // بس لو فيه كاتيجوري (في basic mode ممكن نتجاهلها)
+  if (hasCategory) {
+    formData.append("category", catNews.checked ? "Article" : "Conversation");
+  }
+
+  // domains
+  selectedDomains.forEach(d => formData.append("domain", d));
+
+  // ✅ هنا رجّعنا رفع ملف الـ dataset مثل الكود الأول
+  if (fileInput.files && fileInput.files[0]) {
+    formData.append("dataset", fileInput.files[0]);
+  }
+
+  // ✅ إرسال قائمة الـ invited_examiners للباكند (اللي حلّت مشكلتك في الكود الثاني)
+  formData.append("invited_examiners", JSON.stringify(selectedExaminers));
+
+  // اختيار URL (إنشاء أو تحديث)
+  let url = "/api/create_project";
+  if (isEdit) {
+    url = `/api/update_project/${EDIT_ID}`;
+  }
+
+  // حالة التحميل في الواجهة
+  isSubmitting = true;
+  submitBtn.disabled = true;
+  submitBtn.textContent = isEdit ? "Saving..." : "Uploading dataset...";
+  submitStatus.hidden = false;
+  submitStatus.textContent = isEdit
+    ? "Saving changes..."
+    : "Uploading dataset and creating project...";
+
+  try {
+    const res = await fetch(url, { method: "POST", body: formData });
+
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (e) {
+      data = {};
+    }
+
+    if (!res.ok) {
+      throw new Error(data.error || "Server error.");
+    }
+
+    alert(isEdit ? "Project updated!" : "Project created!");
+    window.location.href = "/myprojectowner";
+  } catch (err) {
+    console.error(err);
+    submitStatus.hidden = false;
+    submitStatus.textContent =
+      "Error while uploading dataset or saving project. Please try again.";
+    alert("❌ " + (err.message || "Network error. Please try again."));
+  } finally {
+    // يرجع الزر لحالته (لو ما صار redirect)
+    isSubmitting = false;
+    submitBtn.disabled = false;
+    submitBtn.textContent = isEdit ? "Update Project" : "Create Project";
+  }
 });
 
 if (EDIT_ID) {
   loadProjectData();
 }
+
 
   </script>
 </body>
