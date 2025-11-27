@@ -993,21 +993,153 @@
   opacity: 0.95;
 }
 
+/* ===== Conversation modal (owner viewer) ===== */
+.conv-modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1200;
+}
+.conv-modal-backdrop.show{
+  display:flex;
+}
+.conv-modal{
+  width:100%;
+  max-width:720px;
+  max-height:80vh;
+  background:#ffffff;
+  border-radius:16px;
+  padding:18px 20px;
+  box-shadow:0 25px 45px rgba(15,23,42,.25);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.conv-modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+.conv-modal-title{
+  font-size:15px;
+  font-weight:600;
+  color:#0f172a;
+}
+.conv-modal-sub{
+  font-size:12px;
+  color:#64748b;
+}
+.conv-close-btn{
+  border:none;
+  background:transparent;
+  font-size:18px;
+  cursor:pointer;
+}
+.conv-messages{
+  margin-top:4px;
+  padding-right:4px;
+  flex:1;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.conv-row{
+  display:flex;
+  font-size:13px;
+}
+.conv-left{justify-content:flex-start;}
+.conv-right{justify-content:flex-end;}
+
+.conv-bubble{
+  max-width:80%;
+  border-radius:14px;
+  padding:8px 10px;
+  background:#f1f5f9;
+}
+.conv-left .conv-bubble{
+  border-bottom-left-radius:6px;
+}
+.conv-right .conv-bubble{
+  background:#e0f2fe;
+  border-bottom-right-radius:6px;
+}
+
+.conv-meta{
+  font-size:11px;
+  color:#64748b;
+  margin-bottom:4px;
+}
+.conv-text{
+  color:#0f172a;
+  white-space:pre-wrap;
+}
+
+@media (max-width:640px){
+  .conv-modal{
+    max-height:85vh;
+  }
+}
+
+.owner-task-btn {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #ffffff;
+  background: linear-gradient(90deg, #00b8ff, #155cfb);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.owner-task-btn::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  background-image: url("../static/images/img_container_white_a700.svg"); /* أي أيقونة شات حقتك */
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.owner-task-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.32);
+}
+
+.owner-task-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.25);
+  opacity: 0.9;
+}
+
   </style>
   
   </head>
 <body>
   <main class="main-container">
     <header class="header">
-      <div class="header-left">
-        <img src="../static/images/img_header.svg" alt="TrustLens logo" class="logo">
-        <div class="brand-text">TrustLens</div>
-      </div>
-      <div class="header-right">
-        <div class="language-selector">EN</div>
-        <img src="../static/images/img_button.svg" alt="Settings" class="settings-icon">
-      
-    </header>
+  <div class="header-left">
+    <img src="../static/images/img_header.svg" alt="TrustLens logo" class="logo">
+    <div class="brand-text">TrustLens</div>
+  </div>
+  <div class="header-right">
+    <div class="language-selector">EN</div>
+    <img src="../static/images/img_button.svg" alt="Settings" class="settings-icon">
+  </div>
+</header>
+
 
     <div class="content-wrapper">
       <section class="page-header">
@@ -1130,6 +1262,29 @@
 </section>
 
     </div>
+    
+
+    <!-- ===== Conversation Viewer Modal (Owner) ===== -->
+<div id="convModalBackdrop" class="conv-modal-backdrop">
+  <div class="conv-modal">
+    <div class="conv-modal-header">
+      <div>
+        <div class="conv-modal-title" id="convModalTitle">
+          Conversation
+        </div>
+        <div class="conv-modal-sub" id="convModalSub">
+          Human ↔ Human • Turns timeline
+        </div>
+      </div>
+      <button class="conv-close-btn" onclick="closeConversationModal()">×</button>
+    </div>
+
+    <div id="convMessages" class="conv-messages">
+      <!-- الرسائل تتعبّى هنا بالجافاسكربت -->
+    </div>
+  </div>
+</div>
+
   </main>
 <script>
   function filterTasks(status) {
@@ -1425,65 +1580,73 @@ async function loadTasks() {
       return;
     }
 
-    data.tasks.forEach(t => {
-      const cfg = getStatusConfig(t.status);
+      data.tasks.forEach(t => {
+    const cfg = getStatusConfig(t.status);
 
-      const card = document.createElement("article");
-      card.className = "article-card";
-      card.dataset.status = t.status || "pending";
-      card.dataset.taskId = t.id;
+    const card = document.createElement("article");
+    card.className = "article-card";
+    card.dataset.status = (t.status || "pending").toLowerCase();
+    card.dataset.taskId = t.id;
 
-      let convText = "";
-      if (t.category !== "article" && t.conversationType) {
-        convText =
-          t.conversationType === "human-human"
-            ? `Human ↔ Human • ${t.turns || 2} turns`
-            : `Human ↔ AI • ${t.turns || 2} turns`;
-      }
+    const convType = (t.conversationType || "").toLowerCase();
 
-      const emails = t.examinerEmails || [];
-const examinerCount = emails.length || (t.examinerCount ?? 0);
+    let convText = "";
+    if (convType === "human-human") {
+      convText = `Human ↔ Human • ${t.turns || 2} turns`;
+    } else if (convType === "human-ai") {
+      convText = `Human ↔ LLM • ${t.turns || 2} turns`;
+    }
 
-let assignedHtml = "-";
+    const examinerCount = t.examinerCount ?? 0;
+    const emails = (t.examinerEmails || []).join(", ") || "-";
 
-if (emails.length === 1) {
-  assignedHtml = emails[0];
-} else if (emails.length === 2) {
-  // كل إيميل بسطر
-  assignedHtml = `${emails[0]}<br>${emails[1]}`;
-} else if (emails.length > 2) {
-  assignedHtml = emails.join("<br>");
-}
 
-card.innerHTML = `
-  <div class="article-card-header">
-    <h4 class="article-title">${t.title}</h4>
-    <div class="article-actions">
-      <button class="article-icon-btn js-edit-task">
-        <img src="../static/images/img_button_black_900.svg">
-      </button>
-      <button class="article-icon-btn js-delete-task">
-        <img src="../static/images/img_button_black_900_32x36.svg">
-      </button>
-    </div>
-  </div>
+    const hasConv = convType === "human-human" || convType === "human-ai";
 
-  <p class="article-description">${convText}</p>
-  <span class="status-pill ${cfg.cls}">${cfg.text}</span>
+    card.innerHTML = `
+      <div class="article-card-header">
+        <h4 class="article-title">${t.title || "Untitled task"}</h4>
+        <div class="article-actions">
+          <button class="article-icon-btn js-edit-task">
+            <img src="../static/images/img_button_black_900.svg">
+          </button>
+          <button class="article-icon-btn js-delete-task">
+            <img src="../static/images/img_button_black_900_32x36.svg">
+          </button>
+        </div>
+      </div>
 
-  <div class="article-assigned-box">
-    <div class="article-assigned-label">Assigned to:</div>
-    <div class="article-assigned-email">
-      ${assignedHtml}
-    </div>
-  </div>
+      <p class="article-description">${convText}</p>
+      <span class="status-pill ${cfg.cls}">
+        <span class="status-pill-dot"></span>
+        <span>${cfg.text}</span>
+      </span>
 
-  <div class="article-footer">
-    <span class="article-footer-text">${examinerCount} examiner${examinerCount === 1 ? "" : "s"}</span>
-  </div>
-`;
-      grid.appendChild(card);
-    });
+      <div class="article-assigned-box">
+        <div class="article-assigned-label">Assigned to:</div>
+        <div class="article-assigned-email">
+          ${emails}
+        </div>
+      </div>
+
+      <div class="article-footer" style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+        <span class="article-footer-text">${examinerCount} examiners</span>
+
+        ${hasConv ? `
+          <button class="owner-task-btn"
+                  onclick="openConversation(
+                    '${t.id}',
+                    '${(t.title || "").replace(/'/g,"\\'")}',
+                    '${convType}'
+                  )">
+            View conversation
+          </button>
+        ` : ""}
+      </div>
+    `;
+
+    grid.appendChild(card);
+  });
 
     // ⭐ مهم: نناديه بعد إضافة الكروت ⭐
     attachEditHandlers();
@@ -1561,5 +1724,102 @@ card.innerHTML = `
     
   </script>
   
+  <script>
+  const convBackdrop   = document.getElementById('convModalBackdrop');
+  const convMessagesEl = document.getElementById('convMessages');
+  const convTitleEl    = document.getElementById('convModalTitle');
+  const convSubEl      = document.getElementById('convModalSub');
+
+  function closeConversationModal(){
+    convBackdrop.classList.remove('show');
+    convMessagesEl.innerHTML = '';
+  }
+
+  async function openConversation(taskId, taskTitle, convType){
+    const type = (convType || '').toLowerCase();
+    const isHH = (type === 'human-human' || type === 'hh');
+
+    convTitleEl.textContent = taskTitle || 'Conversation';
+    convSubEl.textContent   = isHH
+      ? 'Human ↔ Human • Turns timeline'
+      : 'Human ↔ LLM • Turns timeline';
+
+    convMessagesEl.innerHTML = 'Loading…';
+    convBackdrop.classList.add('show');
+
+    let url;
+    if (isHH){
+  url = `/api/hh/messages_owner?taskId=${encodeURIComponent(taskId)}`;
+} else {
+  url = `/api/llm/messages_owner?taskId=${encodeURIComponent(taskId)}`;
+}
+
+
+    try{
+      const res = await fetch(url);
+      if (!res.ok){
+        const err = await res.json().catch(() => ({}));
+        convMessagesEl.innerHTML = `<p style="font-size:13px;color:#b91c1c;">
+          ${err.error || 'Failed to load conversation.'}
+        </p>`;
+        return;
+      }
+
+      const data = await res.json();
+      const msgs = data.messages || [];
+
+      if (!msgs.length){
+        convMessagesEl.innerHTML =
+          '<p style="font-size:13px;color:#64748b;">No messages yet for this task.</p>';
+        return;
+      }
+
+      convMessagesEl.innerHTML = '';
+
+      msgs.forEach(m => {
+        const side = (m.side === 'right') ? 'conv-right' : 'conv-left';
+        const row  = document.createElement('div');
+        row.className = `conv-row ${side}`;
+
+        const who  = m.authorLabel || m.author || 'Speaker';
+        const turn = (typeof m.turnIndex === 'number' && m.turnIndex > 0)
+          ? `Turn ${m.turnIndex}`
+          : '';
+
+        row.innerHTML = `
+          <div class="conv-bubble">
+            <div class="conv-meta">
+              ${who}${turn ? ' • ' + turn : ''}
+            </div>
+            <div class="conv-text">${m.text || ''}</div>
+          </div>
+        `;
+        convMessagesEl.appendChild(row);
+      });
+
+      convMessagesEl.scrollTop = convMessagesEl.scrollHeight;
+
+    } catch(e){
+      console.error('Network error while loading conversation for owner:', e);
+      convMessagesEl.innerHTML =
+        '<p style="font-size:13px;color:#b91c1c;">Network error. Please try again.</p>';
+    }
+  }
+
+  // إغلاق بالضغط على الخلفية
+  convBackdrop.addEventListener('click', (e) => {
+    if (e.target === convBackdrop){
+      closeConversationModal();
+    }
+  });
+
+  // إغلاق بالـ Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape'){
+      closeConversationModal();
+    }
+  });
+</script>
+
 </body>
 </html>  

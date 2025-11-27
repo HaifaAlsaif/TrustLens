@@ -592,17 +592,26 @@ async function sendMsg() {
       body: JSON.stringify(payload)
     });
 
-    const data = await res.json().catch(() => ({}));
+        const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
       console.error('HH send error:', data);
-      alert(data.error || 'Failed to send message.');
+
+      // 👇 هنا نفهم خطأ WAIT_FOR_PEER ونطلع رسالة واضحة
+      if (data.error === 'WAIT_FOR_PEER') {
+        alert('Please wait for the other examiner to reply before sending another message.');
+      } else {
+        alert(data.error || 'Failed to send message.');
+      }
+
       return;
     }
 
+    // فقط في حالة النجاح نوّضح الحقل ونعيد تحميل الرسائل
     userInput.value = '';
     updateCounter();
     await loadMessages();
+
   } catch (err) {
     console.error('Network error while sending HH message:', err);
     alert('Network error while sending the message. Please try again.');

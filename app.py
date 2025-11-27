@@ -2258,7 +2258,6 @@ def api_hh_send():
 
     data = request.get_json() or {}
 
-    # ندعم الشكلين: task_id / taskId و message / text
     task_id = data.get("task_id") or data.get("taskId")
     message = (data.get("message") or data.get("text") or "").strip()
 
@@ -2277,7 +2276,7 @@ def api_hh_send():
 
     ref = rtdb.reference(f"hh_conversations/{task_id}/messages")
 
-    # نحسب turn_number الخاص بهذا الـ examiner فقط
+    # 🧠 نجيب الرسائل الموجودة
     existing = ref.get() or {}
     rows = []
     if isinstance(existing, dict):
@@ -2285,6 +2284,31 @@ def api_hh_send():
     elif isinstance(existing, list):
         rows = existing
 
+    # ==============================
+    # 🔒 منع إرسال رسالتين ورا بعض
+    # ==============================
+    if rows:
+        # نرتّب الرسائل بالوقت
+        try:
+            rows_sorted = sorted(rows, key=lambda r: r.get("created_at", ""))
+        except Exception:
+            rows_sorted = rows
+
+        last_msg = rows_sorted[-1]
+
+        # نركز على رسائل الـ examiners فقط
+        if (
+            isinstance(last_msg, dict)
+            and last_msg.get("sender_type") == "Ex"
+            and last_msg.get("examiner_id") == sender_id
+        ):
+            # نفس الشخص أرسل آخر رسالة → لازم ينتظر الثاني
+            return jsonify({
+                "error": "WAIT_FOR_PEER",
+                "message": "You must wait for the other examiner to reply before sending another message."
+            }), 400
+
+    # نحسب turn_number الخاص بهذا الـ examiner فقط
     count_for_this_ex = 0
     for row in rows:
         if isinstance(row, dict) and row.get("examiner_id") == sender_id:
@@ -2301,11 +2325,10 @@ def api_hh_send():
             "sender_type": "Ex",
             "examiner_id": sender_id,
             "message": message,
-            "sender_name": sender_name,  # للواجهة فقط
+            "sender_name": sender_name,
             "created_at": datetime.utcnow().isoformat() + "Z",
         })
 
-        # بعد ما نحفظ الرسالة نشيّك إذا التاسك صار completed
         _update_hh_task_status_if_completed(task_id)
 
         return jsonify({"success": True, "message": "Message saved"}), 200
@@ -2313,6 +2336,185 @@ def api_hh_send():
     except Exception as e:
         print("🔥 HH send error:", e)
         return jsonify({"error": "Server error"}), 500
-if __name__ == "__main__":
-    app.run(debug=True)
 
+
+
+@app.route("/api/hh/messages_owner", methods=["GET"])
+def api_hh_messages_owner():
+    """
+    عرض محادثة Human ↔ Human للـ Owner من مسار:
+    hh_conversations/{taskId}/messages/{pushId}
+    """
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    task_id = request.args.get("taskId")
+    if not task_id:
+        return jsonify({"error": "taskId is required"}), 400
+
+    try:
+        messages_ref = rtdb.reference(f"hh_conversations/{task_id}/messages")
+        raw = messages_ref.get() or {}
+
+        # نحول النودات إلى list ونرتبها حسب turn_number ثم created_at
+        all_msgs = []
+        for key, val in (raw or {}).items():
+            if not isinstance(val, dict):
+                continue
+            val["_key"] = key
+            all_msgs.append(val)
+
+        def _as_int(x, default=0):
+            try:
+                return int(x)
+            except Exception:
+                return default
+
+        all_msgs.sort(
+            key=lambda m: (
+                _as_int(m.get("turn_number", 0)),
+                m.get("created_at") or ""
+            )
+        )
+
+        # نحدد examiners عشان نوزعهم يسار/يمين
+        examiner_side = {}
+        side_order = ["left", "right"]
+
+        def get_side_for_examiner(ex_id):
+            if not ex_id:
+                return "left"
+            if ex_id not in examiner_side:
+                # أول واحد يصير left، الثاني right
+                examiner_side[ex_id] = side_order[len(examiner_side) % 2]
+            return examiner_side[ex_id]
+
+        msgs = []
+        max_turn = 0
+
+        for m in all_msgs:
+            text = m.get("message") or ""
+            if not text:
+                continue
+
+            turn_number = _as_int(m.get("turn_number", 0))
+            if turn_number > max_turn:
+                max_turn = turn_number
+
+            examiner_id = m.get("examiner_id")
+            sender_name = m.get("sender_name") or "Examiner"
+
+            side = get_side_for_examiner(examiner_id)
+
+            msgs.append({
+                "text": text,
+                "side": side,  # left / right
+                "author": sender_name,
+                "authorLabel": sender_name,
+                "turnIndex": turn_number,
+            })
+
+        return jsonify({
+            "messages": msgs,
+            "currentTurn": max_turn,
+            "isComplete": False,   # ما عندنا فلاغ واضح في السكيمة الحالية
+        }), 200
+
+    except Exception as e:
+        app.logger.exception("Error in api_hh_messages_owner: %s", e)
+        return jsonify({"error": "Server error while loading HH conversation"}), 500
+
+@app.route("/api/llm/messages_owner", methods=["GET"])
+def api_llm_messages_owner():
+    """
+    عرض محادثة Human ↔ LLM للـ Owner من مسار:
+    llm_conversations/{taskId}/messages/{pushId}
+    """
+    if not session.get("idToken"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    task_id = request.args.get("taskId")
+    if not task_id:
+        return jsonify({"error": "taskId is required"}), 400
+
+    try:
+        messages_ref = rtdb.reference(f"llm_conversations/{task_id}/messages")
+        raw = messages_ref.get() or {}
+
+        all_msgs = []
+        for key, val in (raw or {}).items():
+            if not isinstance(val, dict):
+                continue
+            val["_key"] = key
+            all_msgs.append(val)
+
+        def _as_int(x, default=0):
+            try:
+                return int(x)
+            except Exception:
+                return default
+
+        all_msgs.sort(
+            key=lambda m: (
+                _as_int(m.get("turn_number", 0)),
+                m.get("created_at") or ""
+            )
+        )
+
+        # نفترض إن الـ human عنده examiner_id، والـ LLM غالبًا بدون examiner_id
+        examiner_side = {}
+
+        def get_side(msg):
+            st = (msg.get("sender_type") or "").lower()
+            ex_id = msg.get("examiner_id")
+
+            # لو رسالة من الـ LLM
+            if st in ("llm", "ai", "assistant", "model") or (not ex_id):
+                return "right"
+
+            # البشري
+            if ex_id not in examiner_side:
+                examiner_side[ex_id] = "left"
+            return examiner_side[ex_id]
+
+        msgs = []
+        max_turn = 0
+
+        for m in all_msgs:
+            text = m.get("message") or ""
+            if not text:
+                continue
+
+            turn_number = _as_int(m.get("turn_number", 0))
+            if turn_number > max_turn:
+                max_turn = turn_number
+
+            sender_name = m.get("sender_name") or "Speaker"
+
+            side = get_side(m)
+
+            msgs.append({
+                "text": text,
+                "side": side,  # left = human, right = LLM
+                "author": sender_name,
+                "authorLabel": sender_name,
+                "turnIndex": turn_number,
+            })
+
+        return jsonify({
+            "messages": msgs,
+            "currentTurn": max_turn,
+            "isComplete": False,
+        }), 200
+
+    except Exception as e:
+        app.logger.exception("Error in api_llm_messages_owner: %s", e)
+        return jsonify({"error": "Server error while loading LLM conversation"}), 500
+    
+
+
+
+
+
+if __name__ == "__main__":
+ app.run(debug=True)
