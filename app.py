@@ -798,7 +798,15 @@ def api_create_project():
     description  = data.get("description")
     category     = data.get("category")
     dataset_id = str(uuid.uuid4())
-    
+      
+ # === منع إنشاء مشروع News بدون Dataset ===
+    if category and category.lower() in ["article", "news", "news article"]:
+      file_check = request.files.get("dataset")
+      if not file_check or not file_check.filename:
+        return jsonify({
+            "error": "Dataset file is required for News Article projects."
+        }), 400
+
 
     if hasattr(data, "getlist"):
         domains = data.getlist("domain")
@@ -864,7 +872,7 @@ def api_create_project():
               .stream()
         )
         if not examiner_docs:
-            continue
+         return jsonify({"error": "Invalid examiner information"}), 400
 
         examiner_uid = examiner_docs[0].id
         invitation_ref = db.collection("invitations").document()
